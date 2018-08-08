@@ -1,0 +1,199 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xgmes.service.mapper.InterfaceNCMapper">
+	<select id="queryUnuploadData" resultType="java.util.Map">
+		<![CDATA[
+		select planid, operatype, isormeasure, matchid
+		  from (select distinct t.planid,
+		                        t.matchid,
+		                        to_char(t.operatype) as operatype,
+		                        o.isormeasure as isormeasure
+		          from m_measure_t t, m_operaconfig_t o
+		         where (t.planid like 'DH%' or t.planid like 'DM%')
+		           and t.suttle != 0
+		           and t.validflag > 0
+		           and t.operatype = o.operatype
+		           and o.isormeasure = 1
+		           and (t.UPDATENCFLAG = 0 or t.UPDATENCFLAG is null)
+		        union all
+		        select distinct t.planid,
+		                        t.matchid,
+		                        to_char(i.operatype) as operatype,
+		                        o.isormeasure
+		          from l_storein_item_t t, l_storein_t i, m_operaconfig_t o
+		         where (t.planid like 'DH%' or t.planid like 'DM%')
+		           and t.counts != 0
+		           and t.matchid = i.matchid
+		           and t.validflag > 0
+		           and i.operatype = o.operatype
+		           and o.isormeasure = 0
+		           and (t.UPDATENCFLAG = 0 or t.UPDATENCFLAG is null))
+				]]>
+	</select>
+	
+	<select id="queryMaterialInfoByPlanid" parameterType="String" resultType="java.util.Map">
+		<![CDATA[select matchid, isormeasure
+				  from (select distinct t.planid, t.matchid, o.isormeasure as isormeasure
+				          from m_measure_t t, m_operaconfig_t o
+				         where t.suttle > 0
+				           and t.validflag > 0
+				           and t.operatype = o.operatype
+				           and o.isormeasure = 1
+				           --and (t.UPDATENCFLAG = 0 or t.updatencflag is null)
+				        union all
+				        select distinct t.planid, t.matchid, o.isormeasure
+				          from l_storein_item_t t, l_storein_t i, m_operaconfig_t o
+				         where t.counts > 0
+				           and t.matchid = i.matchid
+				           and t.validflag > 0
+				           and i.operatype = o.operatype
+				           and o.isormeasure = 0
+				           --and (i.UPDATENCFLAG = 0 or i.updatencflag is null)
+				    )
+				 where planid = #{planid,jdbcType = VARCHAR}]]>
+	</select>
+	<update id="updateMeasureUpflag" parameterType="String">
+		update m_measure_t t set t.UPDATENCFLAG = 1,t.UPDATENCDATE = sysdate where t.matchid = #{matchid,jdbcType = VARCHAR}
+	</update>
+	<update id="updateStoreinUpflag" parameterType="String">
+		update l_storein_item_t t set t.UPDATENCFLAG = 1,t.UPDATENCDATE = sysdate where t.matchid = #{matchid,jdbcType = VARCHAR}
+	</update>
+	<select id="queryUploadData" resultType="java.util.Map" parameterType="application">
+		<![CDATA[
+			select planid,
+			       matchid,
+			       carno,
+			       operatype,
+			       isormeasure,
+			       materialcode,
+			       materialname,
+			       suttle,
+			       updatencflag,
+			       to_char(updatencdate,'yyyy-mm-dd hh24:mi:ss') as updatencdate,
+			       to_char(suttletime,'yyyy-mm-dd hh24:mi:ss') as suttletime
+			  from (select distinct t.planid,
+			                        t.matchid,
+			                        t.carno,
+			                        to_char(t.operatype) as operatype,
+			                        o.isormeasure as isormeasure,
+			                        t.materialcode,
+			                        t.materialname,
+			                        t.suttle/1000 as suttle,
+			                        t.updatencflag,
+			                        t.updatencdate,
+			                        t.suttletime,
+			                        t.cartype
+			          from m_measure_t t, m_operaconfig_t o
+			         where (t.planid like 'DH%' or t.planid like 'DM%')
+			           and t.suttle > 0
+			           and t.validflag > 0
+			           and t.operatype = o.operatype
+			           and o.isormeasure = 1
+			        union all
+			        select distinct t.planid,
+			                        t.matchid,
+			                        i.carno,
+			                        to_char(i.operatype) as operatype,
+			                        o.isormeasure,
+			                        t.materialcode,
+			                        t.materialname,
+			                        t.COUNTS,
+			                        t.updatencflag,
+			                        t.updatencdate,
+			                        t.createdate,
+			                        o.cartype
+			          from l_storein_item_t t, l_storein_t i, m_operaconfig_t o
+			         where (t.planid like 'DH%' or t.planid like 'DM%')
+			           and t.counts > 0
+			           and t.matchid = i.matchid
+			           and t.validflag > 0
+			           and i.operatype = o.operatype
+			           and o.isormeasure = 0) where 1 = 1
+		]]>
+		<if test="begintime!=null and begintime!=''">
+    		<![CDATA[and suttletime >=  to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+    		<![CDATA[and suttletime <= to_date(#{endtime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="planid!=null and planid !=''">
+			and planid like '%' || #{planid} || '%'
+		</if>
+		<if test="matchid!=null and matchid !=''">
+			and matchid like '%' || #{matchid} || '%'
+		</if>
+		<if test="carno !=null and carno !=''">
+			and carno like '%' || #{carno} || '%'
+		</if>
+		<if test="materialname!=null and materialname !=''">
+			and materialname like '%' || #{materialname} || '%'
+		</if>
+		<if test="updatencflag != -1">
+			and updatencflag = #{updatencflag}
+		</if>
+		<if test="cartype!=null and cartype !=''">
+			and cartype = #{cartype}
+		</if>
+	</select>
+	<select id="queryInterfaceList" resultType="application" parameterType="application">
+		select t.planid,
+		       t.usermemo,
+		       t.arrivetime,
+		       t.sourcecode,
+		       t.sourcename,
+		       decode(t.typeflag,1, t.targetcode, i.targetcode)targetcode,
+               decode(t.typeflag,1, t.targetname, i.targetname)targetname,
+		       i.materialcode,
+		       i.materialname,
+		       trim(decode(t.typeflag,1,i.carno,t.carno))carno,
+		       i.snumber,
+		       i.suttleapp,
+		       i.middlemanname,
+		       i.measureunit,
+		       decode(t.typeflag, 1, '到货单', '发运单') sysmemo,
+               i.saleitemid,
+               t.createdate,
+               l_jugestatus_f(i.saleitemid, 0) status
+		  from l_interfaceinfo_t t
+		  left join l_interfaceinfo_item_t i
+		    on t.id = i.fid
+		 where t.validflag > 0
+		 <if test="begintime!=null and begintime!=''">
+    		<![CDATA[and to_date(t.arrivetime,'yyyy-MM-dd hh24:mi:ss')>=  to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+    		<![CDATA[and to_date(t.arrivetime,'yyyy-MM-dd hh24:mi:ss') <= to_date(#{endtime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="planid!=null and planid !=''">
+			and t.planid like #{planid}||'%'
+		</if>
+		<if test="carno !=null and carno !=''">
+			and (i.carno like #{carno}||'%' or t.carno like #{carno}||'%')
+		</if>
+		<if test="materialname!=null and materialname !=''">
+			and i.materialname like #{materialname}||'%'
+		</if>
+		<if test="targetname!=null and targetname!=''">
+			and t.targetname like #{targetname} ||'%'
+		</if>
+		<if test="sourcename!=null and sourcename!=''">
+			and t.sourcename like #{sourcename}||'%'
+		</if>
+		<if test="sysmemo!=null and sysmemo!=''">
+			and t.typeflag = #{sysmemo}
+		</if>
+		<if test="isoruse!=null and isoruse!=''">
+			and i.isoruse = #{isoruse}
+		</if>
+	</select>
+	<insert id="insertUploadLog" parameterType="application">
+		insert into l_uploadnclog_t(matchid,createdate,msg) values(#{matchid,jdbcType=VARCHAR},sysdate,#{status,jdbcType=VARCHAR})
+	</insert>
+	<insert id="insertTrainTask" parameterType="String">
+		<![CDATA[insert into L_TRAININTERFACE_TASK_T(FILEXMLNAME) values (#{filename,jdbcType = VARCHAR})]]>
+	</insert>
+	<select id="queryTrainTask" resultType="java.util.Map">
+		<![CDATA[select FILEXMLNAME from L_TRAININTERFACE_TASK_T where CDATE > sysdate - 0.25 order by CDATE desc]]>
+	</select>
+</mapper>

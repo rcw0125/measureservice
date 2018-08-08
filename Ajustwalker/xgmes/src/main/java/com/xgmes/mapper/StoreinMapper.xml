@@ -1,0 +1,489 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xgmes.service.mapper.StoreinMapper">
+	<select id="queryList" resultType="storein" parameterType="storein">
+		select t.id,
+		t.carno,
+		t.matchid,
+		m.planid,
+		m.materialname,
+		m.materialcode,
+		t.operatype,
+		m.sourcename,
+		m.storename as targetname,
+		t.storename,
+		m.weight,
+		e.suttle * 0.001 suttle,
+		m.counts,
+		t.createoperaname,
+		to_char(t.createdate, 'yyyy-MM-dd hh24:mi:ss') createdate,
+		t.usermemo,
+		m.materialspec,
+		m.modelno,
+		m.pictureno,
+		m.measureunit,
+		m.middlemanname
+		from l_storein_t t
+		left join l_storein_item_t m
+		on (t.matchid = m.matchid and m.validflag
+		> 0)
+		left join m_measure_t e
+		on (t.matchid = e.matchid and e.validflag >
+		0)
+		where t.validflag > 0
+		<if test="begintime!=null and begintime!=''">
+    		<![CDATA[and t.createdate>=  to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+    		<![CDATA[and t.createdate <= to_date(#{endtime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="planid!=null and planid !=''">
+			and m.planid like '%'|| #{planid}||'%'
+		</if>
+		<if test="matchid!=null and matchid !=''">
+			and m.matchid like '%'|| #{matchid}||'%'
+		</if>
+		<if test="carno !=null and carno !=''">
+			and t.carno like '%'|| #{carno} ||'%'
+		</if>
+		<if test="materialname!=null and materialname !=''">
+			and m.materialname like '%'|| #{materialname}||'%'
+		</if>
+		<if test="sourcename!=null and sourcename!=''">
+			and m.sourcename like '%'|| #{sourcename} ||'%'
+		</if>
+		<if test="storename!=null and storename!=''">
+			and t.storename like '%'|| #{storename}||'%'
+		</if>
+		order by t.createdate desc,m.materialcode asc,m.id 
+	</select>
+	<select id="queryCount" resultType="storein" parameterType="storein">
+		select count(matchid)carcounts,sum(suttle)suttle,sum(counts) counts
+		from (select t.matchid,
+		sum(nvl(e.suttle, 0) * 0.001) suttle,
+		sum(nvl(m.counts, 0)) counts
+		from l_storein_t t
+		left join
+		l_storein_item_t m
+		on (t.matchid = m.matchid and m.validflag > 0)
+		left
+		join m_measure_t e
+		on (t.matchid = e.matchid and e.validflag > 0)
+		where
+		t.validflag > 0
+		<if test="begintime!=null and begintime!=''">
+    		<![CDATA[and t.createdate>=  to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+    		<![CDATA[and t.createdate <= to_date(#{endtime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="planid!=null and planid !=''">
+			and m.planid like '%'|| #{planid}||'%'
+		</if>
+		<if test="matchid!=null and matchid !=''">
+			and m.matchid like '%'|| #{matchid}||'%'
+		</if>
+		<if test="carno !=null and carno !=''">
+			and t.carno like '%'|| #{carno} ||'%'
+		</if>
+		<if test="materialname!=null and materialname !=''">
+			and m.materialname like '%'|| #{materialname}||'%'
+		</if>
+		<if test="sourcename!=null and sourcename!=''">
+			and m.sourcename like '%'|| #{sourcename} ||'%'
+		</if>
+		<if test="storename!=null and storename!=''">
+			and t.storename like '%'|| #{storename}||'%'
+		</if>
+		group by t.matchid)
+	</select>
+	<select id="queryInfoBycarno" parameterType="storein"
+		resultType="storein">
+		select b.operatype,
+		m.operaname,
+		c.itemid,
+		b.carno,
+		b.matchid,
+		c.planid,
+		c.taskcode,
+		c.orderno,
+		c.sourcecode,
+		c.sourcename,
+		c.middlemancode,
+		c.middlemanname,
+		c.sourceplace,
+		c.targetcode,
+		c.targetname,
+		c.materialcode,
+		c.materialname,
+		c.snumber outcounts,
+		0
+		counts,
+		c.suttleapp weight,
+		c.shipcode,
+		c.ship,
+		nvl(t.gross * 0.001, 0)
+		gross,
+		c.prodlinename,
+		c.pictureno,
+		(select t.sizerange
+		from B_MATERIAL_T
+		t
+		where t.materialcode = c.materialcode
+		and rownum = 1) materialspec,
+		c.measureunit,
+		c.steelname modelno,
+		nvl(t.tare * 0.001, 0) tare,
+		m.isormeasure,
+		to_char(l.createdate, 'yyyy-MM-dd hh24:mi:ss') entrytime
+		from l_applicationbill_t b
+		left join l_applicationbill_item_t c
+		on
+		(b.matchid = c.matchid and c.validflag > 0)
+		left join l_curr_temp_t t
+		on (b.matchid = t.matchid and t.validflag > 0)
+		left join
+		m_operaconfig_t m
+		on b.operatype = m.operatype
+		left join l_entrylog_t l
+		on b.id = l.id
+		where b.validflag = 1
+		and b.types = 0
+		and t.sflag != 1
+		and
+		t.targettime is null
+		and ((t.gross > 0 and m.isormeasure = 1) or
+		m.isormeasure = 0)
+		and b.carno = #{carno,jdbcType=VARCHAR}
+		order by
+		c.middlemanname,
+		b.createdate desc , c.materialcode asc,c.itemid
+	</select>
+
+	<select id="queryInfoBycarnoNotcode" parameterType="String"
+		resultType="String">
+		select wm_concat((select l.workpointcode
+		from l_workline_item_t l
+		where l.fid = b.routeid
+		and l.nodecode = 'SIN') ) nodecode
+		from l_applicationbill_t b
+		left join l_applicationbill_item_t c
+		on (b.matchid = c.matchid and c.validflag > 0)
+		left join l_curr_temp_t t
+		on (b.matchid = t.matchid and t.validflag > 0)
+		left join m_operaconfig_t m
+		on b.operatype = m.operatype
+		left join l_entrylog_t l
+		on b.id = l.id
+		where b.validflag = 1
+		and b.types = 0
+		and t.sflag != 1
+		and t.targettime is null
+		and ((t.gross > 0 and m.isormeasure = 1) or m.isormeasure = 0)
+		and b.carno = #{carno,jdbcType = VARCHAR}
+		order by b.createdate desc, c.materialcode asc, c.itemid
+	</select>
+
+	<select id="querywnamebycode" parameterType="storein"
+		resultType="storein">
+		select  wm_concat(w.workpointname)  unitname from
+		b_workpoint_t w where
+		w.workpointcode in (${unitcode})
+	</select>
+	<insert id="insertStorein" parameterType="storein">
+		insert into l_storein_t
+		(id,
+		validflag,
+		matchid,
+		operatype,
+		cartype,
+		carno,
+		storecode,
+		storename,
+		workgroup,
+		workgroupindex,
+		usermemo,
+		sysmemo,
+		createoperacode,
+		createoperaname,
+		createdate,
+		recetype,
+		deductiontype,cardid)
+		values
+		(l_storein_s.nextval,
+		1,
+		#{matchid,jdbcType=VARCHAR},
+		#{operatype,jdbcType=VARCHAR},
+		#{cartype,jdbcType=VARCHAR},
+		#{carno,jdbcType=VARCHAR},
+		#{storecode,jdbcType=VARCHAR},
+		#{storename,jdbcType=VARCHAR},
+		#{workgroup,jdbcType=VARCHAR},
+		#{workgroupindex,jdbcType=VARCHAR},
+		#{usermemo,jdbcType=VARCHAR},
+		#{sysmemo,jdbcType=VARCHAR},
+		#{createoperacode,jdbcType=VARCHAR},
+		#{creator,jdbcType=VARCHAR},
+		to_date(#{createdate,jdbcType=VARCHAR},'yyyy/MM/dd hh24:mi:ss'),
+		#{recetype,jdbcType=VARCHAR},
+		#{deductiontype,jdbcType=VARCHAR},
+		#{cardid,jdbcType=VARCHAR})
+	</insert>
+	<insert id="insertStoreinitem" parameterType="storein">
+		insert into
+		L_STOREIN_ITEM_T
+		(id,
+		validflag,
+		matchid,
+		itemid,
+		planid,
+		taskcode,
+		storecode,
+		storename,
+		sourcecode,
+		sourcename,
+		shipcode,
+		ship,
+		materialcode,
+		materialname,
+		counts,
+		weight,
+		postioncode,
+		storepos,
+		deduction,
+		deductiontime,
+		deductioncode,
+		deductionname,
+		deductionoperacode,
+		deductionoperaname,
+		createoperacode,
+		createoperaname,
+		createdate,
+		materialspec,
+		modelno,
+		pictureno,
+		productline,
+		measureunit,plancounts,middlemanname)
+		values
+		(l_storein_item_s.nextval,
+		1,
+		#{matchid,jdbcType=VARCHAR},
+		#{itemid,jdbcType=VARCHAR},
+		#{planid,jdbcType=VARCHAR},
+		#{taskcode,jdbcType=VARCHAR},
+		#{targetcode,jdbcType=VARCHAR},
+		#{targetname,jdbcType=VARCHAR},
+		#{sourcecode,jdbcType=VARCHAR},
+		#{sourcename,jdbcType=VARCHAR},
+		#{shipcode,jdbcType=VARCHAR},
+		#{ship,jdbcType=VARCHAR},
+		#{materialcode,jdbcType=VARCHAR},
+		#{materialname,jdbcType=VARCHAR},
+		#{counts,jdbcType=VARCHAR},
+		#{weight,jdbcType=VARCHAR},
+		#{postioncode,jdbcType=VARCHAR},
+		#{storepos,jdbcType=VARCHAR},
+		#{deduction,jdbcType=VARCHAR},
+		#{deductiontime,jdbcType=VARCHAR},
+		#{deductioncode,jdbcType=VARCHAR},
+		#{deductionname,jdbcType=VARCHAR},
+		#{deductionoperacode,jdbcType=VARCHAR},
+		#{deductionoperaname,jdbcType=VARCHAR},
+		#{createoperacode,jdbcType=VARCHAR},
+		#{creator,jdbcType=VARCHAR},
+		to_date(#{createdate,jdbcType=VARCHAR},'yyyy/MM/dd hh24:mi:ss'),
+		#{materialspec,jdbcType=VARCHAR},
+		#{modelno,jdbcType=VARCHAR},
+		#{pictureno,jdbcType=VARCHAR},
+		#{prodlinename,jdbcType=VARCHAR},
+		#{measureunit,jdbcType=VARCHAR},
+		#{outcounts,jdbcType=VARCHAR},
+		#{middlemanname,jdbcType=VARCHAR})
+
+	</insert>
+	<update id="cancelStorein" parameterType="storein">
+		update L_STOREIN_T set
+		validflag=0, validflagtime=sysdate,
+		validflagoperaname=#{canceler,jdbcType=VARCHAR} where
+		matchid=#{matchid,jdbcType=VARCHAR}
+	</update>
+	<update id="cancelStoreinitem" parameterType="storein">
+		update
+		L_STOREIN_ITEM_T set validflag=0, validflagtime=sysdate,
+		validflagoperaname=#{canceler,jdbcType=VARCHAR} where
+		matchid=#{matchid,jdbcType=VARCHAR}
+	</update>
+	<update id="updateCurrtemp" parameterType="storein">
+		update l_curr_temp_t t
+		set
+		t.targetcode=#{storecode,jdbcType=VARCHAR},
+		t.targetname=
+		#{storename,jdbcType=VARCHAR},
+		t.bflag=#{recetype,jdbcType=VARCHAR},
+		t.targettime=#{storeintime,jdbcType=VARCHAR},
+		t.targetoperaname=#{creator,jdbcType=VARCHAR},
+		t.targetoperacode=#{createoperacode,jdbcType=VARCHAR},
+		t.memo3=#{usermemo,jdbcType=VARCHAR}
+		where matchid =
+		#{matchid,jdbcType=VARCHAR}
+	</update>
+	<update id="updateApplicationitem" parameterType="storein">
+		update
+		l_applicationbill_item_t t set
+		t.targetcode=#{storecode,jdbcType=VARCHAR},
+		t.targetname=#{storename,jdbcType=VARCHAR} where
+		t.matchid=#{matchid,jdbcType=VARCHAR}
+	</update>
+
+
+	<select id="queryInfoBymatchid" parameterType="storein"
+		resultType="storein">
+		select b.operatype,
+		c.itemid,
+		c.planid,
+		c.taskcode,
+		c.orderno,
+		c.sourcecode,
+		c.sourcename,
+		c.targetcode,
+		c.targetname,
+		c.materialcode,
+		c.materialname,
+		c.snumber outcounts,
+		c.suttleapp weight,
+		c.shipcode,
+		c.ship,
+		c.materialspec,
+		c.steelname modelno,
+		c.pictureno,
+		c.prodline
+		productline,
+		c.measureunit
+		from l_applicationbill_t b
+		left join
+		l_applicationbill_item_t c
+		on (b.matchid = c.matchid and b.validflag >
+		0)
+		where c.validflag > 0
+		and c.matchid = #{matchid}
+	</select>
+	<select id="queryPrintInfoByitemid" parameterType="storein" resultType="storein">
+		select b.operatype,
+		       m.operaname,
+		       c.itemid,
+		       b.carno,
+		       b.matchid,
+		       c.planid,
+		       c.taskcode,
+		       c.orderno,
+		       c.sourcecode,
+		       c.sourcename,
+		       c.middlemancode,
+		       c.middlemanname,
+		       c.sourceplace,
+		       c.targetcode,
+		       c.targetname,
+		       c.materialcode,
+		       c.materialname,
+		       c.snumber counts,
+		       0 outcounts,
+		       c.suttleapp weight,
+		       c.shipcode,
+		       c.ship,
+		       nvl(t.gross * 0.001, 0) gross,
+		       c.prodlinename,
+		       (select t.sizerange
+		          from B_MATERIAL_T t
+		         where t.materialcode = c.materialcode
+		           and rownum = 1) || decode(c.steelname, null, '', c.steelname) ||
+		       decode(c.pictureno, null, '', c.pictureno) as reserve10,
+		       c.measureunit,
+		       nvl(t.tare * 0.001, 0) tare,
+		       m.isormeasure,
+		       to_char(l.createdate, 'yyyy-MM-dd hh24:mi:ss') as reserve9,
+		       c.middlemanname,
+		       n.cproject as reserve8
+		  from l_applicationbill_t b
+		  left join l_applicationbill_item_t c
+		    on (b.matchid = c.matchid and c.validflag > 0)
+		  left join l_interfaceinfo_item_t n
+		    on c.saleitemid = n.saleitemid
+		   and n.materialcode = c.materialcode
+		  left join l_curr_temp_t t
+		    on (b.matchid = t.matchid and t.validflag > 0)
+		  left join m_operaconfig_t m
+		    on b.operatype = m.operatype
+		  left join l_entrylog_t l
+		    on b.id = l.id
+		 where b.validflag = 1
+		   and b.types = 0
+		   and t.sflag != 1
+		   and t.targettime is null
+		   and ((t.gross > 0 and m.isormeasure = 1) or m.isormeasure = 0)
+		and c.itemid in
+		<foreach item="item" index="index" collection="array" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+		order by b.carno,c.middlemanname,b.createdate desc ,c.materialcode asc,c.itemid 
+	</select>
+	<select id="queryPrintData" resultType="storein" parameterType="storein">
+		select distinct t.id,
+				m.id,
+                t.carno,
+                t.matchid,
+                m.planid,
+                m.materialname,
+                m.materialcode,
+                o.operaname,
+                m.MEASUREUNIT,
+                m.sourcename,
+                m.storename as targetname,
+                t.storename,
+                m.weight,
+                t.suttle * 0.001 suttle,
+                m.counts,
+                m.plancounts,
+                t.createoperaname,
+                to_char(t.createdate, 'yyyy-mm-dd hh24:mi:ss') createdate,
+                t.usermemo,
+                decode(b.materialspec, null, '', b.materialspec) ||
+                decode(b.MATERIALTYPE, null, '', b.MATERIALTYPE) ||
+                decode(b.MATERIALGRAPH, null, '', b.MATERIALGRAPH) as reserve10,
+                to_char(e.createdate, 'yyyy-mm-dd hh24:mi:ss') as reserve9,
+                m.middlemanname,
+                n.cproject as reserve8
+		  from l_storein_t t
+		  left join l_storein_item_t m
+		    on (t.matchid = m.matchid and m.validflag > 0)
+		  left join b_material_t b
+		    on m.materialcode = b.materialcode
+		  left join l_applicationbill_t a
+		    on t.matchid = a.matchid
+		   and a.validflag > 0
+		  left join l_applicationbill_item_t i
+		    on t.matchid = i.matchid
+		   and i.validflag > 0
+		   and i.materialcode = m.materialcode
+		  left join l_interfaceinfo_item_t n
+		    on i.saleitemid = n.saleitemid
+		   and n.materialcode = i.materialcode
+		  left join l_entrylog_t e
+		    on a.id = e.id
+		   and e.entrytype = 1
+		  left join m_operaconfig_t o
+		    on t.operatype = o.operatype
+		 where t.validflag > 0 and m.matchid in
+		<foreach item="item" index="index" collection="array" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+		order by t.carno,m.materialcode
+	</select>
+	<select id="queryCountBymatchid" parameterType="storein"
+		resultType="int">
+		select count(1) from l_storein_t t where t.validflag>0 and
+		t.matchid=#{matchid,jdbcType=VARCHAR}
+	</select>
+</mapper>

@@ -1,0 +1,1087 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xgmes.service.mapper.ApplicationbillMapper">
+
+	<select id="queryList" resultType="application" parameterType="application">
+		select a.matchid,
+		a.carno,
+		a.icid,
+		a.operatype,
+		m.operaname,
+		a.cartype,
+		t.itemid,
+		t.planid,
+		t.taskcode,
+		t.materialcode,
+		t.materialname,
+		t.sourcename,
+		t.targetname,
+		t.sourceplace,
+		t.sourceoperaname,
+		t.targetplace,
+		t.planmaterialcount,
+		t.planweight,
+		t.grossb,
+		t.tareb,
+		t.suttleb,
+		t.shipcode,
+		t.ship,
+		t.snumber,
+		t.suttleapp,
+		t.middlemancode,
+		t.middlemanname,
+		a.unitcode,
+		a.unitname,
+		t.usermemo,
+		a.sysmemo,
+		a.createoperacode,
+		a.createoperaname creator,
+		to_char(a.createdate,'yyyy-MM-dd hh24:mi:ss') createdate,
+		a.auditlevel,
+		a.approverfirst,
+		a.approversecond,
+		to_char(a.firsttime,
+		'yyyy-MM-dd hh24:mi:ss')
+		firsttime,
+		to_char(a.secondtime, 'yyyy-MM-dd
+		hh24:mi:ss') secondtime,
+		a.documentcode,
+		decode(a.documentcode,
+		'0',
+		decode(m.materialflow, '1', '到货单', '发运单'),
+		(select b.documentname from
+		b_documenttype_t b
+		where b.validflag = 1
+		and b.documentcode =
+		a.documentcode)) documentname,
+		m.isormeasure,
+		m.materialflow
+		from
+		l_applicationbill_t a
+		left join
+		l_applicationbill_item_t t
+		on
+		(a.matchid =
+		t.matchid and t.validflag >
+		0)
+		LEFT JOIN m_operaconfig_t m
+		ON a.operatype
+		= m.operatype
+		where
+		a.validflag > 0 and a.types=0
+		<if test="begintime!=null and begintime!=''">
+    		<![CDATA[and a.createdate>=  to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+    		<![CDATA[and a.createdate <= to_date(#{endtime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="planid!=null and planid !=''">
+			and t.planid like '%' || #{planid}||'%'
+		</if>
+		<if test="matchid!=null and matchid !=''">
+			and a.matchid like '%' || #{matchid}||'%'
+		</if>
+		<if test="carno !=null and carno !=''">
+			and a.carno like '%' || #{carno}||'%'
+		</if>
+		<if test="materialname!=null and materialname !=''">
+			and t.materialname like '%' || #{materialname}||'%'
+		</if>
+		<if test="targetname!=null and targetname!=''">
+			and t.targetname like '%' || #{targetname} ||'%'
+		</if>
+		<if test="sourcename!=null and sourcename!=''">
+			and t.sourcename like '%' || #{sourcename}||'%'
+		</if>
+		<if test="operatype !=null and operatype !=''">
+			and a.operatype=#{operatype}
+		</if>
+		<if test="documentcode !=null and documentcode !=''">
+			and a.documentcode=#{documentcode}
+		</if>
+		<if test="ship !=null and ship !=''">
+			and a.ship=#{ship}
+		</if>
+		<if test="sourceplace !=null and sourceplace !=''">
+			and a.sourceplace=#{sourceplace}
+		</if>
+		<if test="unitname !=null and unitname !=''">
+			and a.unitname like '%' || #{unitname}|| '%'
+		</if>
+		order by a.createdate desc
+	</select>
+
+	<select id="queryDocumentList" resultType="application" parameterType="application">
+		        select distinct l.matchid,
+               l.carno,
+               l.icid,
+               m.modelname operatype,
+               l.cartype,
+               t.itemid,
+               t.planid,
+               t.taskcode,
+               t.materialcode,
+               t.materialname,
+               t.sourcename,
+               t.targetname,
+               t.sourceplace,
+               t.sourceoperaname,
+               t.targetplace,
+               t.planmaterialcount,
+               t.planweight,
+               t.grossb,
+               t.tareb,
+               t.suttleb,
+               t.shipcode,
+               t.ship,
+               t.snumber,
+               t.suttleapp,
+               t.middlemancode,
+               t.middlemanname,
+               l.inoutdate,
+               l.unitcode,
+               l.unitname,
+               l.usermemo,
+               t.usermemo sysmemo,
+               l.createoperacode,
+               l.createoperaname creator,
+               decode(l.flag , 0, '未使用', 1, '已使用',2,'终止',8,'完成') isoruse,
+               l.createdate cdate,
+               l.auditlevel,
+               l.approverfirst,
+               l.approversecond,
+               to_char(l.firsttime, 'yyyy-MM-dd hh24:mi:ss') firsttime,
+               to_char(l.secondtime,
+                       'yyyy-MM-dd
+		hh24:mi:ss') secondtime,
+               l.documentcode
+          from (select case
+                 when f.matchid is null and m.planid is null and
+                      m.imatchid is null then
+                  0
+                 when f.matchid is null and m.planid is not null and
+                      m.imatchid is not null and  m.validflag = 1 then
+                  1
+                 when f.matchid is null and m.planid is not null and
+                      m.imatchid is not null and  m.validflag = 8  then
+                  8                  
+                 when f.matchid is not null and m.planid is not null and
+                      m.imatchid is not null then
+                  2
+               end flag,
+               m.* 　from (select s.planid, s.imatchid, a.*
+                            from l_applicationbill_t a
+                            left join (select i.planid, i.matchid as imatchid
+                                        from l_applicationbill_item_t i
+                                       where i.validflag is null
+                                          or i.validflag > 0
+                                       group by i.matchid, i.planid) s
+                              on a.matchid = s.planid
+                           where a.id = -1
+                             and a.validflag > 0) m left join (select t.matchid
+                                                                            from l_forcestop_log_t t
+                                                                           where t.matchid not in
+                                                                                 (select u.matchid
+                                                                                    from l_forcestop_log_t u
+                                                                                   where u.usermemo =
+                                                                                         '异常还原 终止业务还原')
+                                                                           group by t.matchid) f on m.imatchid = f.matchid) l,
+               l_applicationbill_item_t t,
+               l_model_t                m
+         where (l.matchid = t.matchid and t.validflag > 0)
+           and (l.documentcode = m.operatype and m.validflag > 0)
+           and l.validflag > 0
+           and l.types = 1 
+		<if test="creator!=null and creator !=''">
+			and (l.createoperaname=#{creator} or
+			approverfirst=#{creator})
+		</if>
+		<if test="planid!=null and planid !=''">
+			and t.planid like '%' || #{planid}||'%'
+		</if>
+		<if test="matchid!=null and matchid !=''">
+			and l.matchid like '%' || #{matchid}||'%'
+		</if>
+		<if test="carno !=null and carno !=''">
+			and l.carno like '%' || #{carno}||'%'
+		</if>
+		<if test="materialname!=null and materialname !=''">
+			and t.materialname like '%' || #{materialname}||'%'
+		</if>
+		<if test="targetname!=null and targetname!=''">
+			and t.targetname like '%' || #{targetname} ||'%'
+		</if>
+		<if test="sourcename!=null and sourcename!=''">
+			and t.sourcename like '%' || #{sourcename}||'%'
+		</if>
+		<if test="documentcode !=null and documentcode !=''">
+			and l.documentcode=#{documentcode}
+		</if>
+		<if test="sourceplace !=null and sourceplace !=''">
+			and l.sourceplace=#{sourceplace}
+		</if>
+		<if test="isoruse !=null and isoruse !=-1">
+			and l.flag=#{isoruse}
+		</if>
+		<if test="auditlevel !=null">
+			<if test="auditlevel ==0">
+				and l.firsttime is null
+			</if>
+			<if test="auditlevel ==0">
+				and l.firsttime is null
+			</if>
+			<if test="auditlevel ==1">
+				and l.secondtime is null
+			</if>
+			<if test="auditlevel ==2">
+				and l.firsttime is not null
+			</if>
+			<if test="auditlevel ==3">
+				and l.secondtime is not null
+			</if>
+		</if>
+		<if test="secondflag !=0">
+			and auditlevel=2 and l.firsttime is not null
+		</if>
+		<if test="begintime!=null and begintime!=''">
+    		<![CDATA[and l.createdate>=  to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+    		<![CDATA[and l.createdate <= to_date(#{endtime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		order by l.createdate desc,t.itemid desc
+	</select>
+
+	<insert id="insertApplicationbill" parameterType="application">
+		insert into
+		l_applicationbill_t
+		(matchid,
+		carno,
+		icid,
+		rfidid,
+		operatype,
+		cartype,
+		unitcode,
+		unitname,
+		usermemo,
+		sysmemo,
+		createoperacode,
+		createoperaname,
+		createdate,
+		types,
+		documentcode,
+		fdocumentno,
+		businessname ,
+		saleman ,
+		inoutdate,
+		isormeasure ,
+		reason ,
+		auditlevel,
+		routeid,id,approverfirst)
+		values
+		(#{matchid},
+		#{carno,jdbcType=VARCHAR},
+		#{icid,jdbcType=VARCHAR},
+		#{rfidid,jdbcType=VARCHAR},
+		#{operatype,jdbcType=VARCHAR},
+		'C',
+		#{unitcode,jdbcType=VARCHAR},
+		#{unitname,jdbcType=VARCHAR},
+		#{memo,jdbcType=VARCHAR},
+		#{sysmemo,jdbcType=VARCHAR},
+		#{createoperacode,jdbcType=VARCHAR},
+		#{creator,jdbcType=VARCHAR},
+		sysdate,
+		#{types,jdbcType=VARCHAR},
+		#{documentcode,jdbcType=VARCHAR},
+		#{fdocumentno,jdbcType=VARCHAR},
+		#{businessname,jdbcType=VARCHAR},
+		#{saleman,jdbcType=VARCHAR},
+		#{inoutdate,jdbcType=VARCHAR},
+		#{isormeasure,jdbcType=VARCHAR},
+		#{reason,jdbcType=VARCHAR},
+		#{auditlevel,jdbcType=VARCHAR},
+		#{routeid,jdbcType=VARCHAR},
+		#{id,jdbcType=VARCHAR},
+		#{approverfirst,jdbcType=VARCHAR}
+		)
+	</insert>
+	<insert id="insertApplicationbillitem" parameterType="application">
+		insert into
+		l_applicationbill_item_t
+		(itemid,
+		matchid,
+		planid,
+		taskcode,
+		materialcode,
+		materialname,
+		sourcecode,
+		sourcename,
+		targetcode,
+		targetname,
+		sourceplace,
+		sourceoperaname,
+		targetplace,
+		planmaterialcount,
+		planweight,
+		grossb,
+		tareb,
+		suttleb,
+		shipcode,
+		ship,
+		snumber,
+		suttleapp,
+		middlemancode,
+		middlemanname,
+		measureunit ,
+		isorin ,
+		isorout,
+		returntime ,
+		outtime ,
+		returntotal ,
+		outtotal,
+		usermemo,
+		saleitemid,
+		materialspec,
+		steelname,
+		pictureno,
+		prodline)
+		values
+		(l_applicationbill_item_s.nextval,
+		#{matchid,jdbcType=VARCHAR},
+		#{planid,jdbcType=VARCHAR},
+		#{taskcode,jdbcType=VARCHAR},
+		#{materialcode,jdbcType=VARCHAR},
+		#{materialname,jdbcType=VARCHAR},
+		#{sourcecode,jdbcType=VARCHAR},
+		#{sourcename,jdbcType=VARCHAR},
+		#{targetcode,jdbcType=VARCHAR},
+		#{targetname,jdbcType=VARCHAR},
+		#{sourceplace,jdbcType=VARCHAR},
+		#{sourceoperaname,jdbcType=VARCHAR},
+		#{targetplace,jdbcType=VARCHAR},
+		#{planmaterialcount,jdbcType=VARCHAR},
+		#{planweight,jdbcType=VARCHAR},
+		#{grossb,jdbcType=VARCHAR},
+		#{tareb,jdbcType=VARCHAR},
+		#{suttleb,jdbcType=VARCHAR},
+		#{shipcode,jdbcType=VARCHAR},
+		#{ship,jdbcType=VARCHAR},
+		#{snumber,jdbcType=VARCHAR},
+		#{suttleapp,jdbcType=VARCHAR},
+		#{middlemancode,jdbcType=VARCHAR},
+		#{middlemanname,jdbcType=VARCHAR},
+		#{measureunit,jdbcType=VARCHAR} ,
+		#{isorin,jdbcType=VARCHAR} ,
+		#{isorout,jdbcType=VARCHAR},
+		#{returntime,jdbcType=VARCHAR} ,
+		#{outtime,jdbcType=VARCHAR} ,
+		#{returntotal,jdbcType=VARCHAR} ,
+		#{outtotal,jdbcType=VARCHAR},
+		#{usermemo,jdbcType=VARCHAR},
+		#{saleitemid,jdbcType=VARCHAR},
+		#{materialspec,jdbcType=VARCHAR},
+		#{steelname,jdbcType=VARCHAR},
+		#{pictureno,jdbcType=VARCHAR},
+		#{prodline,jdbcType=VARCHAR})
+	</insert>
+	<insert id="insertCurrtemp" parameterType="application">
+		insert into
+		l_curr_temp_t
+		(carno,
+		icid,
+		rfidid,
+		matchid,
+		operatype,
+		validflag,
+		planid,
+		orderno,
+		taskcode,
+		materialcode,
+		materialname,
+		sourcecode,
+		sourcename,
+		sourceplace,
+		targetcode,
+		targetname,
+		ship,
+		suttleapp,
+		usermemo,
+		entertime,
+		entergatename,
+		grossb,
+		tareb,
+		snumber,
+		motorcadecode,
+		motorcadename,
+		memo1,
+		memo2,
+		routeid,
+		materialspec)
+		values
+		(#{carno,jdbcType=VARCHAR},
+		#{icid,jdbcType=VARCHAR},
+		#{rfidid,jdbcType=VARCHAR},
+		#{matchid,jdbcType=VARCHAR},
+		#{operatype,jdbcType=VARCHAR},
+		1,
+		#{planid,jdbcType=VARCHAR},
+		#{orderno,jdbcType=VARCHAR},
+		#{taskcode,jdbcType=VARCHAR},
+		#{materialcode,jdbcType=VARCHAR},
+		#{materialname,jdbcType=VARCHAR},
+		#{sourcecode,jdbcType=VARCHAR},
+		#{sourcename,jdbcType=VARCHAR},
+		#{sourceplace,jdbcType=VARCHAR},
+		#{targetcode,jdbcType=VARCHAR},
+		#{targetname,jdbcType=VARCHAR},
+		#{ship,jdbcType=VARCHAR},
+		#{suttleapp,jdbcType=VARCHAR},
+		#{usermemo,jdbcType=VARCHAR},
+		#{entrytime,jdbcType=VARCHAR},
+		#{entergatename,jdbcType=VARCHAR},
+		#{grossb,jdbcType=VARCHAR},
+		#{tareb,jdbcType=VARCHAR},
+		#{snumber,jdbcType=VARCHAR},
+		#{motorcadecode,jdbcType=VARCHAR},
+		#{motorcadename,jdbcType=VARCHAR},
+		#{memo1,jdbcType=VARCHAR},
+		#{memo2,jdbcType=VARCHAR},
+		#{routeid,jdbcType=VARCHAR},
+		#{materialspec,jdbcType=VARCHAR}||' '||
+		#{steelname,jdbcType=VARCHAR}
+		)
+	</insert>
+	<update id="updateApplicationbill" parameterType="application">
+		update
+		l_applicationbill_t set
+		carno=#{carno,jdbcType=VARCHAR},
+		icid=#{icid,jdbcType=VARCHAR},
+		operatype=#{operatype,jdbcType=VARCHAR},
+		unitcode=#{unitcode,jdbcType=VARCHAR},
+		unitname=#{unitname,jdbcType=VARCHAR},
+		usermemo=#{memo,jdbcType=VARCHAR},
+		sysmemo=#{sysmemo,jdbcType=VARCHAR},
+		updateoperaname=#{creator,jdbcType=VARCHAR},
+		updatedate=sysdate ,
+		documentcode=#{documentcode,jdbcType=VARCHAR},
+		businessname=#{businessname,jdbcType=VARCHAR},
+		saleman=#{saleman,jdbcType=VARCHAR},
+		inoutdate=#{inoutdate,jdbcType=VARCHAR},
+		isormeasure=#{isormeasure,jdbcType=VARCHAR},
+		reason=#{reason,jdbcType=VARCHAR},
+		auditlevel=#{auditlevel,jdbcType=VARCHAR},
+		routeid =
+		#{routeid,jdbcType=VARCHAR},
+		approverfirst=#{approverfirst,jdbcType=VARCHAR}
+		where
+		matchid=#{matchid,jdbcType=VARCHAR}
+	</update>
+	<select id="queryCountByitemid" resultType="int" parameterType="application">
+		select count(1) from l_applicationbill_item_t where
+		itemid=#{itemid,jdbcType=VARCHAR}
+	</select>
+	<update id="updateApplicationbillitem" parameterType="application">
+		update
+		l_applicationbill_item_t set
+		planid=#{planid,jdbcType=VARCHAR},
+		taskcode=#{taskcode,jdbcType=VARCHAR},
+		materialcode=#{materialcode,jdbcType=VARCHAR},
+		materialname=#{materialname,jdbcType=VARCHAR},
+		sourcecode=#{sourcecode,jdbcType=VARCHAR},
+		sourcename=#{sourcename,jdbcType=VARCHAR},
+		sourceplace=#{sourceplace,jdbcType=VARCHAR},
+		sourceoperaname=#{sourceoperaname,jdbcType=VARCHAR},
+		targetcode=#{targetcode,jdbcType=VARCHAR},
+		targetname=#{targetname,jdbcType=VARCHAR},
+		targetplace=#{targetplace,jdbcType=VARCHAR},
+		planmaterialcount=#{planmaterialcount,jdbcType=VARCHAR},
+		planweight=#{planweight,jdbcType=VARCHAR},
+		grossb=#{grossb,jdbcType=VARCHAR},
+		tareb=#{tareb,jdbcType=VARCHAR},
+		suttleb=#{suttleb,jdbcType=VARCHAR},
+		shipcode=#{shipcode,jdbcType=VARCHAR},
+		ship=#{ship,jdbcType=VARCHAR},
+		snumber=#{snumber,jdbcType=VARCHAR},
+		suttleapp=#{suttleapp,jdbcType=VARCHAR},
+		middlemancode=#{middlemancode,jdbcType=VARCHAR},
+		middlemanname=#{middlemanname,jdbcType=VARCHAR},
+		measureunit=#{measureunit,jdbcType=VARCHAR},
+		isorin=#{isorin,jdbcType=VARCHAR} ,
+		isorout=#{isorout,jdbcType=VARCHAR},
+		returntime=#{returntime,jdbcType=VARCHAR},
+		outtime
+		=#{outtime,jdbcType=VARCHAR},
+		returntotal=#{returntotal,jdbcType=VARCHAR} ,
+		outtotal=#{outtotal,jdbcType=VARCHAR},
+		validflag=1,
+		usermemo
+		=#{usermemo,jdbcType=VARCHAR},
+		saleitemid =
+		#{saleitemid,jdbcType=VARCHAR}
+		where
+		itemid=#{itemid,jdbcType=VARCHAR}
+	</update>
+	<update id="updateCurrtemp" parameterType="application">
+		update l_curr_temp_t
+		set
+		carno= #{carno,jdbcType=VARCHAR},
+		icid=#{icid,jdbcType=VARCHAR},
+		operatype=#{operatype,jdbcType=VARCHAR},
+		validflag=#{validflag,jdbcType=VARCHAR},
+		planid=#{planid,jdbcType=VARCHAR},
+		orderno=#{orderno,jdbcType=VARCHAR},
+		taskcode=#{taskcode,jdbcType=VARCHAR},
+		materialcode=#{materialcode,jdbcType=VARCHAR},
+		materialname=#{materialname,jdbcType=VARCHAR},
+		sourcecode=#{sourcecode,jdbcType=VARCHAR},
+		sourcename=#{sourcename,jdbcType=VARCHAR},
+		sourceplace=#{targetcode,jdbcType=VARCHAR},
+		targetcode=#{carno,jdbcType=VARCHAR},
+		targetname=#{targetname,jdbcType=VARCHAR},
+		ship=#{ship,jdbcType=VARCHAR},
+		suttleapp=#{suttleapp,jdbcType=VARCHAR},
+		usermemo=#{usermemo,jdbcType=VARCHAR},
+		grossb=#{grossb,jdbcType=VARCHAR},
+		tareb=#{tareb,jdbcType=VARCHAR},
+		snumber=#{snumber,jdbcType=VARCHAR},
+		motorcadecode=#{motorcadecode,jdbcType=VARCHAR},
+		motorcadename=#{motorcadename,jdbcType=VARCHAR},
+		routeid=#{routeid,jdbcType=VARCHAR}
+		where
+		matchid=#{matchid,jdbcType=VARCHAR}
+	</update>
+	<update id="cancelApplicationbill" parameterType="application">
+		update
+		l_applicationbill_t set
+		validflag=0, validflagtime=sysdate,
+		validflagoperaname=#{creator,jdbcType=VARCHAR} where
+		matchid=#{matchid,jdbcType=VARCHAR}
+	</update>
+	<update id="cancelapplicationbillitem" parameterType="application">
+		update
+		l_applicationbill_item_t set validflag=0, validflagtime=sysdate,
+		validflagoperaname=#{creator,jdbcType=VARCHAR} where
+		matchid=#{matchid,jdbcType=VARCHAR}
+	</update>
+	<update id="cancelCurrtemp" parameterType="application">
+		update l_curr_temp_t
+		set validflag=0 where matchid=#{matchid,jdbcType=VARCHAR}
+	</update>
+	<update id="cancelEntrylog" parameterType="application">
+		update l_entrylog_t t
+		set
+		t.validflag=0,t.validflagtime=sysdate,t.validflagoperaname=#{creator,jdbcType=VARCHAR}
+		where t.id=#{id,jdbcType=VARCHAR}
+	</update>
+	<select id="queryInfoBymatchid" parameterType="application" resultType="application">
+		select t.itemid,
+		t.saleitemid,
+		a.matchid,
+		a.carno,
+		a.icid,
+		a.rfidid,
+		a.operatype,
+		a.cartype,
+		t.planid,
+		t.taskcode,
+		t.orderno,
+		t.materialcode,
+		t.materialname,
+		t.sourcecode,
+		t.sourcename,
+		t.targetcode,
+		t.targetname ,
+		t.sourceplace,
+		t.targetplace,
+		t.shipcode,
+		t.ship,
+		t.middlemancode,
+		t.middlemanname,
+		t.grossb,
+		t.tareb,
+		t.suttleb,
+		t.snumber,
+		t.suttleapp,
+		a.usermemo memo,
+		a.approverfirst,
+		a.firsttime,
+		a.approversecond,
+		a.secondtime,
+		t.measureunit ,
+		t.isorin ,
+		t.isorout,
+		t.returntime ,
+		t.outtime ,
+		a.documentcode,
+		a.businessname ,
+		a.saleman ,
+		a.inoutdate,
+		a.isormeasure ,
+		a.reason,
+		a.routeid,
+		t.usermemo,
+		(select l.snumber
+		from
+		l_applicationbill_item_t l
+		where l.matchid = a.fdocumentno
+		and
+		to_char(l.itemid)
+		= t.saleitemid) materialcounts,
+		l_getcount_f(#{matchid,jdbcType =VARCHAR}, t.itemid)
+		returntotal,
+		l_getcount_f(#{matchid,jdbcType =VARCHAR}, t.itemid)
+		outtotal
+		from
+		l_applicationbill_t a
+		left join
+		l_applicationbill_item_t
+		t
+		on
+		(a.matchid=
+		t.matchid and t.validflag > 0)
+		where a.validflag > 0
+		and
+		a.matchid
+		=#{matchid,jdbcType = VARCHAR}
+	</select>
+	<select id="queryDocumentBymatchid" parameterType="application" resultType="application">
+		select distinct t.itemid,
+		a.matchid,
+		a.carno,
+		a.icid,
+		a.documentcode operatype,
+		a.cartype,
+		t.planid,
+		t.taskcode,
+		t.orderno,
+		t.materialcode,
+		t.materialname,
+		t.materialspec,
+		t.sourcecode,
+		t.sourcename,
+		t.targetcode,
+		t.targetname,
+		t.sourceplace,
+		t.targetplace,
+		t.shipcode,
+		t.ship,
+		t.middlemancode,
+		t.middlemanname,
+		t.grossb,
+		t.tareb,
+		t.suttleb,
+		t.snumber,
+		t.suttleapp,
+		a.usermemo memo,
+		a.approverfirst,
+		a.firsttime,
+		a.approversecond,
+		a.secondtime,
+		t.measureunit,
+		t.isorin,
+		t.isorout,
+		t.returntime,
+		t.outtime,
+		t.returntotal,
+		t.outtotal,
+		a.documentcode,
+		a.businessname,
+		a.saleman,
+		a.inoutdate,
+		a.isormeasure,
+		a.reason,
+		t.usermemo,
+		to_char(a.createdate, 'yyyy-mm-dd hh24:mi:ss') as
+		reserve1,
+		m.modelname as reserve2,
+		a.createoperaname as creator,
+		a.fdocumentno
+		from l_applicationbill_t a
+		left join
+		l_applicationbill_item_t t
+		on (a.matchid = t.matchid and t.validflag >
+		0)
+		left join l_model_t m
+		on (m.operatype = a.documentcode and
+		m.validflag>0)
+		where a.validflag > 0 and a.matchid in
+		(#{matchid,jdbcType = VARCHAR}) order by t.itemid
+	</select>
+	<select id="queryDocumentBymatchids" resultType="application">
+		select distinct t.itemid,
+		a.matchid,
+		a.carno,
+		a.icid,
+		a.documentcode
+		operatype,
+		a.cartype,
+		t.planid,
+		t.taskcode,
+		t.orderno,
+		t.materialcode,
+		t.materialname,
+		t.materialspec,
+		t.sourcecode,
+		t.sourcename,
+		t.targetcode,
+		t.targetname,
+		t.sourceplace,
+		t.targetplace,
+		t.shipcode,
+		t.ship,
+		t.middlemancode,
+		t.middlemanname,
+		t.grossb,
+		t.tareb,
+		t.suttleb,
+		t.snumber,
+		t.suttleapp,
+		a.usermemo memo,
+		a.approverfirst,
+		a.firsttime,
+		a.approversecond,
+		a.secondtime,
+		t.measureunit,
+		t.isorin,
+		t.isorout,
+		t.returntime,
+		t.outtime,
+		t.returntotal,
+		t.outtotal,
+		a.documentcode,
+		a.businessname,
+		a.saleman,
+		a.inoutdate,
+		a.isormeasure,
+		a.reason,
+		t.usermemo,
+		to_char(a.createdate, 'yyyy-mm-dd hh24:mi:ss') as
+		reserve1,
+		m.modelname as reserve2,
+		a.createoperaname as creator
+		from
+		l_applicationbill_t a
+		left join l_applicationbill_item_t t
+		on (a.matchid
+		= t.matchid and t.validflag > 0)
+		left join l_model_t m
+		on m.operatype =
+		a.documentcode
+		where a.validflag > 0 and a.matchid in
+		<foreach item="item" index="index" collection="array" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+		order by t.itemid desc
+	</select>
+	<select id="queryPlanid" parameterType="application" resultType="application">
+		select l.saleitemid, a.id,nvl(a.documentcode,0) documentcode,a.routeid
+		from l_applicationbill_item_t l
+		left join l_applicationbill_t a
+		on
+		l.matchid = a.matchid
+		where l.validflag > 0
+		and l.matchid =
+		#{matchid,jdbcType=VARCHAR}
+	</select>
+
+	<update id="updateFirst" parameterType="application">
+		update
+		l_applicationbill_t
+		set approverfirst =
+		#{approverfirst,jdbcType=VARCHAR}, firsttime = sysdate
+		where matchid =
+		#{matchid,jdbcType=VARCHAR}
+	</update>
+	<update id="updatesecond" parameterType="application">
+		update
+		l_applicationbill_t
+		set approversecond =
+		#{approversecond,jdbcType=VARCHAR}, secondtime = sysdate
+		where matchid
+		= #{matchid,jdbcType=VARCHAR}
+	</update>
+	<update id="giveupfirst" parameterType="application">
+		update
+		l_applicationbill_t
+		set giveupfirst = #{giveupfirst,jdbcType=VARCHAR},
+		giveupftime = sysdate,
+		firsttime =''
+		where matchid =#{matchid}
+	</update>
+
+	<update id="giveupsecond" parameterType="application">
+		update
+		l_applicationbill_t
+		set giveupsecond = #{giveupfirst,jdbcType=VARCHAR},
+		giveupstime = sysdate,
+		approversecond ='',
+		secondtime = ''
+		where matchid
+		= #{matchid}
+	</update>
+
+	<update id="updateIsoruse" parameterType="application">
+		update
+		l_applicationbill_item_t set
+		isoruse=#{isoruse,jdbcType=VARCHAR},
+		fendanflag=0
+		where
+		itemid=#{saleitemid,jdbcType=VARCHAR}
+	</update>
+	<update id="updateVIsoruse" parameterType="application">
+		update
+		l_applicationbill_item_t set
+		isoruse=#{isoruse,jdbcType=VARCHAR},
+		fendanflag=#{fendanflag,jdbcType=VARCHAR}
+		where
+		itemid=#{saleitemid,jdbcType=VARCHAR}
+	</update>
+
+	<update id="updateIsoruseInter" parameterType="application">
+		update
+		l_interfaceinfo_item_t set
+		isoruse=#{isoruse,jdbcType=VARCHAR}
+		where
+		saleitemid=#{saleitemid,jdbcType=VARCHAR}
+	</update>
+
+	<select id="queryCountBymatchid" parameterType="application" resultType="int">
+		select count(1)
+		from l_applicationbill_t a,
+		l_applicationbill_item_t t
+		where (a.matchid = t.matchid
+		and a.validflag
+		> 0
+		and t.validflag > 0)
+		and t.planid = #{matchid,jdbcType=VARCHAR}
+		and
+		a.types
+		= 0
+	</select>
+	<select id="queryRouteidBymateiral" parameterType="workline" resultType="workline">
+		select t.routeid id from B_MATERIAL_T t
+		where t.validflag >
+		0
+		and t.materialcode=#{materialcode,jdbcType=VARCHAR}
+		and rownum=1
+
+	</select>
+
+	<select id="queryRouteidByfolder" parameterType="workline" resultType="workline">
+		select t.id
+		from L_WORKLINE_T t
+		where t.validflag > 0
+		and
+		t.foldercode = (select t.foldercode
+		from B_MATERIAL_T t
+		where
+		t.materialcode = #{materialcode,jdbcType=VARCHAR}
+		and rownum = 1)
+		and
+		rownum=1
+	</select>
+	<select id="queryConfig" parameterType="application" resultType="application">
+		select t.mflag ,t.isormeasure from m_operaconfig_t t where t.operatype
+		=
+		#{operatype,jdbcType=VARCHAR} and t.validflag>0
+	</select>
+	<select id="queryOperatypeBycarno" parameterType="operaconfig" resultType="operaconfig">
+		select m.operatype id, m.operaname text
+		from L_PLAN_V t
+		left
+		join m_operaconfig_t m
+		on t.operatype = m.operatype
+		where t.carno =
+		#{carno,jdbcType=VARCHAR}
+		group by m.operatype, m.operaname
+	</select>
+
+	<select id="queryFdocumentBymatchid" parameterType="application" resultType="application">
+		select 'add' || rownum itemid,
+		a.matchid,
+		a.operatype,
+		t.planid,
+		t.materialcode,
+		t.materialname,
+		t.sourcecode,
+		t.sourcename,
+		t.targetcode,
+		t.targetname,
+		t.snumber,
+		t.suttleapp,
+		a.usermemo memo,
+		t.measureunit,
+		t.isorin,
+		t.isorout,
+		t.returntime,
+		t.outtime,
+		a.documentcode,
+		decode(a.documentcode,
+		'108',
+		l_getcount_f(#{matchid,jdbcType = VARCHAR}, t.itemid),
+		0) returntotal,
+		decode(a.documentcode,
+		'111',
+		l_getcount_f(#{matchid,jdbcType =
+		VARCHAR}, t.itemid),
+		0) outtotal,
+		t.usermemo,
+		t.itemid saleitemid,
+		t.snumber materialcounts
+		from
+		l_applicationbill_t a
+		left join
+		l_applicationbill_item_t t
+		on (a.matchid = t.matchid
+		and t.validflag >
+		0)
+		where a.validflag > 0
+		and a.matchid
+		= #{matchid,
+		jdbcType = VARCHAR}
+	</select>
+	<select id="queryAppinfoBypitemid" parameterType="application" resultType="application">
+		select t.planid,
+		t.carno,
+		t.saleitemid,
+		t.materialcode,
+		t.materialname,
+		t.sourcecode,
+		t.sourcename,
+		t.targetcode,
+		t.targetname,
+		t.documentcode,
+		t.routeid,
+		t.auditlevel,
+		t.operatype,
+		t.materialspec,
+		t.measureunit,
+		t.steelname,
+		t.pictureno,
+		t.prodline,
+		t.itemid,
+		t.usermemo,
+		t.snumber,
+		t.middlemanname
+		from l_plan_v t
+		where t.planid in (${planid})
+		and t.saleitemid in
+		(${saleitemid})
+	</select>
+	<select id="queryAllAppBypitemid" parameterType="application" resultType="application">
+		select t.planid,
+		t.carno,
+		t.saleitemid,
+		t.materialcode,
+		t.materialname,
+		t.sourcecode,
+		t.sourcename,
+		t.targetcode,
+		t.targetname,
+		t.documentcode,
+		t.routeid,
+		t.auditlevel,
+		t.operatype,
+		t.materialspec,
+		t.measureunit,
+		t.steelname,
+		t.pictureno,
+		t.prodline,
+		t.itemid,t.snumber
+		from l_plan_all_v t
+		where t.planid in (${planid})
+		and t.saleitemid in
+		(${saleitemid})
+	</select>
+	<select id="queryRfidBycarno" parameterType="String" resultType="String">
+		select cardid
+		from b_card_t b
+		where b.carno = #{carno,jdbcType =
+		VARCHAR}
+		and b.validflag = 3
+		and b.cardclass = 1
+		and rownum = 1
+	</select>
+	<select id="queryUncomplete" parameterType="String" resultType="String">
+		select m.isormeasure
+		from L_CURR_TEMP_T t
+		left join m_operaconfig_t m
+		on
+		t.operatype = m.operatype
+		where t.carno = #{carno, jdbcType = VARCHAR}
+		and t.validflag = 1
+	</select>
+	<select id="queryIdcount" parameterType="Long" resultType="int">
+		select count(1) from l_applicationbill_t l where l.validflag>0 and
+		l.id=#{id, jdbcType = VARCHAR}
+	</select>
+	<select id="queryFdocumentcode" parameterType="String" resultType="String">
+		select t.fdocumentcode fdocumentno from b_documenttype_t t
+		where t.validflag>0 and t.documentcode=#{documentcode, jdbcType =
+		VARCHAR}
+	</select>
+
+	<select id="queryFdocument" parameterType="application" resultType="application">
+		select a.matchid,
+		t.sourcename,
+		t.targetname,
+		a.inoutdate,
+		a.createoperaname creator
+		from l_applicationbill_t a,
+		l_applicationbill_item_t t
+		where (a.matchid = t.matchid and t.validflag
+		> 0)
+		and a.validflag = 1
+
+		and a.types = 1
+		<if test="creator!=null and creator !=''">
+			and a.createoperaname=#{creator}
+		</if>
+		<if test="matchid!=null and matchid !=''">
+			and a.matchid like '%' || #{matchid}||'%'
+		</if>
+		<if test="targetname!=null and targetname!=''">
+			and t.targetname like '%' || #{targetname} ||'%'
+		</if>
+		<if test="sourcename!=null and sourcename!=''">
+			and t.sourcename like '%' || #{sourcename}||'%'
+		</if>
+		and a.documentcode=#{fdocumentno, jdbcType = VARCHAR}
+
+		<!-- <if test="begintime!=null and begintime!=''"> <![CDATA[and a.createdate>= 
+			to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]> </if> <if test="endtime!=null 
+			and endtime!=''"> <![CDATA[and a.createdate <= to_date(#{endtime}, 'yyyy-MM-dd 
+			hh24:mi:ss')]]> </if> -->		
+		group by a.matchid,
+		t.sourcename,
+		t.targetname,
+		a.inoutdate,
+		a.createoperaname
+		order by a.inoutdate desc
+	</select>
+
+	<update id="updateMeasure" parameterType="application">
+		update m_measure_t set
+		carno= #{carno,jdbcType=VARCHAR},
+		operatype=#{operatype,jdbcType=VARCHAR},
+		planid=#{planid,jdbcType=VARCHAR},
+		materialcode=#{materialcode,jdbcType=VARCHAR},
+		materialname=#{materialname,jdbcType=VARCHAR},
+		sourcecode=#{sourcecode,jdbcType=VARCHAR},
+		sourcename=#{sourcename,jdbcType=VARCHAR},
+		sourceplace=#{targetcode,jdbcType=VARCHAR},
+		targetcode=#{carno,jdbcType=VARCHAR},
+		targetname=#{targetname,jdbcType=VARCHAR},
+		ship=#{ship,jdbcType=VARCHAR},
+		usermemo=#{usermemo,jdbcType=VARCHAR},
+		grossb=#{grossb,jdbcType=VARCHAR},
+		tareb=#{tareb,jdbcType=VARCHAR},
+		motorcadecode=#{motorcadecode,jdbcType=VARCHAR},
+		motorcadename=#{motorcadename,jdbcType=VARCHAR},
+		basket=#{saleitemid,jdbcType=VARCHAR}
+		where
+		matchid=#{matchid,jdbcType=VARCHAR}
+	</update>
+</mapper>

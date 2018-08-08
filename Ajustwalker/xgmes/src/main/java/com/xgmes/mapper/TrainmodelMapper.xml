@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xgmes.service.mapper.TrainmodelMapper">
+
+	<select id="queryList" resultType="trainmodel" parameterType="trainmodel">
+		select t.id,
+		t.validflag,
+		t.model,
+		t.load,
+		t.standardtare,
+		t.deduction,
+		t.createdate,
+		t.createor,
+		t.updateor,
+		t.updatedate,
+		t.validflagman,
+		t.validflagdate,
+		t.usermemo
+		from b_trainmodel_t t
+		where t.validflag > 0
+		<if test="model !=null and model !=''">
+			and instr(t.model,#{model})>0
+		</if>
+		order by t.createdate
+	</select>
+	
+	<!-- 修改时，查询信息 -->
+	<select id="queryInfoByID" parameterType="trainmodel" resultType="trainmodel">
+		select t.id,
+		t.validflag,
+		t.model,
+		t.load,
+		t.standardtare,
+		t.deduction,
+		to_char(t.createdate,'yyyy-mm-dd hh24:mi:ss') createdate,
+		t.createor,
+		t.updateor,
+		to_char(t.updatedate,'yyyy-mm-dd hh24:mi:ss') updatedate,
+		t.validflagman,
+		to_char(t.validflagdate,'yyyy-mm-dd hh24:mi:ss') validflagdate,
+		t.usermemo
+		from b_trainmodel_t t
+		where t.validflag > 0
+		<if test="id!=null and id!='' and id!=-1 and id!=0">
+			and t.id = #{id}
+		</if>
+	</select>
+	
+	<!--添加信息 -->
+	<insert id="insertTrainmodel" parameterType="trainmodel">
+		<selectKey resultType="java.lang.Long" order="BEFORE" keyProperty="id">
+			select b_trainmodel_s.nextval from dual
+		</selectKey>
+		insert into b_trainmodel_t t (
+		t.id,
+		t.validflag,
+		t.model,
+		t.load,
+		t.standardtare,
+		t.deduction,
+		t.createdate,
+		t.createor,
+		t.usermemo
+		)
+		values(
+		#{id,jdbcType=NUMERIC},
+		1,
+		#{model,jdbcType=VARCHAR},
+		#{load,jdbcType=VARCHAR},
+		#{standardtare,jdbcType=VARCHAR},
+		#{deduction,jdbcType=VARCHAR},
+		sysdate,
+		#{createor,jdbcType=VARCHAR},
+		#{usermemo,jdbcType=VARCHAR}
+		)
+	</insert>
+
+	<!--修改 -->
+	<update id="updateTrainmodel" parameterType="trainmodel">
+		update b_trainmodel_t t set
+		t.model=#{model,jdbcType=VARCHAR},
+		t.load=#{load,jdbcType=VARCHAR},
+		t.standardtare=#{standardtare,jdbcType=VARCHAR},
+		t.deduction=#{deduction,jdbcType=VARCHAR},
+		t.updateor=#{updateor,jdbcType=VARCHAR},
+		t.updatedate=sysdate,
+		t.usermemo=#{usermemo,jdbcType=VARCHAR}
+		where t.id =#{id}
+		and t.validflag > 0
+	</update>
+	<!--作废 -->
+	<delete id="cancelTrainmodel" parameterType="trainmodel">
+		delete b_trainmodel_t t
+		where t.id = #{id}
+		and t.validflag > 0
+	</delete>
+</mapper>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.talent.measureservice.service.mapper.SeatConfigrationMapper">
+	<select id="getSeatList" parameterType="String" resultType="seatconfigraton">
+		select t.equcode, t.equname, t.equtype,t.id
+		from M_EQUIPMENT_T t
+		where
+		t.validflag = 1
+		<if test="equtype!=null and equtype !=''">
+			and t.equtype =#{equtype,jdbcType=VARCHAR}
+		</if>
+	</select>
+	<select id="getSeatClient" parameterType="seatclient"  resultType="seatclient">
+		select t.SEATID,SEATNAME,SEATRIGHT,SEATTYPE,SEATSTATE,CLIENTID
+		from m_seat_t t
+		where t.validflag = 1
+		<if test="seatid !=null and seatid !=''">
+			and t.seatid=#{seatid,jdbcType=VARCHAR}
+		</if>
+		<if test="seatname !=null and seatname !=''">
+			and t.seatname=#{seatname,jdbcType=VARCHAR}
+		</if>
+	</select>
+	<select id="checkSeatClientIsAdd" parameterType="String" resultType="int">
+		select count(1)
+		from m_seat_t t
+		where t.validflag = 1
+		and seatid=#{seatid,jdbcType=VARCHAR}  
+	</select>
+
+	<select id="getLastVersionNum" parameterType="String" resultType="int">
+		select case when max(VERSIONNUM) is null then 0 else
+		max(VERSIONNUM) end as VERSIONNUM
+		from M_EQUIPMENT_param_T t
+		where EQUCODE =#{equcode,jdbcType=VARCHAR}
+	</select>
+	<select id="getEquParamInfo" parameterType="equipentparam" resultType="equipentparam">
+		select t.ID,t.EQUCODE,t.PARAMINFOS,t.VERSIONNUM,t.EQUNAME
+		from M_EQUIPMENT_param_T t
+		where 1 = 1
+		<if test="equcode !=null and equcode !='' and equcode !=-1">
+			and t.equcode=#{equcode,jdbcType=VARCHAR}
+		</if>
+		<if test="versionnum !=null and versionnum !='' and versionnum !=-1">
+			and t.versionnum=#{versionnum,jdbcType=VARCHAR}
+		</if>
+		<if test="equname !=null and equname !='' and equname !=-1">
+			and t.equname=#{equname,jdbcType=VARCHAR}
+		</if>
+	</select>
+
+	<!--保存秤体参数 -->
+	<insert id="insertEquParamInfo" parameterType="equipentparam">
+		<selectKey resultType="java.lang.Long" order="BEFORE" keyProperty="id">
+		 select m_equipment_param_s.nextval from dual		
+		</selectKey>
+		insert into
+		m_equipment_param_t(ID,PARAMINFOS,EQUCODE,EQUNAME,VERSIONNUM)
+		VALUES(#{id,jdbcType=VARCHAR},#paraminfos,handler=org.springframework.orm.ibatis.support.ClobStringTypeHandler#,#{equcode,jdbcType=VARCHAR},#{equname,jdbcType=VARCHAR},#{versionnum,jdbcType=VARCHAR})
+	</insert>
+
+	<update id="updateEquParamInfo" parameterType="equipentparam">
+		update M_EQUIPMENT_param_T set
+		PARAMINFOS=#paraminfos,handler=org.springframework.orm.ibatis.support.ClobStringTypeHandler#,
+		EQUNAME=#{equname,jdbcType=VARCHAR},
+		VERSIONNUM=#{versionnum,jdbcType=VARCHAR}
+		where EQUCODE=#{equcode,jdbcType=VARCHAR}
+	</update>
+
+	<!--保存坐席对应的秤体-->
+	<insert id="insertSeatClient" parameterType="seatclient">
+		insert into m_seat_t(seatid,seatname,clientid,seattype,seatright,validflag)
+		VALUES(#{seatid,jdbcType=VARCHAR},#{seatname,jdbcType=VARCHAR},#{clientid,jdbcType=VARCHAR},#{seattype,jdbcType=VARCHAR},#{seatright,jdbcType=VARCHAR},#{validflag,jdbcType=VARCHAR})
+	</insert>
+
+	<!--保存坐席对应的秤体-->
+	<update id="updateSeatClient" parameterType="seatclient">
+		update m_seat_t set
+		seatname=#{seatname,jdbcType=VARCHAR},clientid=#{clientid,jdbcType=VARCHAR},seattype=#{seattype,jdbcType=VARCHAR},
+		seatright=#{seatright,jdbcType=VARCHAR},validflag=#{validflag,jdbcType=VARCHAR}
+		where seatid=#{seatid,jdbcType=VARCHAR}
+	</update>
+	<!--获取秤体对应的坐席 -->
+	<select id="getEqucodeSeat" parameterType="seatclient" resultType="seatclient">
+		select t.seatid,t.seatname
+		from m_seat_t t
+		where t.validflag = 1
+		<if test="clientid !=null and clientid !=''">
+			and t.clientid like '%'|| #{clientid,jdbcType=VARCHAR} || '%'
+		</if>
+	</select>
+</mapper>

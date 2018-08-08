@@ -1,0 +1,234 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xgmes.service.mapper.BillMapper">
+
+	<select id="queryBillList" resultType="interface"
+		parameterType="interface">
+		select t.planid,
+		(t.usermemo || i.usermemo) usermemo,
+		t.arrivetime,
+		t.sourcecode,
+		t.sourcename,
+		decode(t.typeflag,1, t.targetcode, i.targetcode)targetcode,
+		decode(t.typeflag,1, t.targetname, i.targetname)targetname,
+		i.materialcode,
+		i.materialname,
+		trim(decode(t.typeflag,1,i.carno,t.carno))carno,
+		i.snumber,
+		i.suttleapp,
+		i.middlemanname,
+		i.measureunit,
+		decode(t.typeflag, 1, '到货单', '发运单') sysmemo,
+		t.id,
+		t.createdate,
+		t.creator,
+		l_jugestatus_f(i.saleitemid, 0) status
+		from l_interfaceinfo_t t
+		left join l_interfaceinfo_item_t i
+		on (t.id = i.fid and i.validflag>0)
+		where t.validflag > 0 and reserve3=1
+		<if test="planid!=null and planid !=''">
+			and t.planid like '%' || #{planid}||'%'
+		</if>
+		<if test="carno !=null and carno !=''">
+			and (i.carno like '%' || #{carno}||'%' or t.carno like '%'
+			|| #{carno}||'%')
+		</if>
+		<if test="materialname!=null and materialname !=''">
+			and i.materialname like '%' || #{materialname}||'%'
+		</if>
+		<if test="targetname!=null and targetname!=''">
+			and t.targetname like '%' || #{targetname} ||'%'
+		</if>
+		<if test="sourcename!=null and sourcename!=''">
+			and t.sourcename like '%' || #{sourcename}||'%'
+		</if>
+		<if test="typeflag!=null and typeflag!='' and typeflag !=-1">
+			and t.typeflag = #{typeflag}
+		</if>
+		<if test="isoruse!=null and isoruse!='' and isoruse !=-1">
+			and i.isoruse = #{isoruse}
+		</if>
+		<if test="creator!=null and creator!=''">
+			and t.creator like '%' || #{creator}||'%'
+		</if>
+		<if test="begintime!=null and begintime!=''">
+    		<![CDATA[and t.cdate>=  to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+    		<![CDATA[and t.cdate <= to_date(#{endtime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		order by t.cdate,t.planid desc
+	</select>
+	<insert id="insertInterfaceinfo" parameterType="interface">
+	    <selectKey resultType="java.lang.Long" order="BEFORE" keyProperty="id">
+			select l_interfaceinfo_s.nextval from dual
+		</selectKey>
+		insert into l_interfaceinfo_t t
+		(t.id,
+		t.validflag,
+		t.carno,
+		t.planid,
+		t.sourcecode,
+		t.sourcename,
+		t.targetcode,
+		t.targetname,
+		t.arrivetime,
+		t.typeflag,
+		t.reserve1,
+		t.reserve2,
+		t.reserve3,
+		t.sourceplace,
+		t.targetplace,
+		t.usermemo,
+		t.creator)
+		values
+		(#{id,jdbcType=VARCHAR},
+		1,
+		#{carno,jdbcType=VARCHAR},
+		#{planid,jdbcType=VARCHAR},
+		#{sourcecode,jdbcType=VARCHAR},
+		#{sourcename,jdbcType=VARCHAR},
+		#{targetcode,jdbcType=VARCHAR},
+		#{targetname,jdbcType=VARCHAR},
+		#{arrivetime,jdbcType=VARCHAR},
+		#{typeflag,jdbcType=VARCHAR},
+		#{reserve1,jdbcType=VARCHAR},
+		#{reserve2,jdbcType=VARCHAR},
+		1,
+		#{sourceplace,jdbcType=VARCHAR},
+		#{targetplace,jdbcType=VARCHAR},
+		#{memo,jdbcType=VARCHAR},
+		#{creator,jdbcType=VARCHAR})
+	</insert>
+	<insert id="insertInterfaceinfoitem" parameterType="interface">
+	    <selectKey resultType="java.lang.Long" order="BEFORE" keyProperty="id">
+			select l_interfaceinfo_item_s.nextval from dual
+		</selectKey>
+		insert into l_interfaceinfo_item_t t
+		(t.id,
+		t.saleitemid,
+		t.fid,
+		t.validflag,
+		t.carno,
+		t.materialcode,
+		t.materialname,
+		t.materialspec,
+		t.steelname,
+		t.snumber,
+		t.suttleapp,
+		t.measureunit,
+		t.middlemanname,
+		t.usermemo,
+		t.targetcode,
+		t.targetname)
+		values
+		(#{id,jdbcType=VARCHAR},
+		#{id,jdbcType=VARCHAR},
+		#{fid,jdbcType = VARCHAR},                                                                  
+		1,
+		#{carno,jdbcType = VARCHAR},
+		#{materialcode,jdbcType = VARCHAR},
+		#{materialname,jdbcType = VARCHAR},
+		#{materialspec,jdbcType = VARCHAR},
+		#{steelname,jdbcType = VARCHAR},
+		#{snumber,jdbcType = VARCHAR},
+		#{suttleapp,jdbcType = VARCHAR},
+		#{measureunit,jdbcType = VARCHAR},
+		#{middlemanname,jdbcType = VARCHAR},
+		#{usermemo,jdbcType = VARCHAR},
+		#{targetcode,jdbcType=VARCHAR},
+		#{targetname,jdbcType=VARCHAR})
+	</insert>
+	<update id="updateInterfaceinfo" parameterType="interface">
+		update l_interfaceinfo_t t set
+		t.carno=#{carno,jdbcType=VARCHAR},
+		t.sourcecode=#{sourcecode,jdbcType=VARCHAR},
+		t.sourcename=#{sourcename,jdbcType=VARCHAR},
+		t.targetcode=#{targetcode,jdbcType = VARCHAR},
+		t.targetname=#{targetname,jdbcType = VARCHAR},
+		t.arrivetime=#{arrivetime,jdbcType=VARCHAR},
+		t.reserve1=#{reserve1,jdbcType=VARCHAR},
+		t.reserve2=#{reserve2,jdbcType=VARCHAR},
+		t.sourceplace=#{sourceplace,jdbcType=VARCHAR},
+		t.targetplace=#{targetplace,jdbcType=VARCHAR},
+		t.usermemo=#{memo,jdbcType=VARCHAR},
+		t.creator=#{creator,jdbcType=VARCHAR}
+		where t.id=#{id,jdbcType=VARCHAR}
+	</update>
+	<update id="updateInterfaceinfoitem" parameterType="interface">
+		update l_interfaceinfo_item_t t set
+		t.carno =#{carno,jdbcType = VARCHAR},
+		t.materialcode=#{materialcode,jdbcType = VARCHAR},
+		t.materialname=#{materialname,jdbcType = VARCHAR},
+		t.materialspec=#{materialspec,jdbcType = VARCHAR},
+		t.steelname=#{steelname,jdbcType = VARCHAR},
+		t.snumber=#{snumber,jdbcType = VARCHAR},
+		t.suttleapp=#{suttleapp,jdbcType = VARCHAR},
+		t.measureunit=#{measureunit,jdbcType = VARCHAR},
+		t.middlemanname=#{middlemanname,jdbcType = VARCHAR},
+		t.usermemo=#{usermemo,jdbcType = VARCHAR},
+		t.validflag          = 1,
+		t.targetcode=#{targetcode,jdbcType = VARCHAR},
+		t.targetname=#{targetname,jdbcType = VARCHAR}
+		where t.id =#{id,jdbcType = VARCHAR}
+	</update>
+    <update id="cancelInterfaceinfo" parameterType="interface">
+		update l_interfaceinfo_t t
+	   	set t.validflag          = 0,
+	       t.validflagoperaname = #{creator,jdbcType= VARCHAR},
+	       t.validflagtime      = to_char(sysdate, 'yyyy-MM-dd hh24:mi:ss')
+		where t.id = #{id, jdbcType = VARCHAR}
+	</update>
+	<update id="cancelInterfaceinfoitem" parameterType="interface">
+		update l_interfaceinfo_item_t t
+		   set t.validflag          = 0,
+		       t.validflagoperaname = #{creator,jdbcType= VARCHAR},
+		       t.validflagtime      = sysdate
+		 where t.fid = #{id, jdbcType = VARCHAR}
+	</update>
+	<select id="queryMainByPlanid" resultType="interface"
+		parameterType="interface">
+		select t.id,
+		       t.validflag,
+		       t.carno,
+		       t.planid,
+		       t.sourcecode,
+		       t.sourcename,
+		       t.targetcode,
+               t.targetname,
+		       t.arrivetime,
+		       t.typeflag,
+		       t.reserve1,
+		       t.reserve2,
+		       t.sourceplace,
+		       t.targetplace,
+		       t.usermemo memo,
+		       t.creator
+		  from l_interfaceinfo_t t
+		 where t.validflag > 0
+		   and t.reserve3 = 1
+		   and t.planid = #{planid, jdbcType = VARCHAR}
+	</select>
+	<select id="queryItemByFid" resultType="interface"
+		parameterType="interface">
+		select t.id,
+		       t.saleitemid,
+		       t.fid,
+		       t.validflag,
+		       t.carno,
+		       t.materialcode,
+		       t.materialname,
+		       t.materialspec,
+		       t.steelname,
+		       t.snumber,
+		       t.suttleapp,
+		       t.measureunit,
+		       t.middlemanname,
+		       t.usermemo
+		  from l_interfaceinfo_item_t t
+		 where t.validflag > 0
+		   and t.fid = #{id, jdbcType = VARCHAR}
+	</select>
+</mapper>

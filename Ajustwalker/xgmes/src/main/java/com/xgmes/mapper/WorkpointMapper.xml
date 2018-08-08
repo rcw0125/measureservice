@@ -1,0 +1,195 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xgmes.service.mapper.WorkpointMapper">
+	<select id="queryList" resultType="workpoint" parameterType="workpoint">
+		select id,
+		validflag,
+		workpointcode,
+		workpointname,
+		queryword,
+		workpointip,
+		workpointmac,
+		workpointtime,
+		registers,
+		usermemo,
+		sysmemo,
+		approver,
+		approvertime,
+		createoperaname,
+		createdate,
+		updateoperaname,
+		updatedate,
+		validflagoperaname,
+		validflagtime,
+		ictype,
+		rfidtype,
+		linkcode,
+		linkname
+		from b_workpoint_t b
+		where 1=1 
+		<if test="begintime!=null and begintime!=''">
+    		<![CDATA[and createdate>=  to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+    		<![CDATA[and createdate <= to_date(#{endtime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="workpointname!=null and workpointname !=''">
+			and workpointname like '%' || #{workpointname}||'%'
+		</if>
+		<if test="workpointip!=null and workpointip !=''">
+			and workpointip like '%' || #{workpointip}||'%'
+		</if>
+		<if test="workpointmac !=null and workpointmac !=''">
+			and workpointmac like '%' || #{workpointmac} ||'%'
+		</if>
+		<if test="rfidtype !=null and rfidtype !=''">
+			and (rfidtype=#{rfidtype} or  ictype=#{rfidtype})
+		</if>
+		<if test="validflag!=-1">
+			<if test="validflag!=null and validflag !=''">
+				and validflag=#{validflag}
+			</if>
+		</if>
+		order by createdate desc
+	</select>
+	<select id="queryInfoByid" parameterType="workpoint" resultType="workpoint">
+		select id,
+		validflag,
+		workpointcode,
+		workpointname,
+		queryword,
+		workpointip,
+		workpointmac,
+		workpointtime,
+		usermemo,
+		sysmemo,
+		approver,
+		approvertime,
+		createoperaname,
+		createdate,
+		updateoperaname,
+		updatedate,
+		validflagoperaname,
+		validflagtime,
+		ictype,
+		rfidtype,
+		linkcode,
+		linkname
+		from b_workpoint_t b
+		where 
+		validflag >0 
+		and id=#{id,jdbcType=VARCHAR}
+		and rownum=1
+	</select>
+	<select id="queryInfoByIp" parameterType="workpoint" resultType="workpoint">
+		select
+		workpointcode,
+		workpointname,
+		workpointip,
+		workpointmac
+		from b_workpoint_t b
+		where
+		validflag =1 and
+		workpointip=#{workpointip,jdbcType=VARCHAR} and rownum=1
+	</select>
+	<insert id="insertWorkpoint" parameterType="workpoint">
+		insert into
+		b_workpoint_t
+		(id,
+		workpointcode,
+		workpointname,
+		queryword,
+		workpointip,
+		workpointmac,
+		usermemo,
+		sysmemo,
+		createoperaname,
+		ictype,
+		rfidtype,
+		linktype,
+		linkcode,
+		linkname)
+		values
+		(b_workpoint_s.nextval,
+		#{workpointcode,jdbcType=VARCHAR },
+		#{workpointname,jdbcType=VARCHAR },
+		#{queryword,jdbcType=VARCHAR },
+		#{workpointip,jdbcType=VARCHAR },
+		#{workpointmac,jdbcType=VARCHAR },
+		#{usermemo,jdbcType=VARCHAR },
+		#{sysmemo,jdbcType=VARCHAR },
+		#{creator,jdbcType=VARCHAR },
+		#{ictype,jdbcType=VARCHAR },
+		#{rfidtype,jdbcType=VARCHAR },
+		#{linktype,jdbcType=VARCHAR },	
+		#{linkcode,jdbcType=VARCHAR },
+		#{linkname,jdbcType=VARCHAR })
+	</insert>
+	<update id="updateWorkpoint" parameterType="workpoint">
+		update b_workpoint_t
+		set workpointname = #{workpointname ,jdbcType=VARCHAR },
+		queryword=#{queryword ,jdbcType=VARCHAR },
+		workpointip=#{workpointip,jdbcType=VARCHAR },
+		workpointmac =#{workpointmac,jdbcType=VARCHAR },
+		usermemo = #{usermemo,jdbcType=VARCHAR },
+		sysmemo =#{sysmemo ,jdbcType=VARCHAR },
+		updateoperaname =#{updater,jdbcType=VARCHAR },
+		updatedate = sysdate,
+		ictype=#{ictype,jdbcType=VARCHAR},
+		rfidtype=#{rfidtype,jdbcType=VARCHAR},
+		linkcode=#{linkcode,jdbcType=VARCHAR },
+		linktype=#{linktype,jdbcType=VARCHAR },
+		linkname=#{linkname,jdbcType=VARCHAR },
+		validflag=1
+		where id = #{id ,jdbcType=VARCHAR}
+	</update>
+	<update id="approveWorkpoint" parameterType="workpoint">
+		update b_workpoint_t
+		set approver = #{approver ,jdbcType=VARCHAR },
+		approvertime=sysdate,validflag=3
+		where id = #{id ,jdbcType=VARCHAR}
+	</update>
+	<update id="giveupWorkpoint" parameterType="workpoint">
+		update
+		b_workpoint_t
+		set approver = null,
+		approvertime=null,
+		validflag=1
+		where id = #{id ,jdbcType=VARCHAR}
+	</update>
+	<update id="registeWorkpoint" parameterType="workpoint">
+		update b_workpoint_t
+		set registers = #{registers ,jdbcType=VARCHAR },
+		workpointtime=sysdate,validflag=2,
+		workpointmac =
+		#{workpointmac,jdbcType=VARCHAR },
+		workpointip=#{workpointip,jdbcType=VARCHAR}
+		where validflag=1
+	</update>
+	<update id="cancelWorkpoint" parameterType="workpoint">
+		update b_workpoint_t
+		set
+		validflag =0,validflagoperaname=#{canceler,jdbcType=VARCHAR},validflagtime=sysdate
+		where id =#{id}
+	</update>
+	<select id="queryCount" parameterType="workpoint" resultType="int">
+		select count(1) from b_workpoint_t
+		where workpointip=#{workpointip,jdbcType=VARCHAR} and  validflag>0
+	</select>
+	<select id="queryWorkpointsByType" parameterType="workpoint" resultType="workpoint">
+		select workpointcode,workpointname from b_workpoint_t b where validflag = 3 and linktype = #{linktype,jdbcType=VARCHAR}
+	</select>
+	<select id="queryInfoBycode" parameterType="workpoint" resultType="workpoint">
+		select
+		workpointcode,
+		workpointname,
+		workpointip,
+		workpointmac,
+		validflag
+		from b_workpoint_t b
+		where
+		validflag >0 and
+		workpointcode=#{workpointcode,jdbcType=VARCHAR} and rownum=1
+	</select>
+</mapper>

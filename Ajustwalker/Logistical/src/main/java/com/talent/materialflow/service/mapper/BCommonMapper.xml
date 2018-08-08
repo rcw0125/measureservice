@@ -1,0 +1,1124 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.talent.materialflow.service.mapper.BCommonMapper">
+	<insert id="insertBlacklist" parameterType="blacklist">
+		insert into
+		B_BLACKLIST_T
+		(id, validflag, Cardid, Recordtype, Createman,
+		createdate, Usermemo)
+		values
+		(B_BLACKLIST_s.Nextval,
+		1,
+		#{cardid,jdbcType=VARCHAR},
+		#{recordtype,jdbcType=VARCHAR},
+		#{createman,jdbcType=VARCHAR},
+		sysdate,
+		#{usermemo,jdbcType=VARCHAR})
+	</insert>
+
+	<select id="queryCardinfo" parameterType="blacklist" resultType="blacklist">
+		select b.carno,
+		b.validflag,
+		b.cardclass recordtype,
+		b.driver,
+		b.deposit,
+		b.motorcadecode,
+		b.motorcadename,
+		b.begintime,
+		b.endtime,
+		decode(b.beginperiod,
+		'',
+		'',
+		to_char(sysdate, 'yyyy-MM-dd ') ||
+		b.beginperiod) beginperiod,
+		decode(b.endperiod,
+		'',
+		'',
+		to_char(sysdate,'yyyy-MM-dd ') || b.endperiod) endperiod,
+		b.cartype
+		from B_CARD_T
+		b
+		where
+		b.cardid=#{cardid,jdbcType=VARCHAR}
+	</select>
+	<select id="queryCarinfo" parameterType="blacklist" resultType="blacklist">
+		select b.carno,
+		b.cardid,
+		b.cardclass recordtype,
+		b.driver,
+		b.deposit,
+		b.motorcadecode,
+		b.motorcadename,
+		b.validflag
+		from B_CARD_T b
+		where
+		b.carno = #{carno,jdbcType=VARCHAR}
+		and
+		b.cardid!=#{cardid,jdbcType=VARCHAR}
+	</select>
+	<select id="queryRfidBycarno" parameterType="String" resultType="String">
+		select
+		b.cardid
+		from B_CARD_T b
+		where b.validflag = 3
+		and b.cardclass = 1
+		and b.carno =
+		#{carno,jdbcType=VARCHAR}
+	</select>
+	<select id="queryBlackinfo" parameterType="blacklist" resultType="blacklist">
+		select t.recordtype from B_BLACKLIST_T t where
+		(t.cardid=#{cardid,jdbcType=VARCHAR} or
+		t.cardid=#{carno,jdbcType=VARCHAR}) and t.validflag>0
+	</select>
+	<select id="queryOperatype" parameterType="combox" resultType="combox">
+		select
+		t.operatype id,
+		t.operaname text
+		from M_OPERACONFIG_T t where
+		t.validflag>0
+		<if test="operatype!=null and operatype !=''">
+			and t.operatype in (${operatype})
+		</if>
+		<if test="searchText!=null and searchText !=''">
+			and (t.operatype like '%'||#{searchText}||'%' or
+			t.operaname like
+			'%'||#{searchText}||'%')
+		</if>
+		<if test="cartype!=null and cartype !=''">
+			and t.cartype =#{cartype}
+		</if>
+	</select>
+	<select id="queryDtype" parameterType="combox" resultType="combox">
+		select t.operatype id,t.modelname text from L_MODEL_T t where t.type=3
+		and t.validflag>0
+		<if test="operatype!=null and operatype !=''">
+			and t.operatype=#{operatype}
+		</if>
+		<if test="searchText!=null and searchText !=''">
+			and (t.operatype like '%'||#{searchText}||'%' or
+			t.modelname like
+			'%'||#{searchText}||'%')
+		</if>
+	</select>
+	<select id="querySworkpoint" parameterType="combox" resultType="combox">
+		select t.workpointcode id, t.workpointname text
+		from B_WORKPOINT_T t
+		where t.linkname = '库房'
+		and t.validflag = 3
+		<if test="searchText!=null and searchText !=''">
+			and (t.workpointcode like '%'||#{searchText}||'%' or
+			t.workpointname like
+			'%'||#{searchText}||'%')
+		</if>
+	</select>
+
+	<select id="queryGatename" parameterType="combox" resultType="combox">
+		select t.workpointname id, t.workpointname text
+		from b_workpoint_t t
+		where t.linkname = '门岗'
+		and t.validflag = 3
+		<if test="searchText!=null and searchText !=''">
+			and t.workpointname like '%'||#{searchText}||'%'
+		</if>
+	</select>
+	<select id="queryInOutGatename" parameterType="combox" resultType="combox">
+		select t.workpointcode id, t.workpointname text
+		from b_workpoint_t t
+		where t.linkname = '门岗'
+		and t.validflag = 3
+		<if test="searchText!=null and searchText !=''">
+			and t.workpointname like '%'||#{searchText}||'%'
+		</if>
+	</select>
+	<select id="queryReaderType" parameterType="combox" resultType="combox">
+
+		select t.typename id,t.typename text from B_CREADERTYPE_T t where
+		t.validflag>0
+		<if test="operatype!=null and operatype !=''">
+			and t.types=#{operatype}
+		</if>
+		<if test="searchText!=null and searchText !=''">
+			and t.typename like '%'||#{searchText}||'%'
+		</if>
+	</select>
+	<select id="queryUsername" parameterType="combox" resultType="combox">
+		select t.displayname id,t.displayname text from s_user_t t
+		left join s_roleuser_t s
+		on t.id = s.userid
+		where t.validflag = 1
+		and s.roleid = '203379'
+		<if test="searchText!=null and searchText !=''">
+			and (t.username like '%'||#{searchText}||'%' or
+			t.displayname like '%'||#{searchText}||'%')
+		</if>
+	</select>
+
+
+	<select id="queryNode" parameterType="String" resultType="operaconfig">
+		select
+		t.sequence, t.node from l_detail_t t where t.operatype =
+		#{operatype,jdbcType=VARCHAR}
+		order by t.sequence
+	</select>
+	<select id="queryModelcontent" parameterType="operaconfig" resultType="String">
+		select t.modelcontent from L_MODEL_T t where
+		t.operatype=#{operatype,jdbcType=VARCHAR} and
+		t.type=#{flag,jdbcType=VARCHAR}
+	</select>
+	<parameterMap type="java.util.Map" id="SP_NEXTVAL_P_map">
+		<parameter property="name" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+		<parameter property="nextval" jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT" />
+	</parameterMap>
+	<select id="txNextValue" statementType="CALLABLE" parameterMap="SP_NEXTVAL_P_map">
+		<![CDATA[ {call SP_NEXTVAL_P (#{name,mode=IN,jdbcType=VARCHAR},#{nextval,mode=OUT,jdbcType=VARCHAR})}]]>
+	</select>
+	<resultMap id="entrylog_map" type="entrylog">
+		<result property="carno" column="carno" jdbcType="VARCHAR" javaType="java.lang.String" />
+		<result property="matchid" column="matchid" jdbcType="VARCHAR" javaType="java.lang.String" />
+		<result property="gatename" column="gatename" jdbcType="VARCHAR" javaType="java.lang.String" />
+		<result property="createdate" column="createdate" jdbcType="VARCHAR" javaType="java.lang.String" />
+		<result property="createoperaname" column="createoperaname" jdbcType="VARCHAR" javaType="java.lang.String" />
+		<result property="usermemo" column="usermemo" jdbcType="VARCHAR" javaType="java.lang.String" />
+		<result property="eid" column="eid" jdbcType="VARCHAR" javaType="java.lang.String" />
+		<result property="id" column="id" jdbcType="INTEGER" javaType="java.lang.Long" />
+		<result property="icid" column="icid" jdbcType="VARCHAR" javaType="java.lang.String" />
+		<result property="entrytype" column="entrytype" jdbcType="VARCHAR" javaType="java.lang.String" />
+		<result property="ictype" column="ictype" jdbcType="VARCHAR" javaType="java.lang.String" />
+		<association property="entry" column="eid" javaType="entrylog" select="queryOutDetail" />
+	</resultMap>
+	<select id="queryEntryDetail" parameterType="String" resultMap="entrylog_map">
+		select t.carno,
+		t.matchid,
+		t.icid,
+		t.rfidid,
+		t.gatename,
+		to_char(t.createdate,'yyyy-MM-dd hh24:mi:ss') as createdate,
+		t.createoperaname creator,
+		t.usermemo ,
+		t.eid,
+		t.ictype,
+		t.id,
+		t.entrytype
+		from
+		l_entrylog_t t
+		left join l_applicationbill_t l
+		on t.id = l.id
+		where
+		entrytype = 1
+		and t.validflag > 0
+		and l.validflag > 0
+		and t.entrytype = 1
+		and l.matchid = #{matchid,jdbcType=VARCHAR}
+	</select>
+	<select id="queryOutDetail" parameterType="java.lang.Long" resultType="entrylog">
+		select id ,
+		icid ,
+		rfidid,
+		matchid ,
+		gatename ,
+		to_char(createdate,'yyyy-MM-dd hh24:mi:ss')createdate,
+		createoperaname
+		creator ,
+		usermemo ,
+		eid
+		from l_entrylog_t
+		where entrytype = 2
+		and
+		id=#{id,jdbcType=VARCHAR}
+	</select>
+	<select id="queryMakecardDetail" parameterType="String" resultType="application">
+		select t.matchid,t.operatype,
+		l.planid,
+		l.orderno,
+		t.carno,
+		t.unitname,
+		l.materialname,
+		l.sourcename,
+		l.targetname,
+		l.sourceplace,
+		l.ship,
+		decode(l.suttleapp,'',0,l.suttleapp)*0.001 as suttleapp,
+		decode(l.snumber,'',0,l.snumber) as snumber,
+		decode(l.grossb,'',0,l.grossb)*0.001 as grossb,
+		decode(l.tareb,'',0,l.tareb)*0.001
+		as tareb,
+		to_char(t.createdate,'yyyy-MM-dd hh24:mi:ss')createdate,
+		t.createoperaname as createman,
+		l.itemid,
+		t.routeid
+		from
+		L_APPLICATIONBILL_T t
+		left
+		join l_applicationbill_item_t l
+		on t.matchid
+		=
+		l.matchid
+		where
+		t.validflag>0 and l.validflag>0 and
+		t.matchid=#{matchid,jdbcType=VARCHAR} order by l.materialcode,l.itemid
+	</select>
+	<select id="querymatchidbyitemid" parameterType="String" resultType="String">
+		select matchid from L_APPLICATIONBILL_ITEM_T t where
+		t.validflag > 0
+		and t.saleitemid=#{saleitemid,jdbcType=VARCHAR} and
+		rownum=1
+	</select>
+	<select id="querymatchidbyid" parameterType="String" resultType="String">
+		select matchid from L_APPLICATIONBILL_T t where t.validflag > 0
+		and
+		t.id=#{id,jdbcType=VARCHAR} and rownum=1
+	</select>
+	<select id="querymatchidbyeid" parameterType="String" resultType="String">
+		select matchid from L_APPLICATIONBILL_T t where t.validflag
+		> 0
+		and t.id=(select t.eid from L_ENTRYLOG_T t where
+		t.id=#{id,jdbcType=VARCHAR}) and rownum=1
+	</select>
+
+
+	<select id="queryMeasureDetail" parameterType="String" resultType="measure">
+		select carno,
+		matchid,
+		matchidb,
+		operatype,
+		planid,
+		taskcode,
+		materialcode,
+		materialname,
+		materialspeccode,
+		materialspec,
+		shipcode,
+		ship,
+		sourcecode,
+		sourcename,
+		sourceplace,
+		sourcetime,
+		targetcode,
+		targetname,
+		targetplace,
+		targettime,
+		materialcount,
+		planweight,
+		planmaterialcount,
+		plancarcount,
+		gross*0.001 gross,
+		to_char(grosstime,'yyyy-mm-dd hh24:mi:ss') as grosstime,
+		grossweighid,
+		grossweigh,
+		grossoperacode,
+		grossoperaname,
+		grossgroupno,
+		grossserial,
+		grossspeed,
+		grosslogid,
+		tare*0.001 tare,
+		to_char(taretime,'yyyy-mm-dd
+		hh24:mi:ss') as taretime,
+		tareweighid,
+		tareweigh,
+		tareoperacode,
+		tareoperaname,
+		taregroupno,
+		tareserial,
+		tarelogid,
+		tarespeed,
+		deduction,
+		to_char(deductiontime,
+		'yyyy-mm-dd hh24:mi') as deductiontime,
+		deductioncode,
+		deductionname,
+		deductionoperacode,
+		deductionoperaname,
+		suttle*0.001 suttle,
+		to_char(suttletime, 'yyyy-mm-dd hh24:mi') as
+		suttletime,
+		suttleweighid,
+		suttleweigh,
+		suttleoperaname,
+		suttleoperacode,
+		grossb*0.001 grossb,
+		grosstimeb,
+		grossweighidb,
+		grossweighb,
+		grossoperacodeb,
+		grossoperanameb,
+		grossgroupnob,
+		grossserialb,
+		grossspeedb,
+		grosslogidb,
+		tareb*0.001 tareb,
+		taretimeb,
+		tareweighidb,
+		tareweighb,
+		tareoperacodeb,
+		tareoperanameb,
+		taregroupnob,
+		tareserialb,
+		tarelogidb,
+		tarespeedb,
+		batchcode,
+		bflag,
+		usermemo,
+		sysmemo,
+		createdate,
+		validflag,
+		suttleb,
+		printgrossnum,
+		printsuttlenum,
+		validflagtime,
+		validflagoperaname,
+		motorcadename,
+		memo1,
+		basket
+		from m_measure_t
+		where
+		validflag >
+		0
+		and
+		matchid =
+		#{matchid,jdbcType=VARCHAR}
+	</select>
+
+	<select id="queryStoreDetail" parameterType="String" resultType="java.util.Map">
+		SELECT distinct S.MATCHID, S.COUNTS AS SUTTLE, S.PLANID, II.IFILEPATH,
+		A.SALEITEMID
+		FROM M_OPERACONFIG_T O,
+		L_STOREIN_ITEM_T S,
+		L_STOREIN_T I,
+		L_INTERFACEINFO_T II,
+		L_APPLICATIONBILL_ITEM_T A
+		WHERE O.OPERATYPE =
+		I.OPERATYPE
+		AND S.MATCHID = I.MATCHID
+		AND S.MATCHID = A.MATCHID
+		AND
+		S.PLANID = II.PLANID
+		AND A.ITEMID = S.ITEMID
+		AND O.ISORMEASURE = 0
+		AND
+		S.COUNTS > 0
+		and s.validflag > 0
+		and s.matchid =
+		#{matchid,jdbcType=VARCHAR}
+		order by s.matchid, s.planid
+	</select>
+	<select id="queryStoreinDetail" resultType="storein" parameterType="String">
+		select t.id,
+		t.carno,
+		t.matchid,
+		m.planid,
+		m.materialname,
+		m.sourcename,
+		m.storename as targetname,
+		t.storename,
+		m.weight * 0.001
+		weight,
+		e.suttle * 0.001 suttle,
+		m.counts,
+		t.createoperaname,
+		to_char(t.createdate, 'yyyy-MM-dd hh24:mi:ss') storeintime,
+		t.usermemo
+		from l_storein_t t
+		left join l_storein_item_t m
+		on (t.matchid =
+		m.matchid and m.validflag > 0)
+		left join m_measure_t e
+		on (e.matchid =
+		t.matchid and e.validflag > 0)
+		where t.validflag > 0
+		and t.matchid =
+		#{matchid, jdbcType = VARCHAR}
+	</select>
+	<select id="queryStoreoutDetail" resultType="storein" parameterType="String">
+		select t.id,
+		t.carno,
+		t.matchid,
+		m.planid,
+		m.materialname,
+		m.storename as sourcename,
+		m.targetname,
+		t.storename,
+		m.weight * 0.001
+		weight,
+		e.suttle * 0.001 suttle,
+		m.counts,
+		t.createoperaname,
+		to_char(t.createdate, 'yyyy-MM-dd hh24:mi:ss') storeintime,
+		t.usermemo
+		from l_storeout_t t
+		left join l_storeout_item_t m
+		on (t.matchid =
+		m.matchid and m.validflag > 0)
+		left join m_measure_t e
+		on (t.matchid =
+		e.matchid and e.validflag > 0)
+		where t.validflag > 0
+		and t.matchid =
+		#{matchid,jdbcType=VARCHAR}
+	</select>
+	<select id="queryQualityDetail" resultType="quality" parameterType="String">
+		select t.id,
+		t.carno,
+		t.matchid,
+		m.planid,
+		m.materialname,
+		m.sourcename,
+		m.targetname,
+		t.qmpostion,
+		t.createoperaname creator,
+		to_char(t.createdate,'yyyy-MM-dd hh24:mi:ss') createdate ,
+		t.usermemo
+		from q_quality_t t
+		left join l_applicationbill_item_t m
+		on t.matchid =
+		m.matchid
+		where t.validflag > 0
+		and t.matchid =
+		#{matchid,jdbcType=VARCHAR} order by m.itemid
+	</select>
+	<select id="querySourceinfo" parameterType="combox" resultType="combox">
+		select t.customercode id, t.customername text
+		from b_customer_v t
+		where
+		t.customertype = 1
+		<if test="searchText!=null and searchText !=''">
+			and (t.customercode like '%' || #{searchText} ||'%' or
+			t.customername like '%' ||#{searchText}||'%' )
+		</if>
+	</select>
+	<select id="queryTargetinfo" parameterType="combox" resultType="combox">
+		select t.customercode id, t.customername text
+		from b_customer_v t
+		where
+		t.customertype = 2
+		<if test="searchText !=null and searchText !=''">
+			and (t.customercode like '%' || #{searchText} ||'%' or
+			t.customername like '%' ||#{searchText}||'%' )
+		</if>
+	</select>
+	<select id="queryStoreinfo" parameterType="combox" resultType="combox">
+		select t.storecode id , t.storename text
+		from b_storename_v t
+		where 1=1
+		<if test="searchText!=null and searchText !=''">
+			and (t.storecode like '%' || #{searchText} || '%' or
+			t.storename like '%' || #{searchText} || '%')
+		</if>
+	</select>
+	<select id="queryMaterilinfo" parameterType="combox" resultType="combox">
+		select t.materialcode id, t.materialname text
+		from b_material_v t
+		where
+		1=1
+		<if test="searchText!=null and searchText !=''">
+			and (t.materialcode like '%' || #{searchText} || '%' or
+			t.materialname like '%' || #{searchText} || '%')
+		</if>
+	</select>
+	<select id="queryBMaterilinfo" parameterType="combox" resultType="combox">
+		select t.materialcode id, t.materialname text
+		from b_material_base_v t
+		where
+		1=1
+		<if test="searchText!=null and searchText !=''">
+			and (t.materialcode like '%' || #{searchText} || '%' or
+			t.materialname like '%' || #{searchText} || '%')
+		</if>
+	</select>
+
+	<select id="selectMateril" parameterType="bcommon" resultType="bcommon">
+		select t.materialcode , t.materialname
+		from b_material_v t
+		where 1=1
+		<if test="materialcode!=null and materialcode !=''">
+			and t.materialcode like '%' || #{materialcode}||'%'
+		</if>
+		<if test="materialname!=null and materialname !=''">
+			and t.materialname like '%' || #{materialname}||'%'
+		</if>
+	</select>
+	<select id="queryStation" parameterType="combox" resultType="combox">
+		select t.stationname id, t.stationname text from b_sation_v t
+		<if test="searchText!=null and searchText !=''">
+			where (t.queryword like '%' || #{searchText} || '%' or
+			t.stationname like '%' || #{searchText} || '%')
+		</if>
+	</select>
+	<select id="queryPlaninfo" parameterType="bcommon" resultType="bcommon">
+		select t.planid,
+		t.carno,
+		t.saleitemid,
+		t.materialcode,
+		t.materialname,
+		t.sourcecode,
+		t.sourcename,
+		t.targetcode,
+		t.targetname,
+		t.documentcode,
+		t.routeid,
+		t.auditlevel,
+		t.operatype,
+		t.operaname,
+		t.materialspec,
+		t.measureunit,
+		t.steelname,
+		t.pictureno,
+		t.prodline,
+		t.usermemo,
+		t.snumber,
+		t.arrivetime,
+		t.documentname
+		from l_plan_v t
+		where 1=1
+		<!-- <if test="begintime!=null and begintime!=''"> <![CDATA[and a.createdate>= to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]> </if> <if test="endtime!=null and endtime!=''"> <![CDATA[and a.createdate <= to_date(#{endtime}, 'yyyy-MM-dd hh24:mi:ss')]]> </if> -->
+		<if test="carno !=null and carno !=''">
+			and t.carno =trim(#{carno})
+		</if>
+		<if test="materialname!=null and materialname !=''">
+			and t.materialname like #{materialname}||'%'
+		</if>
+		<if test="targetname!=null and targetname!=''">
+			and t.targetname like #{targetname} ||'%'
+		</if>
+		<if test="sourcename!=null and sourcename!=''">
+			and t.sourcename like #{sourcename}||'%'
+		</if>
+		order by t.planid,t.arrivetime desc
+	</select>
+	<select id="queryFunction" resultType="logisticalRule">
+		select
+		t.id,t.opertype,t.logisticaltype,t.materialcode from P_MEASUREROLE_T
+		t
+		where t.logisticaltype not in ('T','G')
+	</select>
+	<select id="queryFunctionDetail" resultType="logisticalRuleDetail">
+		select
+		d.id,d.pid,d.functionname,d.ctrlmemo from P_MEASUREROLE_DETAIL_T d
+	</select>
+	<select id="queryAuditlevel" parameterType="bcommon" resultType="bcommon">
+		select t.auditlevel,t.materiallflow from B_DOCUMENTTYPE_T t where
+		t.documentcode=#{documentcode,jdbcType=VARCHAR} and rownum=1 and
+		t.validflag>0
+	</select>
+	<select id="queryMotorcadeinfo" parameterType="operaconfig" resultType="operaconfig">
+		select t.motorcadecode id, t.motorcadename text
+		from B_TRANSPORT_T t
+		where t.validflag > 0
+		<if test="searchText!=null and searchText !=''">
+			and (t.motorcadecode like '%' || #{searchText} ||'%' or
+			t.motorcadename like '%' ||#{searchText}||'%' )
+		</if>
+	</select>
+	<select id="queryLinkinfo" parameterType="combox" resultType="combox">
+		select t.linkcode id,t.linkname text from L_LOGISTICSLINK_T t
+		where
+		t.validflag > 0
+		<if test="searchText!=null and searchText !=''">
+			and (t.linkcode like '%' || #{searchText} ||'%' or
+			t.linkname like '%' ||#{searchText}||'%' )
+		</if>
+		<if test="operatype!=null and operatype !=''">
+			and t.types=#{operatype}
+		</if>
+	</select>
+	<select id="queryEqunameinfo" parameterType="combox" resultType="combox">
+		select t.equcode id,
+		t.equname text
+		from M_EQUIPMENT_T t
+		where
+		t.equtype='C'
+		<if test="searchText!=null and searchText !=''">
+			and (t.equcode like '%' || #{searchText} ||'%' or
+			t.equname like '%' ||#{searchText}||'%' )
+		</if>
+	</select>
+	<select id="queryEqunameinfoByType" parameterType="combox" resultType="combox">
+		select t.equcode id,
+		t.equname text
+		from M_EQUIPMENT_T t
+		where
+		1=1
+		<if test="searchText!=null and searchText !=''">
+			and (t.equcode like '%' || #{searchText} ||'%' or
+			t.equname like '%' ||#{searchText}||'%' )
+		</if>
+		<if test="operatype!=null and operatype !=''">
+			and t.equtype = #{operatype}
+		</if>
+	</select>
+	<select id="queryWorkline" parameterType="combox" resultType="combox">
+		select t.id,t.worklinename text from l_workline_t t where
+		t.validflag>0
+		<if test="searchText!=null and searchText !=''">
+			and (t.id like '%' || #{searchText} ||'%' or
+			t.worklinename like '%' ||#{searchText}||'%' )
+		</if>
+	</select>
+	<select id="queryWorkpoints" parameterType="combox" resultType="combox">
+		select t.workpointcode as id,t.workpointname as text from
+		b_workpoint_t t where t.validflag = 1
+		<if test="searchText!=null and searchText !=''">
+			and (t.workpointcode like '%'||#{searchText}||'%' or
+			t.workpointname like '%'||#{searchText}||'%' or queryword like
+			'%'||#{searchText}||'%')
+		</if>
+	</select>
+
+	<select id="queryStorenames" parameterType="combox" resultType="combox">
+		select t.storecode as id,t.storename as text from
+		b_storename_t t
+		where t.validflag >0 and t.types=3 and t.storename not in (select w.workpointname from b_workpoint_t w where w.validflag > 0)
+		<if test="searchText!=null and searchText !=''">
+			and (t.storecode like '%'||#{searchText}||'%' or
+			t.storename like '%'||#{searchText}||'%' or queryword like
+			'%'||#{searchText}||'%')
+		</if>
+	</select>
+
+	<select id="queryMeasureunit" parameterType="combox" resultType="combox">
+		select t.unitname as id,t.unitname as text from b_measureunit_v t
+		where 1= 1
+		<if test="searchText!=null and searchText !=''">
+			and t.unitname like '%'||#{searchText}||'%'
+		</if>
+	</select>
+
+	<select id="queryCardBycarno" parameterType="blacklist" resultType="int">
+		select count(1) from B_CARD_T t
+		where
+		t.carno=#{carno,jdbcType=VARCHAR}
+		and t.validflag=3
+		and
+		t.cardclass=#{recordtype,jdbcType=VARCHAR}
+	</select>
+	<select id="queryBlackBycarno" parameterType="blacklist" resultType="int">
+		select count(1) from b_blacklist_t t where
+		t.cardid=#{carno,jdbcType=VARCHAR}and t.validflag>0
+	</select>
+	<select id="queryForcestop" parameterType="forcestop" resultType="forcestop">
+		select id,
+		matchid,
+		carno,
+		createman creator,
+		createdate cdate,
+		usermemo,
+		stoplink,
+		linkcode,
+		linkname,
+		materialname,
+		sourcename,
+		targetname
+		from
+		l_forcestop_log_t
+		<if test=" matchid !=null and matchid !=''">
+			and t.matchid like '%' ||#{matchid}||'%' )
+		</if>
+		<if test=" carno !=null and carno !=''">
+			and t.carno like '%' ||#{carno}||'%' )
+		</if>
+		<if test=" stoplink !=null and stoplink !=''">
+			and t.stoplink like '%' ||#{stoplink}||'%' )
+		</if>
+	</select>
+	<insert id="insertForcestop" parameterType="forcestop">
+		insert into
+		l_forcestop_log_t
+		(id,
+		matchid,
+		carno,
+		createman,
+		createdate,
+		usermemo,
+		stoplink,
+		linkcode,
+		linkname,
+		materialname,
+		sourcename,
+		targetname)
+		values
+		(l_forcestop_log_s.nextval,
+		#{matchid,jdbcType=VARCHAR},
+		#{carno,jdbcType=VARCHAR},
+		#{creator,jdbcType=VARCHAR},
+		sysdate,
+		#{usermemo,jdbcType=VARCHAR},
+		#{stoplink,jdbcType=VARCHAR},
+		#{unitcode,jdbcType=VARCHAR},
+		#{unitname,jdbcType=VARCHAR},
+		#{materialname,jdbcType=VARCHAR},
+		#{sourcename,jdbcType=VARCHAR},
+		#{targetname,jdbcType=VARCHAR})
+	</insert>
+	<select id="queryInfoByMatchid" parameterType="forcestop" resultType="forcestop">
+		select t.carno, t.matchid, t.materialname, t.sourcename,
+		t.targetname
+		from L_CURR_TEMP_T t
+		where
+		t.matchid=#{matchid,jdbcType=VARCHAR} and
+		rownum=1
+	</select>
+	<update id="updateCurrStop" parameterType="forcestop">
+		update l_curr_temp_t
+		set validflag=9 where matchid=#{matchid,jdbcType=VARCHAR}
+	</update>
+	<update id="updateAppStop" parameterType="forcestop">
+		update
+		l_applicationbill_t set validflag=9 where
+		matchid=#{matchid,jdbcType=VARCHAR}
+	</update>
+	<update id="updateCurrRebackStop" parameterType="forcestop">
+		update l_curr_temp_t
+		set validflag=1 where matchid=#{matchid,jdbcType=VARCHAR}
+	</update>
+	<update id="updateAppRebackStop" parameterType="forcestop">
+		update
+		l_applicationbill_t set validflag=1 where
+		matchid=#{matchid,jdbcType=VARCHAR}
+	</update>
+	<select id="queryCardhead" resultType="cardhead">
+		select briefname,
+		validflag,
+		orderindex,
+		queryword,
+		createdate,
+		createman,
+		updatedate,
+		updateman,
+		validman,
+		validtime,
+		sysmemo
+		from b_carhead_t
+		where validflag =1
+		order by orderindex asc
+	</select>
+
+	<select id="queryRTypeBycode" parameterType="workpoint" resultType="workpoint">
+		select ictype, rfidtype
+		from b_workpoint_t b
+		where validflag>
+		0
+		and workpointcode = #{workpointcode,jdbcType=VARCHAR}
+		and rownum = 1
+	</select>
+	<resultMap id="carno_map" type="bcommon">
+		<result property="carno" column="carno" jdbcType="VARCHAR" javaType="java.lang.String" />
+	</resultMap>
+	<select id="queryCarno" resultMap="carno_map" parameterType="bcommon">
+		select t.carno from l_plan_v t where t.carno like
+		'%'||#{carno,jdbcType=VARCHAR}||'%'
+		group by t.carno
+	</select>
+
+	<resultMap id="storeincarno_map" type="bcommon">
+		<result property="carno" column="carno" jdbcType="VARCHAR" javaType="java.lang.String" />
+	</resultMap>
+	<select id="queryStoreinCarno" resultMap="storeincarno_map" parameterType="bcommon">
+		select t.carno from (select b.carno
+		from l_applicationbill_t b
+		left join l_applicationbill_item_t c
+		on (b.matchid = c.matchid and c.validflag > 0)
+		left join l_curr_temp_t t
+		on (b.matchid = t.matchid and t.validflag > 0)
+		left join m_operaconfig_t m
+		on b.operatype = m.operatype
+		left join l_entrylog_t l
+		on b.id = l.id
+		where b.validflag = 1
+		and b.types = 0
+		and t.sflag != 1
+		and t.targettime is null
+		and ((t.gross > 0 and m.isormeasure = 1) or m.isormeasure = 0)
+		group by b.carno) t where t.carno like
+		'%'||#{carno,jdbcType=VARCHAR}||'%'
+		group by t.carno
+	</select>
+
+	<resultMap id="storeoutcarno_map" type="bcommon">
+		<result property="carno" column="carno" jdbcType="VARCHAR" javaType="java.lang.String" />
+	</resultMap>
+	<select id="queryStoreoutCarno" resultMap="storeoutcarno_map" parameterType="bcommon">
+		select t.carno from (select b.carno
+		from
+		l_applicationbill_t b
+		left join l_applicationbill_item_t c
+		on (b.matchid
+		= c.matchid and c.validflag > 0)
+		left join l_curr_temp_t t
+		on (b.matchid
+		= t.matchid and t.validflag > 0)
+		left join m_operaconfig_t m
+		on
+		b.operatype = m.operatype
+		left join l_entrylog_t l
+		on b.id = l.id
+		where
+		b.validflag = 1
+		and b.types = 0
+		and t.sflag != 2
+		and t.sourcetime is null
+		and ((t.tare > 0 and m.isormeasure = 1) or m.isormeasure = 0)
+		group by
+		b.carno) t where t.carno like
+		'%'||#{carno,jdbcType=VARCHAR}||'%'
+	</select>
+	<select id="queryTaskcode" resultType="taskcode" parameterType="taskcode">
+		select t.taskcode,
+		t.operatype,
+		t.materialcode,
+		t.materialname,
+		t.sourcecode,
+		t.sourcename,
+		t.targetcode,
+		t.targetname,
+		t.mflag,t.tarehour ,
+		decode(mflag, '1', '先毛后皮', '2', '先皮后毛')
+		measurement
+		from
+		b_taskcode_t t
+		where t.validflag>0
+		<if test=" taskcode !=null and taskcode !=''">
+			and t.taskcode =#{taskcode,jdbcType=VARCHAR}
+		</if>
+		<if test="materialname!=null and materialname !=''">
+			and t.materialname like '%'|| #{materialname}||'%'
+		</if>
+		<if test="targetname!=null and targetname!=''">
+			and t.targetname like '%'|| #{targetname} ||'%'
+		</if>
+		<if test="sourcename!=null and sourcename!=''">
+			and t.sourcename like '%' || #{sourcename}||'%'
+		</if>
+	</select>
+	<select id="queryInfoReturnQA" parameterType="String" resultType="application">
+		select t.matchid,
+		t.itemid,
+		f.saleitemid,
+		a.carno,
+		(select b.cardid from b_card_t b where b.carno=a.carno and b.cardclass=0 and b.validflag=3 and rownum=1)icid,
+		f.materialid materialcode,
+		l.mainid orderno,
+		l.planid,
+		l.sourceid sourcecode,
+		a.routeid,
+		to_char(e.createdate, 'yyyy-MM-dd hh24:mi:ss') begintime,
+		a.operatype,
+		f.reserve1,
+		f.reserve2,
+		f.reserve3,
+		f.reserve4,
+		f.reserve5,
+		f.reserve6,
+		f.reserve7,
+		f.reserve8,
+		f.reserve9,
+		f.reserve10,
+		l.reserve5 memo,
+		l.reserve6 memo1,
+		l.reserve7 memo2,
+		l.reserve8 memo3,
+		l.reserve9 memo4
+		from l_applicationbill_t a
+		left join l_applicationbill_item_t
+		t
+		on a.matchid = t.matchid
+		left join l_interfaceinfo_item_t f
+		on
+		t.saleitemid = f.saleitemid
+		left join l_interfaceinfo_t l
+		on f.fid =
+		l.id
+		left join l_entrylog_t e
+		on a.id = e.id
+		where t.matchid =
+		#{matchid,jdbcType=VARCHAR}
+		and rownum=1
+	</select>
+	<select id="queryOrsample" parameterType="String" resultType="String">
+		select t.workpointcode from l_workline_item_t t
+		where t.fid =
+		#{routeid,jdbcType=VARCHAR} and t.nodecode = 'SP'
+	</select>
+	<select id="queryOutInfoReturnQA" parameterType="String" resultType="application">
+		select t.matchid,
+		t.itemid,
+		e.id,
+		a.routeid,
+		to_char(e.createdate, 'yyyy-MM-dd hh24:mi:ss') begintime,
+		a.operatype
+		from
+		l_applicationbill_t a
+		left join l_applicationbill_item_t t
+		on a.matchid
+		= t.matchid
+		left join l_entrylog_t e
+		on a.id = e.eid
+		where t.matchid =
+		#{matchid,jdbcType=VARCHAR}
+		and rownum=1
+	</select>
+	<select id="queryInfoBymateiracode" parameterType="String" resultType="String">
+		select
+		GET_MATERIALPROPERTY_F(#{mateiralcode,jdbcType=VARCHAR}) from dual
+	</select>
+
+	<insert id="insertAutolog" parameterType="combox">
+		insert into
+		L_AUTOUPLOAD_T
+		(info, msg)
+		values
+		(#{text,jdbcType = VARCHAR},
+		#{searchText, jdbcType = VARCHAR})
+	</insert>
+	<select id="queryUpNode" parameterType="application" resultType="application">
+		select t.nodecode
+		from l_workline_item_t t
+		where t.fid = #{routeid,
+		jdbcType = VARCHAR}
+		and t.sn = (select max(sn)
+		from l_workline_item_t t
+		where t.fid = #{routeid, jdbcType = VARCHAR}
+		and <![CDATA[sn <(select sn
+		                              from l_workline_item_t t
+		                             where t.fid = #{routeid, jdbcType = VARCHAR}
+		                               and nodecode = #{nodecode, jdbcType = VARCHAR})
+		                               and validflag=1
+		                               )]]>
+
+	</select>
+	<select id="queryNodeLists" resultType="application" parameterType="String">
+		select t.carno,
+		t.icid,
+		t.rfidid,
+		t.matchid,
+		t.planid,
+		t.taskcode,
+		t.materialname,
+		t.materialspec,
+		t.sourceplace,
+		t.sourcename,
+		t.targetname,
+		t.targetplace,
+		t.planweight,
+		t.gross * 0.001 gross,
+		t.grosstime,
+		t.tare * 0.001 tare,
+		t.taretime,
+		t.suttle * 0.001 suttle,
+		substr(t.suttletime, 0, 16) suttletime,
+		t.deduction,
+		t.grossb,
+		t.tareb,
+		decode(round(t.grossb - tareb, 2), '', 0, round(t.grossb - tareb, 2))
+		suttleb,
+		t.bflag,
+		t.usermemo || t.memo3 || t.memo4 usermemo,
+		t.operatype,
+		t.suttleweigh,
+		t.mstate,
+		t.routeid,
+		t.sourcetime,
+		t.targettime,
+		t.sampletime,
+		t.entertime
+		from
+		l_curr_temp_t t
+		where
+		t.matchid = #{matchid,jdbcType=VARCHAR}
+		and t.validflag = 1
+		order by
+		t.matchid asc
+	</select>
+	<!--根据车号查询业务临时表皮重及业务信息 -->
+	<select id="getCurrtempBYCarnoT" resultType="measure" parameterType="measure">
+		select t.carno,
+		t.icid,
+		t.matchid,
+		t.taskcode,
+		t.materialname,
+		t.materialcode,
+		t.sourcecode,
+		t.sourcename,
+		t.targetname,
+		t.targetcode,
+		t.tare * 0.001 tare,
+		t.taretime,
+		t.tareweighid,
+		t.tareweigh,
+		t.tareoperacode,
+		t.tareoperaname,
+		t.operatype,
+		t.tarehour,
+		t.mflag
+		from
+		l_curr_temp_t t
+		where t.operatype in('-1','0','10')
+		and
+		t.carno = #{carno,jdbcType=VARCHAR}
+		and t.gross=0
+		and t.mstate=0
+		and
+		t.validflag = 1
+	</select>
+	<!--根据车号、业务号查询皮重信息 -->
+	<select id="getTareBYCarnoT" resultType="measure" parameterType="measure">
+		select t.carno,
+		t.icid,
+		t.tare * 0.001 tare,
+		to_char(t.taretime,'YYYY-MM-DD HH24:MI:SS') taretime,
+		t.tareweighid,
+		t.tareweigh,
+		t.tareoperacode,
+		t.tareoperaname,
+		(sysdate-t.taretime)
+		tarediff
+		from
+		m_tare_t t
+		where t.carno = #{carno,jdbcType=VARCHAR}
+		and
+		t.validflag = 1
+	</select>
+	<insert id="insertExceptinonlog" parameterType="bcommon">
+		insert into
+		m_exception_log_t
+		(matchid, usermemo, operaman, createdate, types)
+		values
+		(#{matchid,jdbcType=VARCHAR}, #{usermemo,jdbcType=VARCHAR},
+		#{createman,jdbcType=VARCHAR}, sysdate, 2)
+	</insert>
+	<select id="queryIcidBycarno" parameterType="String" resultType="bcard">
+		select b.cardid, b.cardtype, b.cartype,b.driver,b.unitname
+		from B_CARD_T b
+		where b.validflag = 3
+		and b.cardclass = 0
+		and b.carno = #{carno,jdbcType=VARCHAR}
+		and rownum = 1
+	</select>
+
+	<resultMap id="inOutcarno_map" type="bcommon">
+		<result property="carno" column="carno" jdbcType="VARCHAR" javaType="java.lang.String" />
+	</resultMap>
+	<select id="queryInOutCarno" resultMap="inOutcarno_map" parameterType="bcommon">
+		select t.carno from b_card_t t where t.validflag = 3 and t.cardclass=0
+	</select>
+	<select id="queryHcMateril" parameterType="combox" resultType="combox">
+		select t.materialcode id, t.materialname text
+		from b_material_hc_v t
+		<if test="searchText!=null and searchText !=''">
+			where (t.materialcode like '%' || #{searchText} || '%' or
+			t.materialname like '%' || #{searchText} || '%')
+		</if>
+	</select>
+	<select id="queryHcCustomer" parameterType="combox" resultType="combox">
+		select t.customercode id, t.customername text
+		from b_customer_hc_v t
+		<if test="searchText !=null and searchText !=''">
+			where (t.customercode like '%' || #{searchText} ||'%' or
+			t.customername like '%' ||#{searchText}||'%' )
+		</if>
+	</select>
+	<select id="queryOracletime" resultType="String">
+	select to_char(sysdate,'yyyy/MM/dd hh24:mi:ss') from dual
+	
+	</select>
+</mapper>

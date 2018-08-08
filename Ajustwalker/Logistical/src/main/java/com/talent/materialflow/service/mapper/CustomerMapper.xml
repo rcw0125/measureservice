@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.talent.materialflow.service.mapper.CustomerMapper">
+
+	<select id="queryList" resultType="customer" parameterType="customer">
+		select t.id,
+		t.validflag,
+		t.address,
+		t.customerarea,
+		t.customercode,
+		t.customername,
+		decode(t.customertype, 1,'客户', 2,'供应商') customertype,
+		t.queryword,
+		t.tele,
+		t.erpcode,
+		t.sysmemo,
+		t.usermemo,
+		t.creator,
+		t.cdate
+		from b_customer_t t
+		where t.validflag = 1
+		<if test="customercode !=null and customercode !=''">
+			and instr(t.customercode,upper(#{customercode}))>0
+		</if>
+		<if test="queryword !=null and queryword !=''">
+			and instr(t.queryword,upper(#{queryword}))>0
+		</if>
+		<if test="customername !=null and customername !=''">
+			and instr(t.customername,upper(#{customername}))>0
+		</if>
+		<if test="customertype !=null and customertype !='' and customertype != -1">
+			and instr(t.customertype,#{customertype})>0
+		</if>
+		<if test="types !=-1">
+			<if test="types == 1">
+				and instr(t.customercode,'CT')=0
+			</if>
+			<if test="types == 2">
+				and t.customercode like 'CT%'
+			</if>
+		</if>
+		order by t.customercode desc
+	</select>
+	
+	<select id="queryInfoById" parameterType="customer" resultType="customer">
+		select t.id,
+		t.validflag,
+		t.address,
+		t.customerarea,
+		t.customercode,
+		t.customername,
+		t.customertype,
+		t.queryword,
+		t.tele,
+		t.erpcode,
+		t.sysmemo,
+		t.usermemo,
+		t.creator,
+		t.cdate
+		from b_customer_t t
+		where t.validflag = 1 and
+		id=#{id} and rownum=1
+	</select>
+	<insert id="insertCustomer" parameterType="customer">
+        <selectKey resultType="java.lang.Long" order="BEFORE" keyProperty="id">
+		 select b_customer_S.nextval from dual		
+		</selectKey>
+		insert into
+		b_customer_t t
+		(t.id,
+		t.validflag,
+		t.address,
+		t.customerarea,
+		t.customercode,
+		t.customername,
+		t.customertype,
+		t.queryword,
+		t.tele,
+		t.usermemo,
+		t.creator,
+		t.cdate)
+		values
+		(#{id,jdbcType=VARCHAR },
+		1,
+		#{address ,jdbcType=VARCHAR },
+		#{customerarea,jdbcType=VARCHAR },
+		#{customercode ,jdbcType=VARCHAR },
+		#{customername ,jdbcType=VARCHAR },
+		#{customertype ,jdbcType=VARCHAR },
+		#{queryword ,jdbcType=VARCHAR },
+		#{tele ,jdbcType=VARCHAR },
+		#{usermemo ,jdbcType=VARCHAR},
+		#{creator ,jdbcType=VARCHAR},
+		sysdate)
+
+	</insert>
+
+	<update id="updateCustomer" parameterType="customer">
+		update b_customer_t
+		set address = #{address ,jdbcType=VARCHAR },
+		customerarea =#{customerarea ,jdbcType=VARCHAR },
+		customername = #{customername,jdbcType=VARCHAR },
+		customertype = #{customertype ,jdbcType=VARCHAR },
+		queryword = #{queryword ,jdbcType=VARCHAR },
+		tele =#{tele ,jdbcType=VARCHAR },
+		usermemo = #{usermemo,jdbcType=VARCHAR },
+		updater = #{updater ,jdbcType=VARCHAR },
+		udate = sysdate
+		where	id	= #{id ,jdbcType=VARCHAR }
+	</update>
+	<update id="cancelCustomer" parameterType="customer" >
+		update b_customer_T set validflag =
+		0,canceler =#{canceler,jdbcType=VARCHAR},canceldate=sysdate where id =
+		#{id,jdbcType=VARCHAR}
+	</update>
+	<select id="queryCount" parameterType="customer" resultType="int">
+		select count(1) from b_customer_t
+		where validflag>0
+		and customername
+		=#{customername,jdbcType=VARCHAR}
+		and customertype =#{customertype,jdbcType=VARCHAR}
+		and customercode like 'CT%'
+	</select>
+	<select id="queryCountById" parameterType="customer" resultType="int">
+		select count(1) from b_customer_t
+		where id != #{id ,jdbcType=VARCHAR } 
+		and validflag>0
+		and customername=#{customername,jdbcType=VARCHAR}
+		and customertype =#{customertype,jdbcType=VARCHAR}
+		and customercode like 'CT%'
+	</select>
+</mapper>

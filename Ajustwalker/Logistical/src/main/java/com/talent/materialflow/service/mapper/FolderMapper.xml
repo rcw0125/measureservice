@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.talent.materialflow.service.mapper.FolderMapper">
+
+	<select id="downloadfolder" statementType="CALLABLE">
+		 {call b_folder_p}
+	</select>
+	
+	<select id="downloadmaterial" statementType="CALLABLE">
+		 {call b_material_p}
+	</select>
+	
+</mapper>

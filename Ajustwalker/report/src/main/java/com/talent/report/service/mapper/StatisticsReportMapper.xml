@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.talent.report.service.mapper.StatisticsReportMapper">
+
+	<select id="querytaskinfo" resultType="taskinfo" parameterType="taskinfo">
+		select t.opname opname, round(avg(t.timecount)) avgtime, count(1)
+		carcount
+		from m_rc_task_doresult_t t
+		where t.taskdoresult = '正常结束'
+		<if test="begintime!=null and begintime!=''">
+    		<![CDATA[and t.createtime>=  to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+    		<![CDATA[and t.createtime <= to_date(#{endtime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		group by t.opname
+		order by t.opname
+	</select>
+
+	<select id="querytaskdata" resultType="taskinfo" parameterType="taskinfo">
+		select t.opname,
+		round(avg(t.timecount)) avgtime,
+		nvl(count(1), 0) carcount,
+		nvl((select count(1) carcount
+		from
+		m_rc_task_doresult_t r
+		where r.taskdoresult = '任务回退'
+		and r.opname =
+		t.opname
+		<if test="begintime!=null and begintime!=''">
+    		<![CDATA[and r.createtime>=  to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+    		<![CDATA[and r.createtime <= to_date(#{endtime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		group by r.opname),
+		0) backtask,
+		nvl((select count(1) carcount
+		from
+		m_rc_task_doresult_t r
+		where r.taskdoresult = '移卡之后终止计量'
+		and r.opname =
+		t.opname
+		<if test="begintime!=null and begintime!=''">
+    		<![CDATA[and r.createtime>=  to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+    		<![CDATA[and r.createtime <= to_date(#{endtime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		group by r.opname),
+		0) mvcardtask,
+		nvl((select count(1) carcount
+		from
+		m_rc_task_doresult_t r
+		where r.taskdoresult = '终止计量'
+		and r.opname =
+		t.opname
+		<if test="begintime!=null and begintime!=''">
+    		<![CDATA[and r.createtime>=  to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+    		<![CDATA[and r.createtime <= to_date(#{endtime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		group by r.opname),
+		0) finishtask,
+		nvl((select count(1) carcount
+		from
+		m_rc_task_doresult_t r
+		where r.taskdoresult = '系统自动回退'
+		and r.opname =t.opname
+		and r.seatid in ('201','202','203','204','205')
+		<if test="begintime!=null and begintime!=''">
+    		<![CDATA[and r.createtime>=  to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+    		<![CDATA[and r.createtime <= to_date(#{endtime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		group by r.opname),
+		0)autobacktask
+		from m_rc_task_doresult_t t
+		where
+		t.taskdoresult = '正常结束'
+		<if test="begintime!=null and begintime!=''">
+    		<![CDATA[and t.createtime>=  to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+    		<![CDATA[and t.createtime <= to_date(#{endtime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="opname!=null and opname !=''">
+			and instr(t.opname,#{opname})>0
+		</if>
+		group by t.opname
+		order by t.opname
+	</select>
+
+	<select id="queryavgtaskinfo" resultType="taskinfo" parameterType="taskinfo">
+		select nvl(round(sum(carcount) / count(1), 1),0) avgcarcount,
+		nvl(round(sum(avgtime) / count(1)),0) avgcounttime
+		from (select
+		t.opname, round(avg(t.timecount)) avgtime, count(1) carcount
+		from
+		m_rc_task_doresult_t t
+		where t.taskdoresult = '正常结束'
+		<if test="begintime!=null and begintime!=''">
+    		<![CDATA[and t.createtime>=  to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+    		<![CDATA[and t.createtime <= to_date(#{endtime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		group by t.opname
+		order by t.opname)
+	</select>
+</mapper>

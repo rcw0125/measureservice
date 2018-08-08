@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.talent.report.service.mapper.MeasureMapper">
+	<!--查询业务类型 -->
+	<select id="queryOperatype" parameterType="combox" resultType="combox">
+		select
+		t.operatype id,
+		t.operaname text
+		from M_OPERACONFIG_T t where
+		t.validflag>0 and t.isormeasure=1
+		<if test="searchText!=null and searchText !=''">
+			and (t.operatype like '%'||#{searchText}||'%' or
+			t.operaname like
+			'%'||#{searchText}||'%')
+		</if>
+	</select>
+
+	<select id="queryEquipment" parameterType="combox" resultType="combox">
+		select t.equcode id,
+		t.equname text
+		from M_EQUIPMENT_T t
+		where
+		t.equtype='C'
+		<if test="searchText!=null and searchText !=''">
+			and (t.equcode like '%' || #{searchText} ||'%' or
+			t.equname like '%' ||#{searchText}||'%' )
+		</if>
+	</select>
+	
+	<select id="queryMaterial" parameterType="combox" resultType="combox">
+		select t.materialname id,
+		t.materialname text
+		from m_material_combobox_v t
+		where 1=1
+		<if test="searchText!=null and searchText !=''">
+			and (t.materialcode like '%' || upper(#{searchText}) ||'%' or
+			t.materialname like '%' || upper(#{searchText}) ||'%' )
+		</if>
+	</select>
+	
+	<select id="queryStorename" parameterType="combox" resultType="combox">
+		select t.sourcename id,
+		t.sourcename text
+		from m_storename_combobox_v t
+		where 1=1
+		<if test="searchText!=null and searchText !=''">
+			and (t.sourcecode like '%' || upper(#{searchText}) ||'%' or
+			t.sourcename like '%' || upper(#{searchText}) ||'%' )
+		</if>
+	</select>
+	
+	<parameterMap type="java.util.Map" id="SP_NEXTVAL_P_map">
+		<parameter property="name" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="nextval" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="OUT" />
+	</parameterMap>
+	<select id="txNextValue" statementType="CALLABLE" parameterMap="SP_NEXTVAL_P_map">
+		<![CDATA[ {call SP_NEXTVAL_P (#{name,mode=IN,jdbcType=VARCHAR},#{nextval,mode=OUT,jdbcType=VARCHAR})}]]>
+	</select>
+	
+	<select id="queryLoadByModel" parameterType="measureReport" resultType="measureReport">
+	select
+	t.model,
+	t.load
+	from b_trainmodel_t t
+	where t.validflag > 0
+		and t.model = #{model}
+	</select>
+</mapper>

@@ -1,0 +1,105 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.xgmes.mapper.BusinessConfigMapper">
+
+	<select id="queryEntryinfo" parameterType="currtemp" resultType="entrylog">
+		select
+		t.id id
+		from L_ENTRYLOG_T t
+		where t.carno =
+		#{carno,jdbcType=VARCHAR}
+		and t.validflag = 2
+		and entrytype=1
+	</select>
+	<select id="queryCurrTemp" parameterType="currtemp" resultType="currtemp">
+		select t.matchid,
+		t.carno,
+		t.operatype,
+		t.planid,
+		t.taskcode,
+		t.materialcode,
+		t.materialname,
+		t.materialspec,
+		t.shipcode,
+		t.ship,
+		t.sourcecode,
+		t.sourcename,
+		t.targetcode,
+		t.targetname,
+		t.gross,
+		t.grosstime,
+		t.grossweighid,
+		t.grossweigh,
+		t.tare,
+		t.taretime,
+		t.tareweighid,
+		t.tareweigh,
+		t.deduction,
+		t.deductiontime,
+		t.suttle,
+		t.suttletime,
+		t.suttleweighid,
+		t.suttleweigh,
+		t.createdate,
+		t.grossb,
+		t.tareb,
+		t.snumber,
+		t.suttleapp,
+		t.tareoperaname,
+		t.grossoperaname,
+		t.entertime,
+		t.sampletime,
+		t.sourcetime,
+		t.targettime,
+		t.routeid
+		from L_CURR_TEMP_T t
+		where t.validflag > 0
+		and matchid=#{matchid,jdbcType=VARCHAR}
+	</select>
+
+	<select id="queryNotInfoByCarno" parameterType="currtemp"
+		resultType="int">
+		select count(1)
+		from L_CURR_TEMP_T t
+		where t.validflag=1 and
+		t.types=0 and t.carno=#{carno,jdbcType=VARCHAR}
+	</select>
+
+	<select id="queryNextNode" parameterType="worklineItem"
+		resultType="worklineItem">
+		select nodecode
+		  from l_workline_item_t l
+		 where l.sn = (select min(sn)
+                 from l_workline_item_t w
+                where <![CDATA[ w.sn > (select t.sn
+                                 from l_workline_item_t t
+                                where t.fid = #{fid,jdbcType = VARCHAR}
+                                  and t.nodecode = #{nodecode, jdbcType = VARCHAR}
+                                  and validflag=1
+                                  and rownum = 1) ]]>
+                   and w.fid = #{fid, jdbcType = VARCHAR}
+                   and w.validflag=1)
+		   and l.fid = #{fid, jdbcType = VARCHAR}
+		   and rownum = 1
+	</select>
+
+	<select id="queryWorkpoint" parameterType="worklineItem"
+		resultType="int">
+		select count(1)
+		from L_WORKLINE_ITEM_T t
+		where t.validflag>0
+		<if test="nodecode!=null and nodecode !=''">
+			and t.nodecode =#{nodecode,jdbcType=VARCHAR}
+		</if>
+		<if test="id!=null and id !=''">
+			and t.fid =#{id,jdbcType=VARCHAR}
+		</if>
+		<if test="workpointcode!=null and workpointcode !=''">
+			and t.workpointcode like
+			'%'||#{workpointcode,jdbcType=VARCHAR}||'%'
+		</if>
+	</select>
+
+</mapper>

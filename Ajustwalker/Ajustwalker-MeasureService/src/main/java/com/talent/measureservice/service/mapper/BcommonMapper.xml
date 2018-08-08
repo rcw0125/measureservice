@@ -1,0 +1,153 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.talent.measureservice.service.mapper.BcommonMapper">
+
+	<parameterMap type="java.util.Map" id="SP_NEXTVAL_P_map">
+		<parameter property="name" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="nextval" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="OUT" />
+	</parameterMap>
+	<select id="txNextValue" statementType="CALLABLE" parameterMap="SP_NEXTVAL_P_map">
+		<![CDATA[ {call SP_NEXTVAL_P (#{name,mode=IN,jdbcType=VARCHAR},#{nextval,mode=OUT,jdbcType=VARCHAR})}]]>
+	</select>
+	<select id="querySourceinfo" parameterType="combox" resultType="combox">
+		select t.customercode code, t.customername name
+		from b_customer_v t
+		where
+		t.customertype = 1
+		<if test="searchText!=null and searchText !=''">
+			and (t.customercode like '%' || #{searchText} ||'%' or
+			t.customername like '%' ||#{searchText}||'%' )
+		</if>
+	</select>
+	<select id="queryTargetinfo" parameterType="combox" resultType="combox">
+		select t.customercode code, t.customername name
+		from b_customer_v t
+		where
+		t.customertype = 2
+		<if test="searchText !=null and searchText !=''">
+			and (t.customercode like '%' || #{searchText} ||'%' or
+			t.customername like '%' ||#{searchText}||'%' )
+		</if>
+	</select>
+	<select id="queryMateril" parameterType="combox" resultType="combox">
+		select t.materialcode code, t.materialname name
+		from b_material_v t
+		<if test="searchText!=null and searchText !=''">
+			where   (t.materialcode like '%' || #{searchText} || '%' or
+			t.materialname like '%' || #{searchText} || '%')
+		</if>
+	</select>
+	<select id="queryStation" parameterType="combox" resultType="combox">
+		select t.stationcode code, t.stationname name from b_sation_v t
+		<if test="searchText!=null and searchText !=''">
+		  where 	(t.stationcode like '%' || #{searchText} || '%' or
+			t.stationname like '%' || #{searchText} || '%')
+		</if>
+	</select>
+   <select id="queryMaterialCount" parameterType="material" resultType="int">
+	   select count(b.id)
+		  from b_material_t b
+		 where b.validflag > 0
+		   and b.materialname=#{materialname,jdbcType = VARCHAR}
+	</select>
+	<insert id="insertMaterial" parameterType="material">
+	  insert into b_material_t t
+	  	(t.id, t.materialcode, t.materialname, t.queryword, t.reserve3)
+	  values
+	  	(b_material_s.nextval,
+	  	 #{materialcode,jdbcType = VARCHAR},
+	  	 #{materialname,jdbcType = VARCHAR},
+	  	 l_get_py(#{materialname, jdbcType = VARCHAR}),
+	   	 '1')
+	</insert>
+	<select id="queryCustomerCount" parameterType="customer" resultType="int">
+	select count(b.id)
+	  from b_customer_t b
+	 where b.validflag > 0
+	   and b.customername=#{customername,jdbcType = VARCHAR}
+	</select>
+		<insert id="insertCustomer" parameterType="customer">
+	  insert into b_customer_t t
+		  (t.id,
+		   t.customercode,
+		   t.customername,
+		   t.customertype,
+		   t.queryword,
+		   t.reserve1)
+		values
+		  (b_customer_s.nextval,
+		   #{customercode,jdbcType = VARCHAR},
+		   #{customername,jdbcType = VARCHAR},
+		   #{customertype,jdbcType = VARCHAR},
+		   l_get_py(#{customername,jdbcType = VARCHAR}),
+		   '1')
+	</insert>
+	<select id="querySationCount" parameterType="customer" resultType="int">
+		select count(b.id)
+		  from b_fromsation_t b
+		where b.validflag > 0
+		   and b.stationname=#{customername,jdbcType = VARCHAR}
+	</select>
+	<insert id="insertSation" parameterType="customer">
+	  insert into b_fromsation_t t
+		  (t.id,
+		   t.validflag,
+		   t.stationcode,
+		   t.stationname,
+		   t.queryword,
+		   t.sationtype,
+		   t.createman)
+		values
+		  (b_fromsation_s.nextval,
+		   1,
+		   #{customercode,jdbcType = VARCHAR},
+		   #{customername,jdbcType = VARCHAR},
+		   l_get_py(#{customername,jdbcType = VARCHAR}),
+		   #{customertype,jdbcType = VARCHAR},
+		   '系统添加'
+		   )
+	</insert>	
+	<select id="queryTrainmodel" parameterType="trainmodel" resultType="trainmodel">
+		select b.model, b.deduction, b.load, b.standardtare
+		  from b_trainmodel_t b
+		 where b.validflag > 0
+		   and b.model = #{model, jdbcType = VARCHAR}
+	</select>
+	<!--添加信息 -->
+	<insert id="insertTrainmodel" parameterType="trainmodel">
+		<selectKey resultType="java.lang.Long" order="BEFORE" keyProperty="id">
+			select b_trainmodel_s.nextval from dual
+		</selectKey>
+		insert into b_trainmodel_t t (
+		t.id,
+		t.validflag,
+		t.model,
+		t.load,
+		t.standardtare,
+		t.createdate,
+		t.createor
+		)
+		values(
+		#{id,jdbcType=NUMERIC},
+		1,
+		#{model,jdbcType=VARCHAR},
+		#{load,jdbcType=VARCHAR},
+		#{standardtare,jdbcType=VARCHAR},
+		sysdate,
+		'系统添加'
+		)
+	</insert>
+	<select id="queryOperatype" parameterType="combox" resultType="combox">
+		select
+		t.operatype code,
+		t.operaname name
+		from m_operaconfig_t t where
+		t.validflag>0
+		<if test="searchText!=null and searchText !=''">
+			and t.cartype =#{searchText}
+		</if>
+	</select>
+</mapper>

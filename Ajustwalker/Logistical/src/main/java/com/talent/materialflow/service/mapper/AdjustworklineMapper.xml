@@ -1,0 +1,156 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.talent.materialflow.service.mapper.AdjustworklineMapper">
+
+	<select id="queryList" resultType="application" parameterType="application">
+		select a.matchid,
+		a.carno,
+		a.icid,
+		a.operatype,
+		m.operaname,
+		a.cartype,
+		t.itemid,
+		t.planid,
+		t.taskcode,
+		t.materialcode,
+		t.materialname,
+		t.sourcename,
+		t.targetname,
+		t.sourceplace,
+		t.sourceoperaname,
+		t.targetplace,
+		t.planmaterialcount,
+		t.planweight,
+		t.grossb,
+		t.tareb,
+		t.suttleb,
+		t.shipcode,
+		t.ship,
+		t.snumber,
+		t.suttleapp,
+		t.middlemancode,
+		t.middlemanname,
+		a.unitcode,
+		a.unitname,
+		t.usermemo,
+		a.sysmemo,
+		a.createoperacode,
+		a.createoperaname creator,
+		to_char(a.createdate,'yyyy-MM-dd hh24:mi:ss') createdate,
+		a.auditlevel,
+		a.approverfirst,
+		a.approversecond,
+		to_char(a.firsttime,
+		'yyyy-MM-dd hh24:mi:ss')
+		firsttime,
+		to_char(a.secondtime, 'yyyy-MM-dd
+		hh24:mi:ss') secondtime,
+		a.documentcode,
+		m.isormeasure,
+		m.materialflow,
+        a.routeid,
+       (select t.worklinename from L_WORKLINE_T t where t.id= a.routeid and t.validflag>0 and rownum=1)reason
+		from
+		l_applicationbill_t a
+		left join
+		l_applicationbill_item_t t
+		on
+		(a.matchid =
+		t.matchid and t.validflag >
+		0)
+		LEFT JOIN m_operaconfig_t m
+		ON a.operatype
+		= m.operatype
+		where
+		a.validflag =1  and a.types=0
+		<if test="begintime!=null and begintime!=''">
+    		<![CDATA[and a.createdate>=  to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+    		<![CDATA[and a.createdate <= to_date(#{endtime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="matchid!=null and matchid !=''">
+			and a.matchid like '%' || #{matchid}||'%'
+		</if>
+		<if test="carno !=null and carno !=''">
+			and a.carno like '%' || #{carno}||'%'
+		</if>
+		<if test="materialname!=null and materialname !=''">
+			and t.materialname like '%' || #{materialname}||'%'
+		</if>
+		<if test="targetname!=null and targetname!=''">
+			and t.targetname like '%' || #{targetname} ||'%'
+		</if>
+		<if test="sourcename!=null and sourcename!=''">
+			and t.sourcename like '%' || #{sourcename}||'%'
+		</if>
+		<if test="operatype !=null and operatype !=''">
+			and a.operatype=#{operatype}
+		</if>
+		<if test="documentcode !=null and documentcode !=''">
+			and a.documentcode=#{documentcode}
+		</if>
+		<if test="unitname !=null and unitname !=''">
+			and a.unitname like '%' || #{unitname}|| '%'
+		</if>
+		order by a.createdate desc
+	</select>
+	<select id="queryNodename" parameterType="worklineItem" resultType="worklineItem">
+	    select t.id, t.sn,t.nodename from L_WORKLINE_ITEM_T t where t.fid=#{worklinecode,jdbcType=VARCHAR } order by t.sn asc
+	</select>
+	<select id="queryWorkline" parameterType="workline" resultType="workline">
+	  select t.id,t.fid,t.sn,t.queryword,t.worklinecode,t.worklinename from l_workline_t t where t.id=#{fid,jdbcType=VARCHAR } 
+	</select>
+	<select id="queryWorklineItem" parameterType="worklineItem" resultType="worklineItem">
+		select t.id,
+		       t.fid,
+		       t.sn,
+		       t.nodecode,
+		       t.nodename,
+		       t.worklinecode,
+		       t.workpointcode
+		  from L_WORKLINE_ITEM_T t
+		 where t.fid=#{fid,jdbcType=VARCHAR }
+	</select>
+	<select id="queryId" resultType="workline">
+	  select hibernate_sequence.nextval id from dual
+	</select>
+	<insert id="insertWorkline" parameterType="workline">
+	   insert into l_workline_t t
+		  (t.id, t.fid, t.sn, t.queryword, t.worklinecode, t.worklinename,
+		   t.validflag)
+		values
+		  ( #{id,jdbcType=VARCHAR},
+		    #{fid,jdbcType=VARCHAR},
+		    #{sn,jdbcType=VARCHAR},
+		    #{queryword,jdbcType=VARCHAR},
+		    #{worklinecode,jdbcType=VARCHAR}||#{id,jdbcType=VARCHAR},
+		    #{worklinename,jdbcType=VARCHAR},2)
+	</insert>
+	<insert id="insertWorklineItem" parameterType="worklineItem">
+	   insert into l_workline_item_t t
+		  (t.id,
+		   t.fid,
+		   t.sn,
+		   t.nodecode,
+		   t.nodename,
+		   t.worklinecode,
+		   t.workpointcode,
+		   t.validflag)
+		values
+		  ( hibernate_sequence.nextval,
+		   #{fid,jdbcType=VARCHAR},
+		   #{sn,jdbcType=VARCHAR},
+		   #{nodecode,jdbcType=VARCHAR},
+		   #{nodename,jdbcType=VARCHAR},
+		   #{worklinecode,jdbcType=VARCHAR}||#{fid,jdbcType=VARCHAR},
+		   #{workpointcode,jdbcType=VARCHAR},2)
+	</insert>
+	<update id="updateAppRouteid" parameterType="worklineItem">
+	  update l_applicationbill_t t set  t.routeid=#{fid,jdbcType=VARCHAR}  where t.matchid=#{fids,jdbcType=VARCHAR}
+	</update>
+	<update id="updateCurrRouteid" parameterType="worklineItem">
+	  update l_curr_temp_t t set  t.routeid=#{fid,jdbcType=VARCHAR}  where t.matchid=#{fids,jdbcType=VARCHAR}
+	</update>
+</mapper>

@@ -1,0 +1,1568 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xgmes.service.mapper.ExceptionMapper">
+
+	<select id="queryList" resultType="application" parameterType="application">
+		select a.matchid,
+		a.carno,
+		a.icid,
+		a.operatype,
+		m.operaname,
+		a.cartype,
+		t.itemid,
+		t.planid,
+		t.taskcode,
+		t.materialcode,
+		t.materialname,
+		t.sourcename,
+		t.targetname,
+		t.sourceplace,
+		t.sourceoperaname,
+		t.targetplace,
+		t.planmaterialcount,
+		t.planweight,
+		t.grossb,
+		t.tareb,
+		t.suttleb,
+		t.shipcode,
+		t.ship,
+		t.snumber,
+		t.suttleapp,
+		t.middlemancode,
+		t.middlemanname,
+		a.unitcode,
+		a.unitname,
+		a.usermemo,
+		a.createoperacode,
+		a.createoperaname,
+		a.auditlevel,
+		a.approverfirst,
+		a.approversecond,
+		to_char(a.firsttime, 'yyyy-MM-dd hh24:mi:ss') firsttime,
+		to_char(a.secondtime, 'yyyy-MM-dd hh24:mi:ss') secondtime,
+		a.documentcode,
+		m.gross,
+		m.tare,
+		m.isormeasure,
+		m.materialflow,
+		a.validflag,
+		decode(a.validflag,0,'作废',1,'正常',8,'完成',9,'终止')sysmemo
+		from l_applicationbill_t a
+		left join l_applicationbill_item_t t
+		on
+		(a.matchid = t.matchid and t.validflag > 0)
+		left join m_measure_t m
+		on
+		(a.matchid = m.matchid and m.validflag > 0)
+		LEFT JOIN m_operaconfig_t m
+		ON a.operatype = m.operatype
+		where a.validflag > 0
+		and a.types = 0
+		<if test="begintime!=null and begintime!=''">
+    		<![CDATA[and a.createdate>=  to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+    		<![CDATA[and a.createdate <= to_date(#{endtime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="planid!=null and planid !=''">
+			and t.planid like '%' || #{planid}||'%'
+		</if>
+		<if test="matchid!=null and matchid !=''">
+			and a.matchid like '%' || #{matchid}||'%'
+		</if>
+		<if test="carno !=null and carno !=''">
+			and a.carno like '%' || #{carno}||'%'
+		</if>
+		<if test="materialname!=null and materialname !=''">
+			and t.materialname like '%' || #{materialname}||'%'
+		</if>
+		<if test="targetname!=null and targetname!=''">
+			and t.targetname like '%' || #{targetname} ||'%'
+		</if>
+		<if test="sourcename!=null and sourcename!=''">
+			and t.sourcename like '%' || #{sourcename}||'%'
+		</if>
+		<if test="operatype !=null and operatype !=''">
+			and a.operatype=#{operatype}
+		</if>
+		<if test="documentcode !=null and documentcode !=''">
+			and a.documentcode=#{documentcode}
+		</if>
+		<if test="ship !=null and ship !=''">
+			and a.ship=#{ship}
+		</if>
+		<if test="sourceplace !=null and sourceplace !=''">
+			and a.sourceplace=#{sourceplace}
+		</if>
+		order by a.createdate desc
+	</select>
+	<select id="queryInfoBymatchid" parameterType="application"
+		resultType="application">
+		select t.itemid,
+		a.matchid,
+		a.carno,
+		a.icid,
+		a.operatype,
+		a.cartype,
+		t.planid,
+		t.taskcode,
+		t.orderno,
+		t.materialcode,
+		t.materialname,
+		t.sourcecode,
+		t.sourcename,
+		t.targetcode,
+		t.targetname ,
+		t.sourceplace,
+		t.targetplace,
+		t.shipcode,
+		t.ship,
+		t.middlemancode,
+		t.middlemanname,
+		t.grossb,
+		t.tareb,
+		t.suttleb,
+		t.snumber,
+		t.suttleapp,
+		a.usermemo memo,
+		a.approverfirst,
+		a.firsttime,
+		a.approversecond,
+		a.secondtime,
+		t.measureunit ,
+		t.isorin ,
+		t.isorout,
+		t.returntime ,
+		t.outtime ,
+		t.returntotal ,
+		t.outtotal,
+		a.documentcode,
+		a.businessname ,
+		a.saleman ,
+		a.inoutdate,
+		a.isormeasure ,
+		a.reason,
+		t.usermemo
+		from
+		l_applicationbill_t a
+		left join l_applicationbill_item_t t
+		on
+		(a.matchid= t.matchid and t.validflag > 0)
+		where a.validflag > 0
+		and
+		a.matchid =#{matchid,jdbcType = VARCHAR}
+	</select>
+
+	<select id="querySinInfoBymatchid" parameterType="storein"
+		resultType="storein">
+		select b.operatype,
+		b.carno,
+		b.matchid,
+		c.planid,
+		c.orderno,
+		c.sourcename,
+		c.middlemanname,
+		c.sourceplace,
+		c.targetname,
+		c.materialcode,
+		c.materialname,
+		c.snumber counts,
+		c.suttleapp weight,
+		c.ship,
+		nvl(t.gross, 0) gross,
+		c.prodlinename ,
+		c.pictureno,
+		c.materialspec,
+		c.measureunit,
+		c.steelname modelno
+		from
+		l_applicationbill_t b
+		left join l_applicationbill_item_t c
+		on (b.matchid
+		= c.matchid and c.validflag > 0)
+		left join l_curr_temp_t t
+		on (b.matchid
+		= t.matchid and t.validflag > 0)
+		where b.validflag = 1
+		and b.types = 0
+		and t.sflag != 1
+		and not exists (select 0
+		from l_storein_t d
+		where
+		d.validflag > 0
+		and b.matchid = d.matchid)
+		and b.matchid =
+		#{matchid,jdbcType=VARCHAR}
+		order by b.createdate desc
+	</select>
+	<select id="querySoutInfoBymatchid" parameterType="storein"
+		resultType="storein">
+		select b.operatype,
+		b.carno,
+		b.matchid,
+		c.planid,
+		c.orderno,
+		c.sourcename,
+		c.middlemanname,
+		c.sourceplace,
+		c.targetname,
+		c.materialname,
+		c.snumber counts,
+		c.suttleapp weight,
+		c.ship,
+		nvl(t.tare,0)tare
+		from l_applicationbill_t b
+		left join
+		l_applicationbill_item_t c
+		on (b.matchid = c.matchid and c.validflag >
+		0)
+		left join l_curr_temp_t t
+		on (b.matchid = t.matchid and t.validflag >
+		0)
+		where b.validflag = 1
+		and b.types = 0
+		and t.sflag!=2
+		and not exists
+		(select 0
+		from l_storeout_t d
+		where d.validflag > 0
+		and b.matchid =
+		d.matchid)
+		and b.matchid = #{matchid,jdbcType=VARCHAR}
+		order by
+		b.createdate desc
+	</select>
+	<select id="queryMeasureBymatchid" parameterType="measure"
+		resultType="measure">
+		select t.matchid,
+		t.carno,
+		t.operatype,
+		t.planid,
+		t.taskcode,
+		t.materialcode,
+		t.materialname,
+		t.materialspec,
+		t.shipcode,
+		t.ship,
+		t.sourcecode,
+		t.sourcename,
+		t.targetcode,
+		t.targetname,
+		t.gross * 0.001
+		gross,
+		to_char(t.grosstime,'yyyy-MM-dd hh24:mi:ss')grosstime,
+		t.grossweighid,
+		t.grossweigh,
+		t.tare * 0.001 tare,
+		to_char(t.taretime,'yyyy-MM-dd hh24:mi:ss')taretime,
+		t.tareweighid,
+		t.tareweigh,
+		tareoperaname,
+		grossoperaname,
+		t.usermemo
+		from m_measure_t t
+		where matchid = #{matchid,jdbcType=VARCHAR}
+	</select>
+	<parameterMap type="java.util.Map" id="measureMap">
+		<parameter property="v_matchid" jdbcType="VARCHAR" mode="IN" />
+		<parameter property="v_gross" jdbcType="VARCHAR" mode="IN" />
+		<parameter property="v_grosstime" jdbcType="VARCHAR" mode="IN" />
+		<parameter property="v_grossweighid" jdbcType="VARCHAR"
+			mode="IN" />
+		<parameter property="v_grossweigh" jdbcType="VARCHAR" mode="IN" />
+		<parameter property="v_grossoperacode" jdbcType="VARCHAR"
+			mode="IN" />
+		<parameter property="v_grossoperaname" jdbcType="VARCHAR"
+			mode="IN" />
+		<parameter property="v_tare" jdbcType="VARCHAR" mode="IN" />
+		<parameter property="v_taretime" jdbcType="VARCHAR" mode="IN" />
+		<parameter property="v_tareweighid" jdbcType="VARCHAR" mode="IN" />
+		<parameter property="v_tareweigh" jdbcType="VARCHAR" mode="IN" />
+		<parameter property="v_tareoperacode" jdbcType="VARCHAR"
+			mode="IN" />
+		<parameter property="v_tareoperaname" jdbcType="VARCHAR"
+			mode="IN" />
+		<parameter property="v_usermemo" jdbcType="VARCHAR" mode="IN" />
+		<parameter property="v_createman" jdbcType="VARCHAR" mode="IN" />
+		<parameter property="v_flag" jdbcType="DECIMAL" mode="OUT" />
+		<parameter property="v_msg" jdbcType="VARCHAR" mode="OUT" />
+	</parameterMap>
+	<select id="insertMeasureException" parameterMap="measureMap"
+		statementType="CALLABLE">
+		<![CDATA[CALL m_exception_update_p(#{v_matchid,mode=IN,jdbcType=VARCHAR},
+		#{v_gross,mode=IN,jdbcType=VARCHAR},
+		#{v_grosstime,mode=IN,jdbcType=VARCHAR},
+		#{v_grossweighid,mode=IN,jdbcType=VARCHAR},
+		#{v_grossweigh,mode=IN,jdbcType=VARCHAR},
+		#{v_grossoperacode,mode=IN,jdbcType=VARCHAR},
+		#{v_grossoperaname,mode=IN,jdbcType=VARCHAR},
+		#{v_tare,mode=IN,jdbcType=VARCHAR},
+		#{v_taretime,mode=IN,jdbcType=VARCHAR},
+		#{v_tareweighid,mode=IN,jdbcType=VARCHAR},
+		#{v_tareweigh,mode=IN,jdbcType=VARCHAR},
+		#{v_tareoperacode,mode=IN,jdbcType=VARCHAR},		
+		#{v_tareoperaname,mode=IN,jdbcType=VARCHAR},
+		#{v_usermemo,mode=IN,jdbcType=VARCHAR},
+		#{v_createman,mode=IN,jdbcType=VARCHAR},
+		#{v_flag,mode=OUT,jdbcType=VARCHAR},
+		#{v_msg,mode=OUT,jdbcType=VARCHAR})]]>
+	</select>
+
+
+	<parameterMap type="java.util.Map" id="outMap">
+		<parameter property="matchid" mode="IN" jdbcType="VARCHAR" />
+		<parameter property="carno" mode="IN" jdbcType="VARCHAR" />
+		<parameter property="icid" mode="IN" jdbcType="VARCHAR" />
+		<parameter property="rfidid" mode="IN" jdbcType="VARCHAR" />
+		<parameter property="gatecode" mode="IN" jdbcType="VARCHAR" />
+		<parameter property="gatename" mode="IN" jdbcType="VARCHAR" />
+		<parameter property="usermemo" mode="IN" jdbcType="VARCHAR" />
+		<parameter property="createman" mode="IN" jdbcType="VARCHAR" />
+		<parameter property="forceflag" mode="IN" jdbcType="VARCHAR" />
+		<parameter property="outflag" mode="OUT" jdbcType="VARCHAR" />
+		<parameter property="outmsg" mode="OUT" jdbcType="VARCHAR" />
+	</parameterMap>
+	<select id="insertExceptionOut" parameterMap="outMap"
+		statementType="CALLABLE">
+		<![CDATA[CALL l_exceptionout_p(#{matchid,mode=IN,jdbcType=VARCHAR},
+		#{carno,mode=IN,jdbcType=VARCHAR},
+		#{icid,mode=IN,jdbcType=VARCHAR},
+		#{rfidid,mode=IN,jdbcType=VARCHAR},
+		#{gatecode,mode=IN,jdbcType=VARCHAR},
+		#{gatename,mode=IN,jdbcType=VARCHAR},
+		#{usermemo,mode=IN,jdbcType=VARCHAR},
+		#{createman,mode=IN,jdbcType=VARCHAR},
+		#{forceflag,mode=IN,jdbcType=VARCHAR},
+		#{outflag,mode=OUT,jdbcType=VARCHAR},
+		#{outmsg,mode=OUT,jdbcType=VARCHAR})]]>
+	</select>
+
+
+	<select id="queryExceptiondbList" resultType="measure"
+		parameterType="measure">
+		select t.matchid,
+		t.carno,
+		t.operatype,
+		t.planid,
+		t.taskcode,
+		t.materialcode,
+		t.materialname,
+		t.materialspec,
+		t.shipcode,
+		t.ship,
+		t.sourcecode,
+		t.sourcename,
+		t.targetcode,
+		t.targetname,
+		t.gross * 0.001
+		gross,
+		to_char(t.grosstime, 'yyyy-MM-dd hh24:mi:ss') grosstime,
+		t.grossweighid,
+		t.grossweigh,
+		t.grossoperaname,
+		t.grossoperacode,
+		t.tare *
+		0.001 tare,
+		to_char(t.taretime, 'yyyy-MM-dd hh24:mi:ss') taretime,
+		t.tareweighid,
+		t.tareweigh,
+		t.tareoperaname,
+		t.tareoperacode,
+		t.deduction *0.001 deduction,
+		to_char(t.deductiontime, 'yyyy-MM-dd hh24:mi:ss')deductiontime,
+		t.deductionname,
+		t.suttle * 0.001 suttle,
+		to_char(t.suttletime, 'yyyy-MM-dd hh24:mi:ss') suttletime,
+		t.suttleweighid,
+		t.suttleweigh,
+		t.suttleoperaname,
+		t.createdate,
+		t.grossb
+		* 0.001 grossb,
+		t.tareb * 0.001 tareb,
+		round((t.suttle-t.deduction),3)*0.001 suttleb,
+		t.usermemo
+		from m_measure_t t
+		where t.validflag > 0
+		and t.operatype = 10
+		<if test="begintime!=null and begintime!=''">
+    		<![CDATA[and t.createdate>=  to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+    		<![CDATA[and t.createdate <= to_date(#{endtime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="planid!=null and planid !=''">
+			and t.planid like '%' || #{planid}||'%'
+		</if>
+		<if test="matchid!=null and matchid !=''">
+			and t.matchid like '%' || #{matchid}||'%'
+		</if>
+		<if test="carno !=null and carno !=''">
+			and t.carno like '%' || #{carno}||'%'
+		</if>
+		<if test="materialname!=null and materialname !=''">
+			and t.materialname like '%' || #{materialname}||'%'
+		</if>
+		<if test="targetname!=null and targetname!=''">
+			and t.targetname like '%' || #{targetname} ||'%'
+		</if>
+		<if test="sourcename!=null and sourcename!=''">
+			and t.sourcename like '%' || #{sourcename}||'%'
+		</if>
+		<if test="operatype !=null and operatype !=''">
+			and t.operatype=#{operatype}
+		</if>
+		order by t.createdate desc
+	</select>
+
+	<select id="queryExcedbBymatchid" resultType="measure"
+		parameterType="measure">
+		select t.icid, t.matchid,
+		t.carno,
+		t.operatype,
+		t.planid,
+		t.taskcode,
+		t.materialcode,
+		t.materialname,
+		t.materialspec,
+		t.shipcode,
+		t.ship,
+		t.sourcecode,
+		t.sourcename,
+		t.targetcode,
+		t.targetname,
+		t.gross *
+		0.001 gross,
+		to_char(t.grosstime,'yyyy-MM-dd hh24:mi:ss') grosstime,
+		t.grossweighid,
+		t.grossweigh,
+		t.grossoperaname,
+		t.grossoperacode,
+		t.tare *
+		0.001
+		tare,
+		to_char(t.taretime,'yyyy-MM-dd hh24:mi:ss')
+		taretime,
+		t.tareweighid,
+		t.tareweigh,
+		t.tareoperaname,
+		t.tareoperacode,
+		t.deduction *0.001 deduction,
+		t.deductiontime,
+		t.suttle * 0.001 suttle,
+		t.suttletime,
+		t.suttleweighid,
+		t.suttleweigh,
+		t.suttleoperaname,
+		t.createdate,
+		t.grossb
+		* 0.001 grossb,
+		t.tareb * 0.001 tareb,
+		t.suttleb *
+		0.001 suttleb,
+		t.usermemo,
+		b.mflag
+		from
+		m_measure_t t
+		left join b_taskcode_t b
+		on
+		(t.taskcode = b.taskcode and
+		b.validflag > 0)
+		where t.validflag > 0
+		and
+		t.operatype = 10
+		and t.matchid
+		= #{matchid,jdbcType=VARCHAR}
+	</select>
+
+	<parameterMap type="java.util.Map" id="measuredbMap">
+		<parameter property="v_matchid" jdbcType="VARCHAR" mode="IN" />
+		<parameter property="v_carno" jdbcType="VARCHAR" mode="IN" />
+		<parameter property="v_icid" jdbcType="VARCHAR" mode="IN" />
+		<parameter property="v_taskcode" jdbcType="VARCHAR" mode="IN" />
+		<parameter property="v_gross" jdbcType="VARCHAR" mode="IN" />
+		<parameter property="v_grosstime" jdbcType="VARCHAR" mode="IN" />
+		<parameter property="v_grossweighid" jdbcType="VARCHAR"
+			mode="IN" />
+		<parameter property="v_grossweigh" jdbcType="VARCHAR" mode="IN" />
+		<parameter property="v_grossoperacode" jdbcType="VARCHAR"
+			mode="IN" />
+		<parameter property="v_grossoperaname" jdbcType="VARCHAR"
+			mode="IN" />
+		<parameter property="v_tare" jdbcType="VARCHAR" mode="IN" />
+		<parameter property="v_taretime" jdbcType="VARCHAR" mode="IN" />
+		<parameter property="v_tareweighid" jdbcType="VARCHAR" mode="IN" />
+		<parameter property="v_tareweigh" jdbcType="VARCHAR" mode="IN" />
+		<parameter property="v_tareoperacode" jdbcType="VARCHAR"
+			mode="IN" />
+		<parameter property="v_tareoperaname" jdbcType="VARCHAR"
+			mode="IN" />
+		<parameter property="v_usermemo" jdbcType="VARCHAR" mode="IN" />
+		<parameter property="v_createman" jdbcType="VARCHAR" mode="IN" />
+		<parameter property="v_flag" jdbcType="DECIMAL" mode="OUT" />
+		<parameter property="v_msg" jdbcType="VARCHAR" mode="OUT" />
+	</parameterMap>
+	<select id="insertExceptionDB" parameterMap="measuredbMap"
+		statementType="CALLABLE">
+		<![CDATA[CALL m_exception_db_p(#{v_matchid,mode=IN,jdbcType=VARCHAR},
+		#{v_carno,mode=IN,jdbcType=VARCHAR},
+		#{v_icid,mode=IN,jdbcType=VARCHAR},
+		#{v_taskcode,mode=IN,jdbcType=VARCHAR},
+		#{v_gross,mode=IN,jdbcType=VARCHAR},
+		#{v_grosstime,mode=IN,jdbcType=VARCHAR},
+		#{v_grossweighid,mode=IN,jdbcType=VARCHAR},
+		#{v_grossweigh,mode=IN,jdbcType=VARCHAR},
+		#{v_grossoperacode,mode=IN,jdbcType=VARCHAR},
+		#{v_grossoperaname,mode=IN,jdbcType=VARCHAR},
+		#{v_tare,mode=IN,jdbcType=VARCHAR},
+		#{v_taretime,mode=IN,jdbcType=VARCHAR},
+		#{v_tareweighid,mode=IN,jdbcType=VARCHAR},
+		#{v_tareweigh,mode=IN,jdbcType=VARCHAR},
+		#{v_tareoperacode,mode=IN,jdbcType=VARCHAR},		
+		#{v_tareoperaname,mode=IN,jdbcType=VARCHAR},
+		#{v_usermemo,mode=IN,jdbcType=VARCHAR},
+		#{v_createman,mode=IN,jdbcType=VARCHAR},
+		#{v_flag,mode=OUT,jdbcType=VARCHAR},
+		#{v_msg,mode=OUT,jdbcType=VARCHAR})]]>
+	</select>
+	<select id="queryVirtualInfo" resultType="application"
+		parameterType="application">
+		select a.matchid,
+		       a.carno,
+		       t.documentname operatype,
+		       a.cartype,
+		       t.itemid,
+		       t.planid,
+		       t.taskcode,
+		       t.materialcode,
+		       t.materialname,
+		       t.sourcename,
+		       t.targetname,
+		       t.sourceplace,
+		       t.sourceoperaname,
+		       t.targetplace,
+		       t.planmaterialcount,
+		       t.planweight,
+		       t.grossb,
+		       t.tareb,
+		       t.suttleb,
+		       t.shipcode,
+		       t.ship,
+		       t.snumber,
+		       t.suttleapp,
+		       t.middlemancode,
+		       t.middlemanname,
+		       a.unitcode,
+		       a.unitname,
+		       a.usermemo,
+		       a.sysmemo,
+		       a.createoperacode,
+		       a.createoperaname,
+		       a.auditlevel,
+		       a.approverfirst,
+		       a.approversecond,
+		       to_char(a.firsttime, 'yyyy-MM-dd hh24:mi:ss') firsttime,
+		       to_char(a.secondtime, 'yyyy-MM-dd hh24:mi:ss') secondtime,
+		       a.documentcode,
+		       t.fendanflag,
+		       t.isoruse,
+		       decode(t.fendanflag, '1', '已使用', '未使用') status
+		  from l_applicationbill_t a
+		  left join l_applicationbill_item_t t
+		    on (a.matchid = t.matchid and t.validflag > 0)
+		  left join b_documenttype_t t
+		    on (t.documentcode = a.documentcode and t.validflag > 0)
+		 where a.validflag > 0
+		   and a.types = 1
+		   and (t.isoruse = 0 or (t.isoruse = 1 and t.fendanflag = 1))
+		   and (a.auditlevel = 0 or (a.auditlevel = 1 and a.firsttime is not null) or
+		       (a.auditlevel = 2 and a.secondtime is not null))
+		<if test="planid!=null and planid !=''">
+			and t.planid like #{planid}||'%'
+		</if>
+		<if test="matchid!=null and matchid !=''">
+			and a.matchid like #{matchid}||'%'
+		</if>
+		<if test="carno !=null and carno !=''">
+			and a.carno like #{carno}||'%'
+		</if>
+		<if test="materialname!=null and materialname !=''">
+			and t.materialname like #{materialname}||'%'
+		</if>
+		<if test="targetname!=null and targetname!=''">
+			and t.targetname like #{targetname} ||'%'
+		</if>
+		<if test="sourcename!=null and sourcename!=''">
+			and t.sourcename like #{sourcename}||'%'
+		</if>
+		<if test="documentcode !=null and documentcode !=''">
+			and a.documentcode=#{documentcode}
+		</if>
+		<if test="ship !=null and ship !=''">
+			and a.ship=#{ship}
+		</if>
+		<if test="sourceplace !=null and sourceplace !=''">
+			and a.sourceplace=#{sourceplace}
+		</if>
+		<if test="fendanflag !=null and fendanflag !=''">
+			and t.fendanflag=#{fendanflag}
+		</if>
+		<if test="begintime!=null and begintime!=''">
+    		<![CDATA[and a.createdate>=  to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+    		<![CDATA[and a.createdate <= to_date(#{endtime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		order by a.createdate desc
+	</select>
+
+	<select id="queryVInfoBymatchid" parameterType="application"
+		resultType="application">
+		select 'add' || l.itemid itemid,
+		       t.matchid planid,
+		       to_char(l.itemid) saleitemid,
+		       t.carno,
+		       t.operatype,
+		       m.operaname,
+		       l.materialcode,
+		       l.materialname,
+		       l.sourcecode,
+		       l.sourcename,
+		       l.targetcode,
+		       l.targetname,
+		       t.documentcode,
+		       d.worklinecode routeid,
+		       to_char(t.createdate, 'yyyy-MM-dd hh24:mi:ss') createdate,
+		       l.snumber
+		  from l_applicationbill_t t
+		  left join l_applicationbill_item_t l
+		    on (t.matchid = l.matchid and
+		       (l.fendanflag = 0 or l.fendanflag is null))
+		  left join b_documenttype_t d
+		    on (t.documentcode = d.documentcode and d.validflag > 0)
+		  left join m_operaconfig_t m
+		    on t.operatype = m.operatype
+		 where t.matchid = #{matchid, jdbcType = VARCHAR}
+	</select>
+
+	<select id="querymatchidByplanid" parameterType="String"
+		resultType="String">
+		select t.matchid
+		from l_applicationbill_item_t t
+		where  t.validflag>0 and 
+		t.planid = #{matchid, jdbcType = VARCHAR}
+		and rownum = 1
+	</select>
+	<update id="cancelEntrylog" parameterType="application">
+		update l_entrylog_t e
+		set e.validflag=0 where e.id=#{id,jdbcType=VARCHAR}
+	</update>
+	<update id="cancelMeasure" parameterType="application">
+		update
+		m_measure_t t set
+		 t.tare            = 0,
+		       t.taretime        = '',
+		       t.tareweighid     = '',
+		       t.tareweigh       = '',
+		       t.tareoperacode   = '',
+		       t.tareoperaname   = '',
+		       t.gross           = 0,
+		       t.grosstime       = '',
+		       t.grossweighid    = '',
+		       t.grossweigh      = '',
+		       t.grossoperacode  = '',
+		       t.grossoperaname  = '',
+		       t.suttle          = 0,
+		       t.suttletime      = '',
+		       t.suttleweighid   = '',
+		       t.suttleweigh     = '',
+		       t.suttleoperacode = '',
+		       t.suttleoperaname = ''
+		where
+		matchid=#{matchid,jdbcType=VARCHAR}
+	</update>
+	
+	<update id="deleteMeasure" parameterType="application">
+		delete from m_measure_t t 
+		where matchid=#{matchid,jdbcType=VARCHAR}
+	</update>
+	
+	<update id="cancelStorein" parameterType="application">
+		update L_STOREIN_T set
+		validflag=0, validflagtime=sysdate,
+		validflagoperaname=#{creator,jdbcType=VARCHAR} where
+		matchid=#{matchid,jdbcType=VARCHAR}
+	</update>
+	<update id="cancelStoreinitem" parameterType="application">
+		update
+		L_STOREIN_ITEM_T set validflag=0, validflagtime=sysdate,
+		validflagoperaname=#{creator,jdbcType=VARCHAR} where
+		matchid=#{matchid,jdbcType=VARCHAR}
+	</update>
+	<update id="cancelStoreout" parameterType="application">
+		update l_storeout_t
+		set
+		validflag=0, validflagtime=sysdate,
+		validflagoperaname=#{creator,jdbcType=VARCHAR} where
+		matchid=#{matchid,jdbcType=VARCHAR}
+	</update>
+	<update id="cancelStoreoutitem" parameterType="application">
+		update
+		l_storeout_item_t set validflag=0, validflagtime=sysdate,
+		validflagoperaname=#{creator,jdbcType=VARCHAR} where
+		matchid=#{matchid,jdbcType=VARCHAR}
+	</update>
+
+	<select id="queryMeasureDetail" parameterType="measure"
+		resultType="measure">
+		select t.matchid,
+		t.carno,
+		t.taskcode,
+		t.planid,
+		t.materialname,
+		t.sourcename,
+		t.targetname,
+		nvl(round(t.tare * 0.001, 2), 0) as tare,
+		to_char(t.taretime, 'yyyy-mm-dd hh24:mi:ss') taretime,
+		t.tareweigh,
+		nvl(round(t.gross * 0.001, 2), 0) as gross,
+		to_char(t.grosstime,
+		'yyyy-mm-dd hh24:mi:ss') grosstime,
+		t.grossweigh,
+		nvl(round(t.deduction
+		* 0.001, 2), 0) as deduction,
+		nvl(round(t.suttle * 0.001, 2), 0) as
+		suttle,
+		to_char(t.suttletime, 'yyyy-mm-dd hh24:mi:ss') suttletime,
+		t.suttleweigh,
+		t.grossoperaname,
+		t.tareoperaname,
+		t.suttleoperaname,
+		t.ship,
+		t.sourceplace,
+		o.operaname operatype,
+		nvl(t.tareb * 0.001, 0)
+		tareb,
+		nvl(t.grossb * 0.001, 0) grossb,
+		t.grosstimeb,
+		nvl(round(t.suttleb * 0.001, 2), 0) as suttleb,
+		decode((select
+		count(m.matchid)
+		from m_printbill_t m
+		where m.matchid = t.matchid
+		group
+		by t.matchid),
+		'',
+		0,
+		(select count(m.matchid)
+		from m_printbill_t m
+		where
+		m.matchid = t.matchid
+		group by t.matchid)) printsum,
+		t.usermemo memo
+		from m_measure_t t, m_operaconfig_t o
+		where t.operatype = o.operatype
+		and t.validflag > 0
+		<!-- <if test="begintime!=null and begintime!=''"> <![CDATA[and a.createdate>= 
+			to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]> </if> <if test="endtime!=null 
+			and endtime!=''"> <![CDATA[and a.createdate <= to_date(#{endtime}, 'yyyy-MM-dd 
+			hh24:mi:ss')]]> </if> -->
+		<if test="planid!=null and planid !=''">
+			and t.planid like '%' || #{planid}||'%'
+		</if>
+		<if test="matchid!=null and matchid !=''">
+			and t.matchid like '%' || #{matchid}||'%'
+		</if>
+		<if test="carno !=null and carno !=''">
+			and t.carno like '%' || #{carno}||'%'
+		</if>
+		<if test="materialname!=null and materialname !=''">
+			and t.materialname like '%' || #{materialname}||'%'
+		</if>
+		<if test="targetname!=null and targetname!=''">
+			and t.targetname like '%' || #{targetname} ||'%'
+		</if>
+		<if test="sourcename!=null and sourcename!=''">
+			and t.sourcename like '%' || #{sourcename}||'%'
+		</if>
+		<if test="operatype !=null and operatype !=''">
+			and t.operatype=#{operatype}
+		</if>
+
+		order by t.createdate desc
+	</select>
+	<select id="queryTareException" parameterType="measure"
+		resultType="measure">
+		select t.carno,
+		t.icid,
+		t.matchid,
+		t.tare*0.001 tare,
+		to_char(t.taretime,'yyyy-MM-dd hh24:mi:ss')taretime,
+		t.tareweighid,
+		t.tareweigh,
+		t.tareoperacode,
+		t.tareoperaname
+		from m_tare_t t where 1=1
+		<if test="matchid!=null and matchid !=''">
+			and t.matchid like '%' || #{matchid}||'%'
+		</if>
+		<if test="carno !=null and carno !=''">
+			and t.carno like '%' || #{carno}||'%'
+		</if>
+		<if test="begintime!=null and begintime!=''">
+    		<![CDATA[and t.taretime>=  to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+    		<![CDATA[and t.taretime <= to_date(#{endtime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+
+		order by t.createdate desc
+	</select>
+	<delete id="cancelTare" parameterType="String">
+		delete from m_tare_t m
+		where m.carno=#{carno,jdbcType=VARCHAR}
+	</delete>
+	<update id="cancelTareCurr" parameterType="String">
+		update l_curr_temp_t l
+		set l.validflag =0 where l.operatype=0 and
+		l.carno=#{carno,jdbcType=VARCHAR}
+	</update>
+
+	<select id="queryTareBycarno" parameterType="measure"
+		resultType="measure">
+		select t.carno,
+		t.icid,
+		t.matchid,
+		t.tare*0.001 tare,
+		to_char(t.taretime,'yyyy-MM-dd hh24:mi:ss')taretime,
+		t.tareweighid,
+		t.tareweigh,
+		t.tareoperacode,
+		t.tareoperaname,
+		t.usermemo
+		from m_tare_t t where
+		t.carno=#{carno,jdbcType=VARCHAR}
+	</select>
+	<update id="updateTare" parameterType="measure">
+		update m_tare_t t set
+		t.tare=#{tare,jdbcType=VARCHAR},
+		t.taretime=to_date(#{taretime},'yyyy-MM-dd hh24:mi:ss'),
+		t.tareweighid=#{tareweighid,jdbcType=VARCHAR}, 
+		t.tareweigh=#{tareweigh,jdbcType=VARCHAR},
+		t.tareoperacode=#{tareoperacode,jdbcType=VARCHAR},
+        t.tareoperaname=#{tareoperaname,jdbcType=VARCHAR},
+        t.usermemo=#{usermemo,jdbcType=VARCHAR}
+		where t.carno=#{carno,jdbcType=VARCHAR}
+	</update>
+	<update id="updateCurrTare" parameterType="measure">
+		update l_curr_temp_t t set
+		      t.tare=#{tare,jdbcType=VARCHAR},
+		      t.taretime=#{taretime,jdbcType=VARCHAR},
+		      t.tareweighid=#{tareweighid,jdbcType=VARCHAR}, 
+		      t.tareweigh=#{tareweigh,jdbcType=VARCHAR},
+		      t.tareoperacode=#{tareoperacode,jdbcType=VARCHAR},
+		      t.tareoperaname=#{tareoperaname,jdbcType=VARCHAR}
+		where t.validflag=1 and t.mstate=0 and  t.carno=#{carno,jdbcType=VARCHAR}
+	</update>
+	
+	<select id="queryXCList" resultType="application" parameterType="application">
+		select t.carno,
+		       t.icid,
+		       t.matchid,
+		       t.planid,
+		       '线材' materialname,
+		       t.targetname,
+		       t.entertime,
+		       t.entergatename,
+		       t.leavegatename,
+		       t.leavetime,
+		       t.validflag,
+		       t.createdate
+		  from l_curr_temp_t t
+		 where t.operatype = 84 and t.validflag>0
+		<if test="planid!=null and planid !=''">
+			and t.planid like '%' || #{planid}||'%'
+		</if>
+		<if test="matchid!=null and matchid !=''">
+			and t.matchid like '%' || #{matchid}||'%'
+		</if>
+		<if test="carno !=null and carno !=''">
+			and t.carno like '%' || #{carno}||'%'
+		</if>
+		<if test="targetname!=null and targetname!=''">
+			and t.targetname like '%' || #{targetname} ||'%'
+		</if>
+		<if test="validflag!=null and validflag!=''">
+			and t.validflag = #{validflag} 
+		</if>
+        <if test="begintime!=null and begintime!=''">
+    		<![CDATA[and t.createdate>=  to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+    		<![CDATA[and t.createdate <= to_date(#{endtime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		order by t.createdate desc
+	</select>
+	<update id="updateMDeducation" parameterType="measure">
+		update m_measure_t t set
+		t.deduction=#{deduction,jdbcType=VARCHAR},
+		t.deductiontime=to_date(#{deductiontime,jdbcType=VARCHAR}, 'yyyy-MM-dd hh24:mi:ss'),
+		t.deductioncode=#{deductioncode,jdbcType=VARCHAR},
+		t.deductionname=#{deductionname,jdbcType=VARCHAR}
+		where t.matchid=#{matchid,jdbcType=VARCHAR}
+	</update>
+	<update id="updateCDeducation" parameterType="measure">
+		update l_curr_temp_t set
+		deduction=#{deduction,jdbcType=VARCHAR},
+		deductiontime=#{deductiontime,jdbcType=VARCHAR},
+		deductioncode=#{deductioncode,jdbcType=VARCHAR},
+		deductionname=#{deductionname,jdbcType=VARCHAR}
+		where matchid=#{matchid,jdbcType=VARCHAR}
+	</update>
+	<select id="queryExceptioninfo" parameterType="String" resultType="exceptioninfo">
+	 select t.matchid, t.operaman operaname, t.usermemo, to_char(t.createdate,'yyyy-MM-dd hh24:mi:ss') createdate
+	  from M_EXCEPTION_LOG_T t
+	 where t.matchid = #{matchid,jdbcType=VARCHAR}
+	</select>
+	<select id="queryCountXC" parameterType="String" resultType="Integer">
+		select count(1)
+		  from L_CURR_TEMP_T t
+		 where t.operatype = 84
+		   and t.validflag = 1
+		   and t.carno = #{carno,jdbcType=VARCHAR}
+	</select>
+	<update id="updateCurrMeasure" parameterType="application">
+		update l_curr_temp_t t set
+		       t.tare            = 0,
+		       t.taretime        = '',
+		       t.tareweighid     = '',
+		       t.tareweigh       = '',
+		       t.tareoperacode   = '',
+		       t.tareoperaname   = '',
+		       t.gross           = 0,
+		       t.grosstime       = '',
+		       t.grossweighid    = '',
+		       t.grossweigh      = '',
+		       t.grossoperacode  = '',
+		       t.grossoperaname  = '',
+		       t.suttle          = 0,
+		       t.suttletime      = '',
+		       t.suttleweighid   = '',
+		       t.suttleweigh     = '',
+		       t.suttleoperacode = '',
+		       t.suttleoperaname = '',
+		       t.memo1           = #{memo1,jdbcType= VARCHAR},
+		       t.mstate          = 0
+		 where  t.matchid = #{matchid, jdbcType = VARCHAR}
+	</update>
+	
+	<select id="queryExceptionhcList" resultType="measure"
+		parameterType="measure">
+		select t.matchid,
+		       t.carno,
+		       t.operatype,
+		       t.planid,
+		       t.taskcode,
+		       t.materialcode,
+		       t.materialname,
+		       t.materialspec,
+		       t.shipcode,
+		       t.ship,
+		       t.sourcecode,
+		       t.sourcename,
+		       t.targetcode,
+		       t.targetname,
+		       t.sourceplace,
+		       t.targetplace,
+		       t.gross * 0.001 gross,
+		       to_char(t.grosstime, 'yyyy-MM-dd hh24:mi:ss') grosstime,
+		       t.grossweighid,
+		       t.grossweigh,
+		       t.grossoperaname,
+		       t.grossoperacode,
+		       t.grossgroupno,
+		       t.grossserial,
+		       t.tare * 0.001 tare,
+		       to_char(t.taretime, 'yyyy-MM-dd hh24:mi:ss') taretime,
+		       t.tareweighid,
+		       t.tareweigh,
+		       t.tareoperaname,
+		       t.tareoperacode,
+		       t.taregroupno,
+		       t.tareserial,
+		       t.deduction * 0.001 deduction,
+		       to_char(t.deductiontime, 'yyyy-MM-dd hh24:mi:ss') deductiontime,
+		       t.deductionname,
+		       t.suttle * 0.001 suttle,
+		       to_char(t.suttletime, 'yyyy-MM-dd hh24:mi:ss') suttletime,
+		       t.suttleweighid,
+		       t.suttleweigh,
+		       t.suttleoperaname,
+		       t.createdate,
+		       t.grossb * 0.001 grossb,
+		       t.tareb * 0.001 tareb,
+		       round((t.suttle - t.deduction), 3) * 0.001 suttleb,
+		       t.usermemo,
+		       t.memo8
+		  from m_measure_t t
+		 where t.validflag > 0
+		   and t.cartype = 'T'
+		<if test="planid!=null and planid !=''">
+			and t.planid like '%' || #{planid}||'%'
+		</if>
+		<if test="matchid!=null and matchid !=''">
+			and t.matchid like '%' || #{matchid}||'%'
+		</if>
+		<if test="carno !=null and carno !=''">
+			and t.carno like '%' || #{carno}||'%'
+		</if>
+		<if test="materialname!=null and materialname !=''">
+			and t.materialname like '%' || #{materialname}||'%'
+		</if>
+		<if test="targetname!=null and targetname!=''">
+			and t.targetname like '%' || #{targetname} ||'%'
+		</if>
+		<if test="sourcename!=null and sourcename!=''">
+			and t.sourcename like '%' || #{sourcename}||'%'
+		</if>
+		<if test="sourceplace!=null and sourceplace!=''">
+			and t.sourceplace like '%' || #{sourceplace}||'%'
+		</if>
+		<if test="grossgroupno!=null and grossgroupno!=''">
+			and (t.grossgroupno like '%' || #{grossgroupno}||'%' or t.taregroupno like '%' || #{grossgroupno}||'%') 
+		</if>
+		<if test="operatype !=null and operatype !=''">
+			and t.operatype=#{operatype}
+		</if>
+		<if test="begintime!=null and begintime!=''">
+    		<![CDATA[and t.createdate>=  to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+    		<![CDATA[and t.createdate <= to_date(#{endtime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		order by t.createdate desc,t.grossserial asc,t.tareserial asc
+	</select>
+    
+	<select id="queryExcehcBymatchid" resultType="measure"
+		parameterType="measure">
+		select t.icid,
+		       t.matchid,
+		       t.carno,
+		       t.operatype,
+		       t.planid,
+		       t.taskcode,
+		       (select b.materialcode from b_material_t b where  b.materialcode like 'TM%' and b.validflag > 0 and  b.materialname =t.materialname ) materialcode,
+		       t.materialname,
+		       t.materialspec,
+		       t.shipcode,
+		       t.ship,
+		       t.sourcecode,
+		       t.sourcename,
+		       t.sourceplace,
+		       t.targetcode,
+		       t.targetname,
+		       t.targetplace,
+		       t.gross * 0.001 gross,
+		       to_char(t.grosstime, 'yyyy-MM-dd hh24:mi:ss') grosstime,
+		       t.grossweighid,
+		       t.grossweigh,
+		       t.grossgroupno,
+		       t.grossserial,
+		       t.grossoperaname,
+		       t.grossoperacode,
+		       t.tare * 0.001 tare,
+		       to_char(t.taretime, 'yyyy-MM-dd hh24:mi:ss') taretime,
+		       t.tareweighid,
+		       t.tareweigh,
+		       t.taregroupno,
+		       t.tareserial,
+		       t.tareoperaname,
+		       t.tareoperacode,
+		       t.deduction * 0.001 deduction,
+		       t.deductiontime,
+		       t.suttle * 0.001 suttle,
+		       t.suttletime,
+		       t.suttleweighid,
+		       t.suttleweigh,
+		       t.suttleoperaname,
+		       t.createdate,
+		       t.grossb * 0.001 grossb,
+		       t.tareb * 0.001 tareb,
+		       t.suttleb * 0.001 suttleb,
+		       t.memo1,
+		       t.memo6,
+		       t.memo8
+		  from m_measure_t t
+		 where t.validflag > 0
+		   and t.matchid = #{matchid,jdbcType = VARCHAR}
+	</select>
+	
+	<insert id="insertCurrtemp" parameterType="measure">
+		insert into
+		l_curr_temp_t
+		(validflag,
+		carno,
+		cartype,
+		matchid,
+		operatype,
+		planid,
+		materialcode,
+		materialname,
+		materialspeccode,
+		materialspec,
+		sourcecode,
+		sourcename,
+		sourcetime,
+		sourceplace,
+		targetcode,
+		targetname,
+		targettime,
+		targetplace,
+		planweight,
+		planmaterialcount,
+		materialcount,
+		plancarcount,
+		gross,
+		grosstime,
+		grossweighid,
+		grossweigh,
+		grossoperacode,
+		grossoperaname,
+		grossgroupno,
+		grossserial,
+		grossspeed,
+		grosslogid,
+		tare,
+		taretime,
+		tareweighid,
+		tareweigh,
+		tareoperacode,
+		tareoperaname,
+		taregroupno,
+		tareserial,
+		tarelogid,
+		tarespeed,
+		deduction,
+		deduction2,
+		deductiontime,
+		deductioncode,
+		deductionname,
+		deductionoperacode,
+		deductionoperaname,
+		suttle,
+		suttletime,
+		suttleweighid,
+		suttleweigh,
+		suttleoperacode,
+		suttleoperaname,
+		mstate,
+		usermemo,
+		sysmemo,memo1,
+		memo2,
+		memo3,
+		memo4,
+		memo5,
+		memo6,
+		memo7,
+		memo8,
+		memo9,
+		memo10,
+		memo11,
+		memo12,
+		memo13,
+		memo14,
+		memo15)
+		values
+		(#{validflag,jdbcType=VARCHAR},
+		#{carno,jdbcType=VARCHAR},
+		'T',		
+		#{matchid,jdbcType=VARCHAR},
+		#{operatype,jdbcType=VARCHAR},
+		#{planid,jdbcType=VARCHAR},		
+		#{materialcode,jdbcType=VARCHAR},
+		#{materialname,jdbcType=VARCHAR},
+		#{materialspeccode,jdbcType=VARCHAR},
+		#{materialspec,jdbcType=VARCHAR},
+		#{sourcecode,jdbcType=VARCHAR},
+		#{sourcename,jdbcType=VARCHAR},
+		#{sourcetime,jdbcType=VARCHAR},
+		#{sourceplace,jdbcType=VARCHAR},
+		#{targetcode,jdbcType=VARCHAR},
+		#{targetname,jdbcType=VARCHAR},
+		#{targettime,jdbcType=VARCHAR},
+		#{targetplace,jdbcType=VARCHAR},
+		#{planweight,jdbcType=VARCHAR},
+		#{planmaterialcount,jdbcType=VARCHAR},
+		#{materialcount,jdbcType=VARCHAR},
+		#{plancarcount,jdbcType=VARCHAR},
+		#{gross,jdbcType=VARCHAR},
+		#{grosstime,jdbcType=VARCHAR},
+		#{grossweighid,jdbcType=VARCHAR},
+		#{grossweigh,jdbcType=VARCHAR},
+		#{grossoperacode,jdbcType=VARCHAR},
+		#{grossoperaname,jdbcType=VARCHAR},
+		#{grossgroupno,jdbcType=VARCHAR},
+		#{grossserial,jdbcType=VARCHAR},
+		#{grossspeed,jdbcType=VARCHAR},
+		#{grosslogid,jdbcType=VARCHAR},
+		#{tare,jdbcType=VARCHAR},
+		#{taretime,jdbcType=VARCHAR},
+		#{tareweighid,jdbcType=VARCHAR},
+		#{tareweigh,jdbcType=VARCHAR},
+		#{tareoperacode,jdbcType=VARCHAR},
+		#{tareoperaname,jdbcType=VARCHAR},
+		#{taregroupno,jdbcType=VARCHAR},
+		#{tareserial,jdbcType=VARCHAR},
+		#{tarelogid,jdbcType=VARCHAR},
+		#{tarespeed,jdbcType=VARCHAR},
+		#{deduction,jdbcType=VARCHAR},
+		#{deduction2,jdbcType=VARCHAR},
+		#{deductiontime,jdbcType=VARCHAR},
+		#{deductioncode,jdbcType=VARCHAR},
+		#{deductionname,jdbcType=VARCHAR},
+		#{deductionoperacode,jdbcType=VARCHAR},
+		#{deductionoperaname,jdbcType=VARCHAR},
+		#{suttle,jdbcType=VARCHAR},
+		#{suttletime,jdbcType=VARCHAR},
+		#{suttleweighid,jdbcType=VARCHAR},
+		#{suttleweigh,jdbcType=VARCHAR},
+		#{suttleoperacode,jdbcType=VARCHAR},
+		#{suttleoperaname,jdbcType=VARCHAR},
+		#{mstate,jdbcType=VARCHAR},
+		#{usermemo,jdbcType=VARCHAR},
+		#{sysmemo,jdbcType=VARCHAR},
+		#{memo1,jdbcType=VARCHAR},
+		#{memo2,jdbcType=VARCHAR},
+		#{memo3,jdbcType=VARCHAR},
+		#{memo4,jdbcType=VARCHAR},
+		#{memo5,jdbcType=VARCHAR},
+		#{memo6,jdbcType=VARCHAR},
+		#{memo7,jdbcType=VARCHAR},
+		#{memo8,jdbcType=VARCHAR},
+		#{memo9,jdbcType=VARCHAR},
+		#{memo10,jdbcType=VARCHAR},
+		#{memo11,jdbcType=VARCHAR},
+		#{memo12,jdbcType=VARCHAR},
+		#{memo13,jdbcType=VARCHAR},
+		#{memo14,jdbcType=VARCHAR},
+		#{memo15,jdbcType=VARCHAR})
+	</insert>
+
+	<update id="updateCurrtemp" parameterType="measure">
+		update l_curr_temp_t
+		set  carno = #{carno,jdbcType=VARCHAR},
+		validflag = #{validflag,jdbcType=VARCHAR},
+		rfidid =#{rfidid,jdbcType=VARCHAR},
+		matchid =#{matchid,jdbcType=VARCHAR},
+		operatype = #{operatype,jdbcType=VARCHAR},
+		planid =#{planid,jdbcType=VARCHAR},
+		basket = #{basket,jdbcType=VARCHAR},
+		materialcode =#{materialcode,jdbcType=VARCHAR},
+		materialname =#{materialname,jdbcType=VARCHAR},
+		materialspeccode =#{materialspeccode,jdbcType=VARCHAR},
+		materialspec =#{materialspec,jdbcType=VARCHAR},
+		sourcecode = #{sourcecode,jdbcType=VARCHAR},
+		sourcename =#{sourcename,jdbcType=VARCHAR},
+		sourceplace =#{sourceplace,jdbcType=VARCHAR},
+		sourcetime =#{sourcetime,jdbcType=VARCHAR},
+		targetcode =#{targetcode,jdbcType=VARCHAR},
+		targetname =#{targetname,jdbcType=VARCHAR},
+		targetplace =#{targetplace,jdbcType=VARCHAR},
+		targettime =#{targettime,jdbcType=VARCHAR},		
+		planweight =#{planweight,jdbcType=VARCHAR},
+		planmaterialcount =#{planmaterialcount,jdbcType=VARCHAR},
+		materialcount =#{materialcount,jdbcType=VARCHAR},
+		plancarcount =#{plancarcount,jdbcType=VARCHAR},
+		gross = #{gross,jdbcType=VARCHAR},
+		grosstime = #{grosstime,jdbcType=VARCHAR},
+		grossweighid =#{grossweighid,jdbcType=VARCHAR},
+		grossweigh =#{grossweigh,jdbcType=VARCHAR},
+		grossoperacode =#{grossoperacode,jdbcType=VARCHAR},
+		grossoperaname =#{grossoperaname,jdbcType=VARCHAR},
+		grossgroupno =#{grossgroupno,jdbcType=DECIMAL},
+		grossserial =#{grossserial,jdbcType=DECIMAL},
+		grossspeed =#{grossspeed,jdbcType=DECIMAL},
+		grosslogid =#{grosslogid,jdbcType=VARCHAR},
+		tare = #{tare,jdbcType=VARCHAR},
+		taretime = #{taretime,jdbcType=VARCHAR},
+		tareweighid =#{tareweighid,jdbcType=VARCHAR},
+		tareweigh =#{tareweigh,jdbcType=VARCHAR},
+		tareoperacode =#{tareoperacode,jdbcType=VARCHAR},
+		tareoperaname =#{tareoperaname,jdbcType=VARCHAR},
+		taregroupno =#{taregroupno,jdbcType=VARCHAR},
+		tareserial =#{tareserial,jdbcType=VARCHAR},
+		tarelogid =#{tarelogid,jdbcType=VARCHAR},
+		tarespeed =#{tarespeed,jdbcType=VARCHAR},
+		deduction =#{deduction,jdbcType=VARCHAR},
+		deduction2 =#{deduction2,jdbcType=VARCHAR},
+		deductiontime =#{deductiontime,jdbcType=VARCHAR},
+		deductioncode =#{deductioncode,jdbcType=VARCHAR},
+		deductionname =#{deductionname,jdbcType=VARCHAR},
+		deductionoperacode =#{deductionoperacode,jdbcType=VARCHAR},
+		deductionoperaname =#{deductionoperaname,jdbcType=VARCHAR},
+		suttle =#{suttle,jdbcType=VARCHAR},
+		suttletime =#{suttletime,jdbcType=VARCHAR},
+		suttleweighid =#{suttleweighid,jdbcType=VARCHAR},
+		suttleweigh =#{suttleweigh,jdbcType=VARCHAR},
+		suttleoperacode =#{suttleoperacode,jdbcType=VARCHAR},
+		suttleoperaname =#{suttleoperaname,jdbcType=VARCHAR},
+		mstate = #{mstate,jdbcType=VARCHAR},
+		usermemo = usermemo ||' '||#{usermemo,jdbcType=VARCHAR},
+		memo1 = #{memo1,jdbcType=VARCHAR},
+		memo2 = #{memo2,jdbcType=VARCHAR},
+		memo3 = #{memo3,jdbcType=VARCHAR},
+		memo4 = #{memo4,jdbcType=VARCHAR},
+		memo5 = #{memo5,jdbcType=VARCHAR},
+		memo6 = #{memo6,jdbcType=VARCHAR},
+		memo7 = #{memo7,jdbcType=VARCHAR},
+		memo8 = #{memo8,jdbcType=VARCHAR},
+		memo9 = #{memo9,jdbcType=VARCHAR},
+		memo10 = #{memo10,jdbcType=VARCHAR},
+		memo11 = #{memo11,jdbcType=VARCHAR},
+		memo12 = #{memo12,jdbcType=VARCHAR},
+		memo13 = #{memo13,jdbcType=VARCHAR},
+		memo14 = #{memo14,jdbcType=VARCHAR},
+		memo15 = #{memo15,jdbcType=VARCHAR}
+		where  matchid = #{matchid,jdbcType=VARCHAR}
+	</update>
+	
+	<insert id="insertMeasure" parameterType="measure">
+		insert into m_measure_t
+		(matchid,
+		carno,
+		cartype,
+		rfidid,
+		operatype,
+		planid,
+		materialcode,
+		materialname,
+		materialspeccode,
+		materialspec,
+		sourcecode,
+		sourcename,
+		sourceplace,
+		targetcode,
+		targetname,
+		targetplace,
+		basket,
+		planweight,
+		planmaterialcount,
+		materialcount,
+		plancarcount,
+		gross,
+		grosstime,
+		grossweighid,
+		grossweigh,
+		grossoperacode,
+		grossoperaname,
+		grossgroupno,
+		grossserial,
+		grossspeed,
+		grosslogid,
+		tare,
+		taretime,
+		tareweighid,
+		tareweigh,
+		tareoperacode,
+		tareoperaname,
+		taregroupno,
+		tareserial,
+		tarelogid,
+		tarespeed,
+		deduction,
+		deduction2,
+		deductiontime,
+		deductioncode,
+		deductionname,
+		deductionoperacode,
+		deductionoperaname,
+		suttle,
+		suttletime,
+		suttleweighid,
+		suttleweigh,
+		suttleoperacode,
+		suttleoperaname,
+		usermemo,
+		recordtype,
+		memo1,
+		memo2,
+		memo3,
+		memo4,
+		memo5,
+		memo6,
+		memo7,
+		memo8,
+		memo9,
+		memo10,
+		memo11,
+		memo12,
+		memo13,
+		memo14,
+		memo15
+		)
+		values
+		(#{matchid,jdbcType=VARCHAR},
+		#{carno,jdbcType=VARCHAR},
+		'T',
+		#{rfidid,jdbcType=VARCHAR},
+		#{operatype,jdbcType=VARCHAR},
+		#{planid,jdbcType=VARCHAR},
+		#{materialcode,jdbcType=VARCHAR},
+		#{materialname,jdbcType=VARCHAR},
+		#{materialspeccode,jdbcType=VARCHAR},
+		#{materialspec,jdbcType=VARCHAR},
+		#{sourcecode,jdbcType=VARCHAR},
+		#{sourcename,jdbcType=VARCHAR},
+		#{sourceplace,jdbcType=VARCHAR},
+		#{targetcode,jdbcType=VARCHAR},
+		#{targetname,jdbcType=VARCHAR},
+		#{targetplace,jdbcType=VARCHAR},
+		#{basket,jdbcType=VARCHAR},
+		#{planweight,jdbcType=VARCHAR},
+		#{planmaterialcount,jdbcType=VARCHAR},
+		#{materialcount,jdbcType=VARCHAR},
+		#{plancarcount,jdbcType=VARCHAR},
+		#{gross,jdbcType=VARCHAR},
+		to_date(#{grosstime},'yyyy-MM-dd hh24:mi:ss'),
+		#{grossweighid,jdbcType=VARCHAR},
+		#{grossweigh,jdbcType=VARCHAR},
+		#{grossoperacode,jdbcType=VARCHAR},
+		#{grossoperaname,jdbcType=VARCHAR},
+		#{grossgroupno,jdbcType=VARCHAR},
+		#{grossserial,jdbcType=VARCHAR},
+		#{grossspeed,jdbcType=VARCHAR},
+		#{grosslogid,jdbcType=VARCHAR},
+		#{tare,jdbcType=VARCHAR},
+		to_date(#{taretime},'yyyy-MM-dd hh24:mi:ss'),
+		#{tareweighid,jdbcType=VARCHAR},
+		#{tareweigh,jdbcType=VARCHAR},
+		#{tareoperacode,jdbcType=VARCHAR},
+		#{tareoperaname,jdbcType=VARCHAR},
+		#{taregroupno,jdbcType=VARCHAR},
+		#{tareserial,jdbcType=VARCHAR},
+		#{tarelogid,jdbcType=VARCHAR},
+		#{tarespeed,jdbcType=VARCHAR},
+		#{deduction,jdbcType=VARCHAR},
+		#{deduction2,jdbcType=VARCHAR},
+		to_date(#{deductiontime},'yyyy-MM-dd hh24:mi:ss'),
+		#{deductioncode,jdbcType=VARCHAR},
+		#{deductionname,jdbcType=VARCHAR},
+		#{deductionoperacode,jdbcType=VARCHAR},
+		#{deductionoperaname,jdbcType=VARCHAR},
+		#{suttle,jdbcType=VARCHAR},
+		to_date(#{suttletime},'yyyy-MM-dd hh24:mi:ss'),
+		#{suttleweighid,jdbcType=VARCHAR},
+		#{suttleweigh,jdbcType=VARCHAR},
+		#{suttleoperacode,jdbcType=VARCHAR},
+		#{suttleoperaname,jdbcType=VARCHAR},
+		#{usermemo,jdbcType=VARCHAR},
+		#{recordtype,jdbcType=VARCHAR},
+		#{memo1,jdbcType=VARCHAR},
+		#{memo2,jdbcType=VARCHAR},
+		#{memo3,jdbcType=VARCHAR},
+		#{memo4,jdbcType=VARCHAR},
+		#{memo5,jdbcType=VARCHAR},
+		#{memo6,jdbcType=VARCHAR},
+		#{memo7,jdbcType=VARCHAR},
+		#{memo8,jdbcType=VARCHAR},
+		#{memo9,jdbcType=VARCHAR},
+		#{memo10,jdbcType=VARCHAR},
+		#{memo11,jdbcType=VARCHAR},
+		#{memo12,jdbcType=VARCHAR},
+		#{memo13,jdbcType=VARCHAR},
+		#{memo14,jdbcType=VARCHAR},
+		#{memo15,jdbcType=VARCHAR}
+		)
+	</insert>
+	<update id="updateMeasure" parameterType="measure">
+		update m_measure_t
+		set
+		carno =#{carno,jdbcType=VARCHAR},
+		operatype = #{operatype,jdbcType=VARCHAR},
+		planid =#{planid,jdbcType=VARCHAR},
+		materialcode = #{materialcode,jdbcType=VARCHAR},
+		materialname =#{materialname,jdbcType=VARCHAR},
+		materialspeccode =#{materialspeccode,jdbcType=VARCHAR},
+		materialspec =#{materialspec,jdbcType=VARCHAR},
+		sourcecode = #{sourcecode,jdbcType=VARCHAR},
+		sourcename =#{sourcename,jdbcType=VARCHAR},
+		sourceplace =#{sourceplace,jdbcType=VARCHAR},
+		targetcode =#{targetcode,jdbcType=VARCHAR},
+		targetname =#{targetname,jdbcType=VARCHAR},		
+		targetplace =#{targetplace,jdbcType=VARCHAR},
+		planweight = #{planweight,jdbcType=VARCHAR},
+		planmaterialcount =#{planmaterialcount,jdbcType=VARCHAR},
+		materialcount =#{materialcount,jdbcType=VARCHAR},
+		plancarcount =#{plancarcount,jdbcType=VARCHAR},
+		gross = #{gross,jdbcType=VARCHAR},
+		grosstime = to_date(#{grosstime},'yyyy-MM-dd hh24:mi:ss'),
+		grossweighid =#{grossweighid,jdbcType=VARCHAR},
+		grossweigh =#{grossweigh,jdbcType=VARCHAR},
+		grossoperacode =#{grossoperacode,jdbcType=VARCHAR},
+		grossoperaname =#{grossoperaname,jdbcType=VARCHAR},
+		grossgroupno =#{grossgroupno,jdbcType=VARCHAR},
+		grossserial = #{grossserial,jdbcType=VARCHAR},
+		grossspeed =#{grossspeed,jdbcType=VARCHAR},
+		grosslogid =#{grosslogid,jdbcType=VARCHAR},
+		tare = #{tare,jdbcType=VARCHAR},
+		taretime = to_date(#{taretime},'yyyy-MM-dd hh24:mi:ss'),
+		tareweighid =#{tareweighid,jdbcType=VARCHAR},
+		tareweigh =#{tareweigh,jdbcType=VARCHAR},
+		tareoperacode =#{tareoperacode,jdbcType=VARCHAR},
+		tareoperaname =#{tareoperaname,jdbcType=VARCHAR},
+		taregroupno =#{taregroupno,jdbcType=VARCHAR},
+		tareserial =#{tareserial,jdbcType=VARCHAR},
+		tarelogid =#{tarelogid,jdbcType=VARCHAR},
+		tarespeed =#{tarespeed,jdbcType=VARCHAR},
+		deduction =#{deduction,jdbcType=VARCHAR},
+		deduction2 =#{deduction2,jdbcType=VARCHAR},
+		deductiontime =to_date(#{deductiontime},'yyyy-MM-dd hh24:mi:ss'),
+		deductioncode =#{deductioncode,jdbcType=VARCHAR},
+		deductionname =#{deductionname,jdbcType=VARCHAR},
+		deductionoperacode =#{deductionoperacode,jdbcType=VARCHAR},
+		deductionoperaname =#{deductionoperaname,jdbcType=VARCHAR},
+		suttle =#{suttle,jdbcType=VARCHAR},
+		suttletime =to_date(#{suttletime},'yyyy-MM-dd hh24:mi:ss'),
+		suttleweighid =#{suttleweighid,jdbcType=VARCHAR},
+		suttleweigh =#{suttleweigh,jdbcType=VARCHAR},
+		suttleoperacode =#{suttleoperacode,jdbcType=VARCHAR},
+		suttleoperaname =#{suttleoperaname,jdbcType=VARCHAR},
+		usermemo = usermemo||' '||#{usermemo,jdbcType=VARCHAR},
+		recordtype =#{recordtype,jdbcType=VARCHAR},
+		memo1 = #{memo1,jdbcType=VARCHAR},
+		memo2 = #{memo2,jdbcType=VARCHAR},
+		memo3 = #{memo3,jdbcType=VARCHAR},
+		memo4 = #{memo4,jdbcType=VARCHAR},
+		memo5 = #{memo5,jdbcType=VARCHAR},
+		memo6 = #{memo6,jdbcType=VARCHAR},
+		memo7 = #{memo7,jdbcType=VARCHAR},
+		memo8 = #{memo8,jdbcType=VARCHAR},
+		memo9 = #{memo9,jdbcType=VARCHAR},
+		memo10 = #{memo10,jdbcType=VARCHAR},
+		memo11 = #{memo11,jdbcType=VARCHAR},
+		memo12 = #{memo12,jdbcType=VARCHAR},
+		memo13 = #{memo13,jdbcType=VARCHAR},
+		memo14 = #{memo14,jdbcType=VARCHAR},
+		memo15 = #{memo15,jdbcType=VARCHAR}
+		where matchid = #{matchid,jdbcType=VARCHAR}
+	</update>
+	
+	<parameterMap type="java.util.Map" id="dataMap">
+		<parameter property="v_begintime" mode="IN" jdbcType="VARCHAR" />
+		<parameter property="v_endtime" mode="IN" jdbcType="VARCHAR" />
+		<parameter property="v_message" mode="OUT" jdbcType="VARCHAR" />
+	</parameterMap>
+	<select id="datatransfer" parameterMap="dataMap"
+		statementType="CALLABLE">
+		<![CDATA[CALL l_datatransfer_p(#{v_begintime,mode=IN,jdbcType=VARCHAR},
+		#{v_endtime,mode=IN,jdbcType=VARCHAR},
+		#{v_message,mode=OUT,jdbcType=VARCHAR})]]>
+	</select>
+	<select id="datadelete" parameterMap="dataMap"
+		statementType="CALLABLE">
+		<![CDATA[CALL l_datadelete_p(#{v_begintime,mode=IN,jdbcType=VARCHAR},
+		#{v_endtime,mode=IN,jdbcType=VARCHAR},
+		#{v_message,mode=OUT,jdbcType=VARCHAR})]]>
+	</select>
+</mapper>

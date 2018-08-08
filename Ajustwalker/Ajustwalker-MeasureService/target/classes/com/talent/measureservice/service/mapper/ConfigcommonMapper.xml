@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.talent.measureservice.service.mapper.ConfigcommonMapper">
+
+	<select id="queryConfigmodel" parameterType="configmodel" resultType="configmodel">
+		select
+		t.operatype,t.orderno,t.displayname,t.fieldname,t.isdisplay,t.points,t.aboutweight,t.quicksuggest,t.quicksuggesturl,t.writeable
+		from m_configmodel_t t
+		where t.operatype = #{operatype,jdbcType =VARCHAR} and t.points = #{points,jdbcType = VARCHAR}
+		order by t.orderno asc
+	</select>
+    <select id="queryCurrtime" resultType="String">
+     select to_char(sysdate,'yyyy-MM-dd hh24:mi:ss') currtime from dual
+    </select>
+</mapper>

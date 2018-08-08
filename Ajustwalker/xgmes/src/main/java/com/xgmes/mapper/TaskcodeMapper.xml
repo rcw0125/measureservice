@@ -1,0 +1,239 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xgmes.service.mapper.TaskcodeMapper">
+	<select id="queryList" resultType="taskcode" parameterType="taskcode">
+		select id,
+		       taskcode,
+		       sourcecode,
+		       sourcename,
+		       materialcode,
+		       materialname,
+		       targetcode,
+		       targetname,
+		       transitway,
+		       decode(operatype, '10', '物资调拨', '11', '跨区调拨') operatype,
+		       mflag,
+		       sflag,
+		       mqflag,
+		       kqflag,
+		       gflag,
+		       tarehour,
+		       accountstype,
+		       deduction2,
+		       deductionunit,
+		       deductiontype,
+		       isplan,
+		       isbasket,
+		       forcereceive,
+		       measuretype,
+		       validflagtime,
+		       validflagoperator,
+		       recordtype,
+		       createdate,
+		       createman,
+		       updatedate,
+		       updateman,
+		       usermemo,
+		       sysmemo,
+		       decode(mflag, '1', '先毛后皮', '2', '先皮后毛') measurement,
+		       printcount
+		  from b_taskcode_t
+		 where validflag > 0
+		<if test="begintime!=null and begintime!=''">
+    		<![CDATA[and createdate>=  to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+    		<![CDATA[and createdate <= to_date(#{endtime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="taskcode!=null and taskcode !=''">
+			and taskcode like '%' || #{taskcode}||'%'
+		</if>
+		<if test="materialname!=null and materialname !=''">
+			and materialname like '%'|| #{materialname}||'%'
+		</if>
+		<if test="sourcename !=null and sourcename !=''">
+			and sourcename like '%' || #{sourcename} || '%'
+		</if>
+		<if test="targetname!=null and targetname !=''">
+			and targetname like '%' || #{targetname}||'%'
+		</if>
+		<if test="operatype!=null and operatype!=''">
+			and operatype like '%' || #{operatype} ||'%'
+		</if>
+		<if test="printcount!=null and printcount!=''">
+			and printcount = #{printcount}
+		</if>
+		<if test="mflag!=null and mflag!=''">
+			and mflag like '%' || #{mflag} ||'%'
+		</if>
+		order by taskcode asc, createdate desc
+	</select>
+	<select id="queryInfoBytaskcode" parameterType="taskcode"
+		resultType="taskcode">
+		select id, taskcode,
+		sourcecode,
+		sourcename,
+		materialcode ,
+		materialname,
+		targetcode,
+		targetname,
+		transitway,
+		operatype,
+		mflag,
+		sflag,
+		mqflag,
+		kqflag,
+		gflag,
+		tarehour,
+		accountstype,
+		deduction2,
+		deductionunit,
+		deductiontype,
+		isplan,
+		isbasket,
+		forcereceive,
+		measuretype,
+		validflagtime,
+		validflagoperator,
+		recordtype,
+		createdate,
+		createman,
+		updatedate,
+		updateman,
+		usermemo,
+		sysmemo,
+		printcount
+		from b_taskcode_t
+		where validflag > 0 and
+		id=#{id} and rownum=1
+	</select>
+	<insert id="insertTaskcode" parameterType="taskcode">
+	
+        <selectKey resultType="java.lang.Long" order="BEFORE" keyProperty="id">
+		 select B_TASKCODE_S.nextval from dual		
+		</selectKey>
+		insert into
+		b_taskcode_t
+		(id,taskcode,
+		sourcecode,
+		sourcename,
+		materialcode,
+		materialname,
+		targetcode,
+		targetname,
+		transitway,
+		operatype,
+		mflag,
+		sflag,
+		mqflag,
+		kqflag,
+		gflag,
+		tarehour,
+		accountstype,
+		deduction2,
+		deductionunit,
+		deductiontype,
+		isplan,
+		isbasket,
+		forcereceive,
+		measuretype,
+		validflag,
+		recordtype,
+		createdate,
+		createman,
+		usermemo,
+		printcount)
+		values
+		(#{id,jdbcType=VARCHAR },
+		#{taskcode	,jdbcType=VARCHAR },
+		#{sourcecode ,jdbcType=VARCHAR },
+		#{sourcename,jdbcType=VARCHAR },
+		#{materialcode ,jdbcType=VARCHAR },
+		#{materialname
+		,jdbcType=VARCHAR },
+		#{targetcode ,jdbcType=VARCHAR },
+		#{targetname
+		,jdbcType=VARCHAR },
+		#{transitway ,jdbcType=VARCHAR },
+		#{operatype
+		,jdbcType=VARCHAR },
+		#{mflag ,jdbcType=VARCHAR },
+		#{sflag
+		,jdbcType=VARCHAR },
+		#{mqflag ,jdbcType=VARCHAR },
+		#{kqflag
+		,jdbcType=VARCHAR },
+		#{gflag ,jdbcType=VARCHAR },
+		#{tarehour
+		,jdbcType=VARCHAR },
+		#{accountstype ,jdbcType=VARCHAR},
+		#{deduction2
+		,jdbcType=VARCHAR},
+		#{deductionunit ,jdbcType=VARCHAR},
+		#{deductiontype ,jdbcType=VARCHAR},
+		#{isplan ,jdbcType=VARCHAR},
+		#{isbasket ,jdbcType=VARCHAR},
+		#{forcereceive ,jdbcType=VARCHAR},
+		#{measuretype ,jdbcType=VARCHAR},
+		1,
+		#{recordtype ,jdbcType=VARCHAR},
+		sysdate,
+		#{creator ,jdbcType=VARCHAR},
+		#{usermemo ,jdbcType=VARCHAR},
+		#{printcount ,jdbcType=VARCHAR})
+
+	</insert>
+
+	<update id="updateTaskcode" parameterType="taskcode">
+		update b_taskcode_t
+		set sourcecode = #{sourcecode ,jdbcType=VARCHAR },
+		sourcename =#{sourcename ,jdbcType=VARCHAR },
+		materialcode = #{materialcode,jdbcType=VARCHAR },
+		materialname = #{materialname ,jdbcType=VARCHAR },
+		targetcode = #{targetcode ,jdbcType=VARCHAR },
+		targetname =#{targetname ,jdbcType=VARCHAR },
+		transitway = #{transitway,jdbcType=VARCHAR },
+		operatype = #{operatype ,jdbcType=VARCHAR },
+		mflag= #{mflag ,jdbcType=VARCHAR },
+		sflag = #{sflag ,jdbcType=VARCHAR },
+		mqflag = #{mqflag ,jdbcType=VARCHAR },
+		kqflag = #{kqflag,jdbcType=VARCHAR },
+		gflag = #{gflag ,jdbcType=VARCHAR },
+		tarehour =#{tarehour ,jdbcType=VARCHAR },
+		accountstype = #{accountstype,jdbcType=VARCHAR },
+		deduction2 = #{deduction2 ,jdbcType=VARCHAR },
+		deductionunit = #{deductionunit ,jdbcType=VARCHAR },
+		deductiontype =#{deductiontype ,jdbcType=VARCHAR },
+		isplan = #{isplan,jdbcType=VARCHAR },
+		isbasket = #{isbasket ,jdbcType=VARCHAR },
+		forcereceive = #{forcereceive ,jdbcType=VARCHAR },
+		measuretype =#{measuretype ,jdbcType=VARCHAR },
+		recordtype = #{recordtype,jdbcType=VARCHAR },
+		updateman = #{updater ,jdbcType=VARCHAR },
+		updatedate = sysdate,
+		usermemo = #{usermemo ,jdbcType=VARCHAR },
+		printcount = #{printcount ,jdbcType=VARCHAR}
+		where	id	= #{id ,jdbcType=VARCHAR }
+	</update>
+	<update id="cancelTaskcode" parameterType="taskcode" >
+		update B_TASKCODE_T set validflag =
+		0,VALIDFLAGOPERATOR =#{canceler,jdbcType=VARCHAR},VALIDFLAGTIME=sysdate where id =
+		#{id,jdbcType=VARCHAR}
+	</update>
+	<select id="queryCount" parameterType="taskcode" resultType="int">
+		select count(1) from b_taskcode_t
+		where validflag>0
+		and materialname
+		=#{materialname,jdbcType=VARCHAR}
+		and sourcename =#{sourcename,jdbcType=VARCHAR}
+		and targetname
+		=#{targetname,jdbcType=VARCHAR}
+	</select>
+	<select id="queryCountbyTaskcode" parameterType="taskcode" resultType="int">
+		select count(1) from b_taskcode_t
+		where validflag>0
+		and taskcode=#{taskcode,jdbcType=VARCHAR}
+	</select>
+
+</mapper>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.talent.measureservice.service.mapper.WeighterDataMapper">
+
+	<select id="queryWeighterlist" parameterType="weighterdata" resultType="weighterdata">
+		select ID,carno,matchid,clientid,begintime,endtime,realdata
+		from
+		M_WEIGHTERDATA_T t
+		where 1 = 1
+		<if test="id!=null and id !='' and id!=0">
+			id =#{id,jdbcType=VARCHAR}
+		</if>
+		<if test="carno!=null and carno !=''">
+			carno like '%'|| #{carno,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="matchid!=null and matchid !=''">
+			matchid like '%'|| #{matchid,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="clientid!=null and clientid !=''">
+			clientid like '%'|| #{clientid,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="begintime!=null and begintime !=''">
+           <![CDATA[to_date(substr(t.begintime,0,length(t.begintime)-4),'yyyy-mm-dd hh24:mi:ss') >= to_date(#{begintime,jdbcType=VARCHAR},'yyyy-mm-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime!=null and endtime !=''">
+           <![CDATA[to_date(substr(t.endtime,0,length(t.endtime)-4),'yyyy-mm-dd hh24:mi:ss') <= to_date(#{endtime,jdbcType=VARCHAR},'yyyy-mm-dd hh24:mi:ss')]]>
+		</if>
+		order by id desc
+	</select>
+
+	<!--保存重量信息 -->
+	<insert id="insertWeightdata" parameterType="weighterdata">
+		<selectKey resultType="java.lang.Long" order="BEFORE"
+			keyProperty="id">
+			SELECT P_PLATFORM_S.NEXTVAL AS VALUE FROM DUAL
+		</selectKey>
+		insert into M_WEIGHTERDATA_T
+		(ID,carno,matchid,clientid,begintime,endtime,realdata)
+		values
+		(#{id,jdbcType=VARCHAR},#{carno,jdbcType=VARCHAR},#{matchid,jdbcType=VARCHAR},#{clientid,jdbcType=VARCHAR},#{begintime,jdbcType=VARCHAR},#{endtime,jdbcType=VARCHAR},#{realdata,jdbcType=CLOB})
+	</insert>
+
+</mapper>

@@ -1,0 +1,158 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.talent.materialflow.service.mapper.QualityMapper">
+	<select id="queryList" resultType="quality" parameterType="quality">
+		select t.id,
+		t.carno,
+		t.matchid,
+		m.planid,
+		m.materialname,
+		m.sourcename,
+		m.targetname,
+		t.qmpostion,
+		t.createoperaname creator,
+		to_char(t.createdate,'yyyy-MM-dd hh24:mi:ss') createdate,
+		t.usermemo
+		from q_quality_t t
+		left join l_applicationbill_item_t m
+		on t.matchid =m.matchid
+		where t.validflag > 0
+		<if test="planid!=null and planid !=''">
+			and m.planid like '%' || #{planid}||'%'
+		</if>
+		<if test="matchid!=null and matchid !=''">
+			and m.matchid  like '%' || #{matchid}||'%' 
+		</if>
+		<if test="carno !=null and carno !=''">
+			and t.carno like '%' || #{carno}||'%' 
+		</if>
+		<if test="materialname!=null and materialname !=''">
+			and m.materialname like '%' || #{materialname}||'%'
+		</if>
+		<if test="sourcename!=null and sourcename!=''">
+			and m.sourcename like '%' ||  #{sourcename} ||'%'
+		</if>
+		<if test="targetname!=null and targetname!=''">
+			and m.targetname like  '%' || #{targetname}||'%'
+		</if>
+		<if test="qmpostion!=null and qmpostion!=''">
+			and t.qmpostion like  '%' || #{qmpostion}||'%'
+		</if>
+		<if test="begintime!=null and begintime!=''">
+    		<![CDATA[and t.createdate>=  to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+    		<![CDATA[and t.createdate <= to_date(#{endtime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+       order by t.createdate desc
+	</select>
+	<insert id="insertQuality" parameterType="quality">
+		insert into Q_QUALITY_T
+		(id,
+		validflag,
+		carno,
+		matchid,
+		qmpostioncode,
+		qmpostion,
+		usermemo,
+		sysmemo,
+		createoperacode,
+		createoperaname,
+		unitcode,
+		unitname,
+		createdate,
+		memo1,
+		memo2,
+		memo3,
+		memo4,
+		memo5,cardid)
+		values
+		(Q_QUALITY_S.Nextval,
+		1,
+		#{carno},
+		#{matchid,jdbcType=VARCHAR},
+		#{qmpostioncode,jdbcType=VARCHAR},
+		#{qmpostion,jdbcType=VARCHAR},
+		#{usermemo,jdbcType=VARCHAR},
+		#{sysmemo,jdbcType=VARCHAR},
+		#{createoperacode,jdbcType=VARCHAR},
+		#{creator,jdbcType=VARCHAR},
+		#{unitcode,jdbcType=VARCHAR},
+		#{unitname,jdbcType=VARCHAR},
+		sysdate,
+		#{memo1,jdbcType=VARCHAR},
+		#{memo2,jdbcType=VARCHAR},
+		#{memo3,jdbcType=VARCHAR},
+		#{memo4,jdbcType=VARCHAR},
+		#{memo5,jdbcType=VARCHAR},
+		#{cardid,jdbcType=VARCHAR})
+	</insert>
+	<update id="cancelQuality" parameterType="quality">
+		update Q_QUALITY_T t
+		set
+		t.validflag=0,t.validflagoperaname=#{canceler,jdbcType=VARCHAR},t.validflagtime=sysdate
+		where t.matchid=#{matchid,jdbcType=VARCHAR}
+	</update>
+	<update id="updateCurrtemp" parameterType="quality">
+		update l_curr_temp_t t
+		set t.sampletime = to_char(sysdate,'yyyy-MM-dd hh24:mi:ss'),
+		t.sampleunitcode =
+		#{qmpostioncode,jdbcType=VARCHAR},
+		t.sampleunitname =
+		#{qmpostion,jdbcType=VARCHAR}
+		where matchid = #{matchid,jdbcType=VARCHAR}
+	</update>
+	<update id="cancelCurrtemp" parameterType="quality">
+		update
+		l_curr_temp_t t set
+		t.sampletime = '',
+		t.sampleunitcode = '',
+		t.sampleunitname = '' where matchid = #{matchid,jdbcType=VARCHAR}
+	</update>
+	<select id="queryInfoBycarno" parameterType="quality"	resultType="quality">
+		select b.carno,
+		       b.matchid,
+		       c.planid,
+		       c.orderno,
+		       c.sourcename,
+		       c.middlemanname,
+		       c.sourceplace,
+		       c.targetname,
+		       c.materialname,
+		       b.createdate,
+		       b.createoperaname
+		  from l_applicationbill_t b
+		  left outer join l_applicationbill_item_t c
+		    on (b.matchid = c.matchid and c.validflag > 0)
+		 where b.validflag = 1
+		   and b.types = 0
+		   and not exists (select 0
+		          from q_quality_t d
+		         where d.validflag > 0
+		           and b.matchid = d.matchid)
+		   and b.carno = #{carno,jdbcType=VARCHAR}
+		 order by b.createdate desc
+	</select>
+	<select id="queryInfoBymatchid" parameterType="quality"
+		resultType="quality">
+		select b.carno,
+		b.matchid,
+		c.planid,
+		c.orderno,
+		c.sourcename,
+		c.middlemanname,
+		c.sourceplace,
+		c.targetname,
+		c.materialname
+		from
+		l_applicationbill_t b
+		left outer join l_applicationbill_item_t c
+		on
+		b.matchid = c.matchid
+		and c.validflag > 0
+		where b.validflag = 1
+		and
+		b.matchid=#{matchid,jdbcType=VARCHAR}
+	</select>
+</mapper>

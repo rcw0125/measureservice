@@ -1,0 +1,515 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xgmes.service.mapper.EntrylogMapper">
+	<select id="queryList" resultType="application" parameterType="String">
+		select t.carno,
+		t.icid,
+		t.rfidid,
+		t.matchid,
+		t.planid,
+		t.taskcode,
+		t.materialname,
+		t.materialspec,
+		t.sourceplace,
+		t.sourcename,
+		t.targetname,
+		t.targetplace,
+		t.planweight,
+		t.gross * 0.001 gross,
+		t.grosstime,
+		t.tare * 0.001 tare,
+		t.taretime,
+		t.suttle * 0.001 suttle,
+		substr(t.suttletime, 0, 16) suttletime,
+		t.deduction,
+		t.grossb,
+		t.tareb,
+		decode(round(t.grossb - tareb, 2), '', 0, round(t.grossb - tareb, 2))
+		suttleb,
+		t.bflag,
+		t.usermemo || t.memo3 || t.memo4 usermemo,
+		t.operatype,
+		t.suttleweigh,
+		t.mstate,
+		t.routeid,
+		t.sourcetime,
+		t.targettime,
+		t.sampletime,
+		t.entertime
+		from l_curr_temp_t t
+		where t.validflag = 1
+		and t.operatype!=10
+		and t.operatype!=0
+		and t.carno =
+		#{carno,jdbcType=VARCHAR}
+		order by t.matchid asc
+	</select>
+	<select id="queryoutList" resultType="application" parameterType="String">
+		select t.carno,
+		t.icid,
+		t.rfidid,
+		t.matchid,
+		t.planid,
+		t.taskcode,
+		t.materialname,
+		t.materialspec,
+		t.sourceplace,
+		t.sourcename,
+		t.targetname,
+		t.targetplace,
+		t.planweight,
+		t.gross * 0.001 gross,
+		t.grosstime,
+		t.tare * 0.001 tare,
+		t.taretime,
+		t.suttle * 0.001 suttle,
+		substr(t.suttletime, 0, 16) suttletime,
+		t.deduction,
+		t.grossb,
+		t.tareb,
+		decode(round(t.grossb - tareb, 2), '', 0, round(t.grossb - tareb, 2))
+		suttleb,
+		t.bflag,
+		t.usermemo || t.memo3 || t.memo4 usermemo,
+		t.operatype,
+		t.suttleweigh,
+		t.mstate,
+		t.routeid,
+		t.sourcetime,
+		t.targettime,
+		t.sampletime,
+		t.entertime,
+		t.validflag
+		from
+		l_curr_temp_t t
+		where (t.validflag = 1 or t.validflag = 9)
+		and t.operatype!=10 and
+		t.operatype!=1
+		and t.carno = #{carno,jdbcType=VARCHAR}
+		order by t.matchid asc
+	</select>
+	<select id="queryMatchids" resultType="String" parameterType="String">
+		select wm_concat(t.matchid) matchids
+		from l_curr_temp_t t
+		where t.carno
+		= #{carno,jdbcType=VARCHAR}
+		and t.validflag = 1
+		order by t.matchid asc
+	</select>
+	<select id="searchMatchidinfo" resultType="application" parameterType="String">				
+			select distinct t.matchid,
+	                    t.carno, 
+	                    t.operatype,
+	                    t.validflag,
+	                    t.planid,
+	                    t.materialcode,
+	                    t.materialname,
+	                    t.sourcecode,
+	                    t.sourcename,
+	                    t.targetcode,
+	                    t.targetname,
+	                    c.driver,
+	                    c.unitname,
+	                    nvl(c.cartype, 0) cartype
+	      from l_curr_temp_t t
+	      left join b_card_t c
+	        on (t.carno = c.carno and c.cardclass=0 and c.validflag > 0)
+	     where t.validflag = 1
+	       and t.operatype != 10
+	       and t.operatype != 0
+		   and t.carno =#{carno,jdbcType=VARCHAR}
+		 order by t.matchid asc
+	</select>
+	<!--添加进厂信息 -->
+	<insert id="insertEntrylog" parameterType="entrylog">
+		<selectKey resultType="java.lang.Long" order="BEFORE" keyProperty="id">
+			select l_entrylog_s.nextval from dual
+		</selectKey>
+		insert into
+		l_entrylog_t
+		(id,
+		ictype,
+		matchid,
+		validflag,
+		carno,
+		icid,
+		rfidid,
+		operatype,
+		materialname,
+		sourcename,
+		targetname,
+		entrytype,
+		gatecode,
+		gatename,
+		createoperaname,
+		createdate,
+		usermemo,
+		systemmemo,
+		entrytime,
+		forceflag,
+		planid,
+		cartype,
+		driver,
+		unitname)
+		values
+		(#{id,jdbcType=VARCHAR},
+		#{ictype,jdbcType=VARCHAR},
+		#{matchid,jdbcType=VARCHAR},
+		2,
+		#{carno,jdbcType=VARCHAR},
+		#{icid,jdbcType=VARCHAR},
+		#{rfidid,jdbcType=VARCHAR},
+		#{operatype,jdbcType=VARCHAR},
+		#{materialname,jdbcType=VARCHAR},
+		#{sourcename,jdbcType=VARCHAR},
+		#{targetname,jdbcType=VARCHAR},
+		#{entrytype,jdbcType=VARCHAR},
+		#{gatecode,jdbcType=VARCHAR},
+		#{gatename,jdbcType=VARCHAR},
+		#{creator,jdbcType=VARCHAR},
+		sysdate,
+		#{usermemo,jdbcType=VARCHAR},
+		#{sysmemo,jdbcType=VARCHAR},
+		sysdate,
+		#{forceflag,jdbcType=VARCHAR},
+		#{planid,jdbcType=VARCHAR},
+		#{cartype,jdbcType=VARCHAR},
+		#{driver,jdbcType=VARCHAR},
+		#{unitname,jdbcType=VARCHAR}
+		)
+	</insert>
+	<update id="updateEntrylog" parameterType="entrylog">
+		update l_entrylog_t
+		set
+		ictype = #{ictype,jdbcType=VARCHAR},
+		icid=#{icid,jdbcType=VARCHAR},
+		rfidid
+		=#{rfidid,jdbcType=VARCHAR},
+		gatecode=
+		#{gatecode,jdbcType=VARCHAR},
+		gatename =#{gatename,jdbcType=VARCHAR},
+		createoperaname=#{creator,jdbcType=VARCHAR},
+		entrytime = sysdate,
+		usermemo=#{usermemo,jdbcType=VARCHAR},
+		planid=#{planid,jdbcType=VARCHAR},
+		matchid=#{matchid,jdbcType=VARCHAR},
+		sourcename=#{sourcename,jdbcType=VARCHAR},
+		targetname=#{targetname,jdbcType=VARCHAR},
+		operatype=#{operatype,jdbcType=VARCHAR},
+		driver=#{driver,jdbcType=VARCHAR},
+		unitname=#{unitname,jdbcType=VARCHAR}
+		where id =
+		#{id,jdbcType=VARCHAR}
+	</update>
+	<select id="queryId" parameterType="entrylog" resultType="entrylog">
+		select
+		t.id id
+		from L_ENTRYLOG_T t
+		where t.carno = #{carno,jdbcType=VARCHAR}
+		and t.validflag = 2
+		and entrytype=1
+		and rownum=1
+	</select>
+	<select id="queryCountBycarno" parameterType="entrylog" resultType="int">
+		select count(id)
+		from L_ENTRYLOG_T t
+		where t.validflag >0
+		and t.carno = #{carno,jdbcType=VARCHAR}
+	</select>
+
+
+	<update id="updateInId" parameterType="entrylog">
+		update L_APPLICATIONBILL_T
+		set id=#{id,jdbcType=VARCHAR} where
+		matchid=#{matchid,jdbcType=VARCHAR}
+	</update>
+	<update id="updatecurrtemp" parameterType="entrylog">
+		update L_CURR_TEMP_T
+		set entertime = to_char(sysdate, 'yyyy-mm-dd hh24:mi:ss'),
+		entergatecode = #{gatecode,jdbcType=VARCHAR},
+		entergatename =
+		#{gatename,jdbcType=VARCHAR}
+		where matchid =
+		#{matchid,jdbcType=VARCHAR}
+	</update>
+	<parameterMap type="java.util.Map" id="outMap">
+		<parameter property="carno" mode="IN" jdbcType="VARCHAR" />
+		<parameter property="icid" mode="IN" jdbcType="VARCHAR" />
+		<parameter property="rfidid" mode="IN" jdbcType="VARCHAR" />
+		<parameter property="gatecode" mode="IN" jdbcType="VARCHAR" />
+		<parameter property="gatename" mode="IN" jdbcType="VARCHAR" />
+		<parameter property="usermemo" mode="IN" jdbcType="VARCHAR" />
+		<parameter property="createman" mode="IN" jdbcType="VARCHAR" />
+		<parameter property="forceflag" mode="IN" jdbcType="VARCHAR" />
+		<parameter property="outflag" mode="OUT" jdbcType="VARCHAR" />
+		<parameter property="outmsg" mode="OUT" jdbcType="VARCHAR" />
+	</parameterMap>
+	<select id="insertOutEntry" parameterMap="outMap" statementType="CALLABLE">
+		<![CDATA[CALL l_entrylogout_p(#{carno,mode=IN,jdbcType=VARCHAR},
+		#{icid,mode=IN,jdbcType=VARCHAR},
+		#{rfidid,mode=IN,jdbcType=VARCHAR},
+		#{gatecode,mode=IN,jdbcType=VARCHAR},
+		#{gatename,mode=IN,jdbcType=VARCHAR},
+		#{usermemo,mode=IN,jdbcType=VARCHAR},
+		#{createman,mode=IN,jdbcType=VARCHAR},
+		#{forceflag,mode=IN,jdbcType=VARCHAR},
+		#{outflag,mode=OUT,jdbcType=VARCHAR},
+		#{outmsg,mode=OUT,jdbcType=VARCHAR})]]>
+	</select>
+	<select id="queryEntrylog" parameterType="entrylog" resultType="entrylog">
+		select distinct t.id,
+		t.carno,
+		t.icid,
+		t.rfidid,
+		decode(t.ictype, '0', '临时卡', '1',
+		'固定卡')
+		ictype,
+		decode(t.entrytype, '1', '进厂', '2', '出厂') entrytype,
+		t.gatename,
+		t.statetime,
+		t.planid,
+		t.targetname,
+		to_char(t.createdate,'yyyy-MM-dd hh24:mi:ss')
+		createdate,
+		t.createoperaname creator,
+		t.usermemo,
+		t.materialname,
+		t.entrytype types,
+		t.stateminute,
+		t.driver,
+		t.unitname,
+		decode(t.cartype,0,'业务车辆','','业务车辆',1,'员工车辆',2,'操作员卡',3,'指令卡') cartype,
+		c.memo as cardmemo
+		from l_entrylog_t t left join b_card_t c on(t.carno=c.carno and c.validflag > 0)
+		where
+		t.validflag>0
+		<if test="begintime !=null and begintime !=''">
+			and <![CDATA[t.createdate >=to_date(#{begintime},'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime !=null and endtime !=''">
+			and <![CDATA[t.createdate <=to_date(#{endtime},'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="entrytype !=null and entrytype !=''">
+			and t.entrytype=#{entrytype}
+		</if>
+		<if test="ictype !=null and ictype !=''">
+			and t.ictype=#{ictype}
+		</if>
+		<if test="carno !=null and carno !=''">
+			and t.carno like '%' || #{carno}|| '%'
+		</if>
+		<if test="icid !=null and icid !=''">
+			and t.icid like '%'|| #{icid} || '%'
+		</if>
+		<if test="gatename !=null and gatename !=''">
+			and t.gatename like '%'|| #{gatename} || '%'
+		</if>
+		<if test="validflag !=null and validflag !=''">
+			and t.validflag = #{validflag}
+		</if>
+		<if test="materialname !=null and materialname !=''">
+			and t.materialname like '%'|| #{materialname} || '%'
+		</if>
+		<if test="validflag !=null and validflag !=''">
+			and t.validflag = #{validflag}
+		</if>
+		<if test="operatype !=null and operatype !=''">
+			<if test="operatype==84">
+				and t.operatype =84
+			</if>
+			<if test="operatype==0">
+				and (t.operatype !=84 or t.operatype is null)
+			</if>
+		</if>
+		<if test="cartype!=-1">
+			and t.cartype = #{cartype}
+		</if>
+		<if test="driver !=null and driver !=''">
+			and instr(t.driver,#{driver})>0
+		</if>
+		<if test="unitname !=null and unitname !=''">
+			and instr(t.unitname,#{unitname})>0
+		</if>
+		order by createdate desc
+	</select>
+	<select id="queryCartypeBycarid" parameterType="entrylog" resultType="entrylog">
+		select nvl(t.cartype, 0) cartype, t.validflag,t.carno,t.driver,t.unitname
+		from b_card_t
+		t where t.cardid=#{icid,jdbcType=VARCHAR}
+	</select>
+	<select id="queryGateparam" parameterType="gateparam" resultType="gateparam">
+		select id,
+		gatecode,
+		gateid,
+		gatename,
+		ictype,
+		iccom,
+		icbruad,
+		icno,
+		icmemo1,
+		icmemo2,
+		icvalidflag,
+		dztype,
+		dzcom,
+		dzbruad,
+		dzno,
+		dzaddress,
+		dzmemo1,
+		dzmemo2,
+		dzvalidflag,
+		inouttype
+		from b_gate_param_t
+		where gatecode
+		= #{gatecode,jdbcType=VARCHAR}
+		order by inouttype asc
+	</select>
+	<insert id="insertXCtemp" parameterType="application">
+		insert into
+		l_curr_temp_t
+		(carno,
+		icid,
+		matchid,
+		operatype,
+		validflag,
+		planid,
+		materialcode,
+		materialname,
+		sourcecode,
+		sourcename,
+		targetcode,
+		targetname,
+		usermemo,entertime)
+		values
+		(#{carno,jdbcType=VARCHAR},
+		#{icid,jdbcType=VARCHAR},
+		#{matchid,jdbcType=VARCHAR},
+		'84',
+		1,
+		#{planid,jdbcType=VARCHAR},
+		#{materialcode,jdbcType=VARCHAR},
+		#{materialname,jdbcType=VARCHAR},
+		#{sourcecode,jdbcType=VARCHAR},
+		#{sourcename,jdbcType=VARCHAR},
+		#{targetcode,jdbcType=VARCHAR},
+		#{targetname,jdbcType=VARCHAR},
+		'线材','')
+	</insert>
+	<select id="queryAllNodelist" parameterType="String" resultType="String">
+		select t.nodecode
+		from L_WORKLINE_ITEM_T t
+		where t.fid = #{routeid,jdbcType=VARCHAR}
+	</select>
+	<select id="querylastsecond" parameterType="String" resultType="String">
+		select t.nodecode
+		from L_WORKLINE_ITEM_T t
+		where t.fid = #{routeid,jdbcType=VARCHAR}
+		and t.sn =
+		(select max(sn) - 1 from L_WORKLINE_ITEM_T t where t.fid =
+		#{routeid,jdbcType=VARCHAR})
+	</select>
+	<select id="queryNodelist" parameterType="String" resultType="String">
+		select wm_concat(t.nodecode) nodecode from L_WORKLINE_ITEM_T t where
+		t.fid=#{routeid,jdbcType=VARCHAR}
+	</select>
+
+	<select id="queryCardclass" parameterType="bcard" resultType="bcard">
+		select b.cardtype from b_card_t b where b.cardid=
+		#{cardid,jdbcType=VARCHAR}
+	</select>
+
+	<select id="queryEXList" resultType="application" parameterType="String">
+		select t.carno,
+		t.icid,
+		t.rfidid,
+		t.matchid,
+		t.planid,
+		a.materialname,
+		a.materialspec,
+		a.steelname,
+		a.pictureno,
+		a.snumber,
+		a.measureunit,
+		a.sourcename,
+		a.targetname,
+		t.usermemo || t.memo3 || t.memo4 usermemo,
+		t.operatype,
+		t.sourcetime,
+		t.targettime,
+		t.sampletime,
+		t.entertime
+		from l_curr_temp_t t
+		inner join l_applicationbill_item_t a
+		on (t.matchid = a.matchid and a.validflag > 0)
+		where t.validflag = 1
+		and t.operatype != 10
+		and t.operatype != 0
+		and t.carno = #{carno,jdbcType=VARCHAR}
+		order by t.matchid asc,a.itemid asc
+
+	</select>
+	<insert id="insertEntrylogmsg" parameterType="entrylog">
+		insert into l_entrylogmsg_t
+		(cardid, carno,gatename, msg, success, entrytype,driver,unitname)
+		values
+		(#{cardid,jdbcType = VARCHAR},
+		#{carno,jdbcType = VARCHAR},
+		#{gatename,jdbcType = VARCHAR},
+		#{cardmemo,jdbcType = VARCHAR},
+		#{types,jdbcType = VARCHAR},
+		#{entrytype,jdbcType = VARCHAR},
+		#{driver,jdbcType = VARCHAR},
+		#{unitname,jdbcType = VARCHAR})
+	</insert>
+
+	<update id="cancelEntrylog" parameterType="entrylog">
+		update l_entrylog_t t set
+		t.validflag = 0,
+		t.validflagoperaname = #{validflagoperaname,jdbcType=VARCHAR},
+		t.validflagtime = sysdate,
+		t.eid='',
+		t.statetime=''
+		where t.id=(select max(id) from L_ENTRYLOG_T where carno=#{cardid,jdbcType=VARCHAR} and validflag > 0)
+	</update>
+	<update id="cancelEntrylog2" parameterType="entrylog">
+		update l_entrylog_t t set
+		t.validflag = 2,
+		t.eid='',
+		t.statetime=''
+		where t.entrytype=1 and
+		t.eid = (select max(id) from L_ENTRYLOG_T where carno=#{cardid,jdbcType=VARCHAR} and validflag = 0 and entrytype=2)
+	</update>
+
+	<select id="gatequreylist" parameterType="entrylog" resultType="entrylog">
+		select t.cardid,
+		t.carno,
+		t.gatename,
+		t.msg,
+		to_char(t.createdate, 'yyyy-MM-dd hh24:mi:ss') createdate,
+		t.driver,
+		t.unitname,
+		t.entrytype
+		from L_ENTRYLOGMSG_T t
+		where 1=1
+		<if test="begintime!=null and begintime!=''">
+    		<![CDATA[and t.createdate>=  to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+    		<![CDATA[and t.createdate <= to_date(#{endtime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="gatename !=null and gatename !=''">
+			and t.gatename=#{gatename}
+		</if>
+		order by t.createdate desc
+	</select>
+
+	<select id="queryCardList" resultType="entrylog" parameterType="entrylog">
+		select cardid,
+		carno,
+		driver,
+		unitname,
+		memo as usermemo
+		from b_card_t t
+		where cardid=#{icid,jdbcType=VARCHAR} and rownum = 1
+	</select>
+</mapper>

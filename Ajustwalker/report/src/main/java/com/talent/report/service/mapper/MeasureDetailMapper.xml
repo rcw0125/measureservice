@@ -1,0 +1,283 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.talent.report.service.mapper.MeasureDetailMapper">
+
+	<select id="queryList" resultType="measureDetail" parameterType="measureDetail">
+		select * from (
+		select t.matchid,
+		t.carno,
+		t.materialcode,
+		t.materialname,
+		(select max(a.materialspec || ' ' || a.steelname)
+		from l_applicationbill_item_t a
+		where a.validflag>0 and a.matchid = t.matchid) materialspec,
+		t.sourcename,
+		t.targetname,
+		t.planid,
+		t.gross*0.001 gross,
+		to_char(t.grosstime, 'YYYY-MM-DD HH24:Mi') grosstime,
+		t.grossweigh,
+		t.grossoperaname,
+		t.tare*0.001 tare,
+		to_char(t.taretime, 'YYYY-MM-DD HH24:Mi') taretime,
+		t.tareweigh,
+		t.tareoperaname,
+		round((t.gross*0.001 - t.tare*0.001), 3) suttle,
+		t.deduction * 0.001 as deduction,
+		round((t.gross - t.tare - t.deduction)*0.001, 3) deductionsuttle,
+		t.suttle*0.001 jsweight,
+		to_char(t.suttletime, 'YYYY-MM-DD HH24:Mi') suttletime,
+		t.suttleweigh,
+		t.suttleoperaname,
+		t.suttleb,
+		t.operatype,
+		t.printcount,
+		decode((select p.materialflow from m_operaconfig_t p where t.operatype = p.operatype),1,t.sourcename,t.targetname) ks
+		from m_measure_t t
+		where t.validflag = 1
+		and t.suttle > 0
+		<if test="materialname!=null and materialname !=''">
+			and t.materialname=#{materialname}
+		</if>
+		<if test="materialcode!=null and materialcode !=''">
+			and instr(t.materialcode,upper(#{materialcode}))>0
+		</if>
+		<if test="targetname!=null and targetname!=''">
+			and t.targetname=#{targetname}
+		</if>
+		<if test="sourcename!=null and sourcename!=''">
+			and t.sourcename=#{sourcename}
+		</if>
+		<if test="grossweighid !=null and grossweighid !=''">
+			and t.grossweighid=#{grossweighid}
+		</if>
+		<if test="tareweighid !=null and tareweighid !=''">
+			and t.tareweighid=#{tareweighid}
+		</if>
+		<if test="suttleweighid !=null and suttleweighid !=''">
+			and t.suttleweighid=#{suttleweighid}
+		</if>
+		<if test="carno !=null and carno !=''">
+			and instr(t.carno,upper(#{carno}))>0
+		</if>
+		<if test="planid!=null and planid !=''">
+			and instr(t.planid,upper(#{planid}))>0
+		</if>
+		<if test="matchid!=null and matchid !=''">
+			and instr(t.matchid,#{matchid})>0
+		</if>
+		<if test="printflag==0">
+			and t.printcount=0
+		</if>
+		<if test="printflag==1">
+			and t.printcount>0
+		</if>
+		<if test="operatypes !=null and operatypes !=''">
+			and t.operatype in
+			<foreach collection="operatypes" item="item" index="index" open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		<if test="begintime!=null and begintime!=''">
+			<if test="selecttime=='t.grosstime'">
+				and <![CDATA[t.grosstime >=to_date(trim(#{begintime}),'yyyy-MM-dd hh24:mi:ss')]]>
+			</if>
+			<if test="selecttime=='t.suttletime'">
+				and <![CDATA[t.suttletime >=to_date(trim(#{begintime}),'yyyy-MM-dd hh24:mi:ss')]]>
+			</if>
+			<if test="selecttime=='t.taretime'">
+				and <![CDATA[t.taretime >=to_date(trim(#{begintime}),'yyyy-MM-dd hh24:mi:ss')]]>
+			</if>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+			<if test="selecttime=='t.grosstime'">
+				and <![CDATA[t.grosstime <=to_date(trim(#{endtime}),'yyyy-MM-dd hh24:mi:ss')]]>
+			</if>
+			<if test="selecttime=='t.suttletime'">
+				and <![CDATA[t.suttletime <=to_date(trim(#{endtime}),'yyyy-MM-dd hh24:mi:ss')]]>
+			</if>
+			<if test="selecttime=='t.taretime'">
+				and <![CDATA[t.taretime <=to_date(trim(#{endtime}),'yyyy-MM-dd hh24:mi:ss')]]>
+			</if>
+		</if>
+		)
+		order by ks,materialcode,suttletime
+	</select>
+
+	<select id="queryCount" resultType="measureDetail" parameterType="measureDetail">
+		select
+		sum(nvl(round(t.tare * 0.001, 2),0)) as tare,
+		sum(nvl(round(t.gross * 0.001, 2),0)) as gross,
+		sum(nvl(round(t.suttle * 0.001, 2),0)) as suttle
+		from m_measure_t t
+		where t.validflag = 1
+		and t.suttle > 0
+		<if test="materialname!=null and materialname !=''">
+			and t.materialname=#{materialname}
+		</if>
+		<if test="materialcode!=null and materialcode !=''">
+			and instr(t.materialcode,upper(#{materialcode}))>0
+		</if>
+		<if test="targetname!=null and targetname!=''">
+			and t.targetname=#{targetname}
+		</if>
+		<if test="sourcename!=null and sourcename!=''">
+			and t.sourcename=#{sourcename}
+		</if>
+		<if test="grossweighid !=null and grossweighid !=''">
+			and t.grossweighid=#{grossweighid}
+		</if>
+		<if test="tareweighid !=null and tareweighid !=''">
+			and t.tareweighid=#{tareweighid}
+		</if>
+		<if test="suttleweighid !=null and suttleweighid !=''">
+			and t.suttleweighid=#{suttleweighid}
+		</if>
+		<if test="carno !=null and carno !=''">
+			and instr(t.carno,upper(#{carno}))>0
+		</if>
+		<if test="planid!=null and planid !=''">
+			and instr(t.planid,upper(#{planid}))>0
+		</if>
+		<if test="matchid!=null and matchid !=''">
+			and instr(t.matchid,#{matchid})>0
+		</if>
+		<if test="printflag==0">
+			and t.printcount=0
+		</if>
+		<if test="printflag==1">
+			and t.printcount>0
+		</if>
+		<if test="operatypes !=null and operatypes !=''">
+			and t.operatype in
+			<foreach collection="operatypes" item="item" index="index" open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		<if test="begintime!=null and begintime!=''">
+			<if test="selecttime=='t.grosstime'">
+				and <![CDATA[t.grosstime >=to_date(trim(#{begintime}),'yyyy-MM-dd hh24:mi:ss')]]>
+			</if>
+			<if test="selecttime=='t.suttletime'">
+				and <![CDATA[t.suttletime >=to_date(trim(#{begintime}),'yyyy-MM-dd hh24:mi:ss')]]>
+			</if>
+			<if test="selecttime=='t.taretime'">
+				and <![CDATA[t.taretime >=to_date(trim(#{begintime}),'yyyy-MM-dd hh24:mi:ss')]]>
+			</if>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+			<if test="selecttime=='t.grosstime'">
+				and <![CDATA[t.grosstime <=to_date(trim(#{endtime}),'yyyy-MM-dd hh24:mi:ss')]]>
+			</if>
+			<if test="selecttime=='t.suttletime'">
+				and <![CDATA[t.suttletime <=to_date(trim(#{endtime}),'yyyy-MM-dd hh24:mi:ss')]]>
+			</if>
+			<if test="selecttime=='t.taretime'">
+				and <![CDATA[t.taretime <=to_date(trim(#{endtime}),'yyyy-MM-dd hh24:mi:ss')]]>
+			</if>
+		</if>
+	</select>
+
+	<select id="queryEquipment" parameterType="combox" resultType="combox">
+		select
+		t.equcode id,
+		t.equname text
+		from M_EQUIPMENT_T t
+		where t.validflag>0
+		and t.equtype = 'C'
+		<if test="searchText!=null and searchText !=''">
+			and (t.equname like '%'||#{searchText}||'%' or
+			t.equname like
+			'%'||#{searchText}||'%')
+		</if>
+		order by t.equcode
+	</select>
+	<!-- 打印日志 -->
+	<insert id="printlog" parameterType="reportLog">
+		<selectKey resultType="java.lang.Long" order="BEFORE" keyProperty="id">
+			select M_EXCEPTION_LOG_S.nextval from dual
+		</selectKey>
+		insert into
+		m_exception_log_t
+		(matchid,
+		usermemo,
+		operaman,
+		createdate,
+		types)
+		values
+		('P'||#{id,jdbcType = NUMERIC},
+		#{usermemo,jdbcType=VARCHAR},
+		#{operaman,jdbcType=VARCHAR},
+		sysdate,
+		#{types,jdbcType=VARCHAR})
+	</insert>
+	<!--更新计量表打印次数及打印序列 -->
+	<update id="updateMeasurePrintCount" parameterType="measureDetail">
+		update m_measure_t t
+		set t.printcount = printcount + 1
+		where t.validflag = 1
+		and t.suttle > 0
+		<if test="nomatchids!=null and nomatchids !=''">
+			and t.matchid not in
+			<foreach collection="nomatchids" item="item" index="index" open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		<if test="materialname!=null and materialname !=''">
+			and t.materialname like #{materialname}||'%'
+		</if>
+		<if test="targetname!=null and targetname!=''">
+			and t.targetname like #{targetname} ||'%'
+		</if>
+		<if test="sourcename!=null and sourcename!=''">
+			and t.sourcename like #{sourcename}||'%'
+		</if>
+		<if test="grossweighid !=null and grossweighid !=''">
+			and t.grossweighid=#{grossweighid}
+		</if>
+		<if test="tareweighid !=null and tareweighid !=''">
+			and t.tareweighid=#{tareweighid}
+		</if>
+		<if test="suttleweighid !=null and suttleweighid !=''">
+			and t.suttleweighid=#{suttleweighid}
+		</if>
+		<if test="carno !=null and carno !=''">
+			and t.carno like '%'||#{carno}||'%'
+		</if>
+		<if test="planid!=null and planid !=''">
+			and t.planid like #{planid}||'%'
+		</if>
+		<if test="matchid!=null and matchid !=''">
+			and t.matchid like #{matchid}||'%'
+		</if>
+		<if test="operatypes !=null and operatypes !=''">
+			and t.operatype in
+			<foreach collection="operatypes" item="item" index="index" open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		<if test="begintime!=null and begintime!=''">
+			<if test="selecttime=='t.grosstime'">
+				and <![CDATA[t.grosstime >=to_date(trim(#{begintime}),'yyyy-MM-dd hh24:mi:ss')]]>
+			</if>
+			<if test="selecttime=='t.suttletime'">
+				and <![CDATA[t.suttletime >=to_date(trim(#{begintime}),'yyyy-MM-dd hh24:mi:ss')]]>
+			</if>
+			<if test="selecttime=='t.taretime'">
+				and <![CDATA[t.taretime >=to_date(trim(#{begintime}),'yyyy-MM-dd hh24:mi:ss')]]>
+			</if>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+			<if test="selecttime=='t.grosstime'">
+				and <![CDATA[t.grosstime <=to_date(trim(#{endtime}),'yyyy-MM-dd hh24:mi:ss')]]>
+			</if>
+			<if test="selecttime=='t.suttletime'">
+				and <![CDATA[t.suttletime <=to_date(trim(#{endtime}),'yyyy-MM-dd hh24:mi:ss')]]>
+			</if>
+			<if test="selecttime=='t.taretime'">
+				and <![CDATA[t.taretime <=to_date(trim(#{endtime}),'yyyy-MM-dd hh24:mi:ss')]]>
+			</if>
+		</if>
+	</update>
+</mapper>

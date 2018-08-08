@@ -1,0 +1,138 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- @author:chengyanli @date :2016-09-07 -->
+<mapper namespace="com.xgmes.service.mapper.MaterialMapper">
+	<!-- 查询 -->
+	<select id="queryList" resultType="material" parameterType="material">
+		select t.id,
+		t.materialcode,
+		t.materialname,
+		t.queryword,
+		t.erpcode,
+		t.theorycoefficient,
+		t.eachweight,
+		t.foldercode,
+		t.sizerange,
+		t.materialunit,
+		t.creator,
+		to_char(t.cdate,'yyyy-MM-dd hh24:mi:ss') cdate,
+		t.updater,
+		to_char(t.udate,'yyyy-MM-dd hh24:mi:ss') udate,
+		t.usermemo
+		from b_material_t t
+		where t.validflag > 0
+		<if test="materialname!=null and materialname !=''">
+			and instr(materialname,#{materialname})>0
+		</if>
+		<if test="materialcode!=null and materialcode !=''">
+			and instr(materialcode,upper(#{materialcode}))>0
+		</if>
+		<if test="queryword!=null and queryword !=''">
+			and instr(queryword,upper(#{queryword}))>0
+		</if>
+		<if test="types !=null and types !=''">
+			<if test="types == -1">
+				and (t.materialcode like 'M%' or t.materialcode like 'TM%')
+			</if>
+			<if test="types == 1">
+				and t.materialcode like 'M%'
+			</if>
+			<if test="types == 2">
+				and t.materialcode like 'TM%'
+			</if>
+		</if>
+		order by t.materialcode desc
+	</select>
+	<!-- 修改时，查询物料信息 -->
+	<select id="queryInfoByMaterial" parameterType="material" resultType="material">
+		select t.id,
+		t.materialcode,
+		t.materialname,
+		t.queryword,
+		t.erpcode,
+		t.theorycoefficient,
+		t.eachweight,
+		t.foldercode,
+		t.sizerange,
+		t.materialunit,
+		t.creator,
+		to_char(t.cdate,'yyyy-MM-dd hh24:mi:ss') cdate,
+		t.updater,
+		to_char(t.udate,'yyyy-MM-dd hh24:mi:ss') udate,
+		t.usermemo
+		from b_material_t t
+		where t.validflag > 0 and (t.materialcode like 'M%' or t.materialcode like 'TM%')
+		<if test="id!=null and id!='' and id!=-1 and id!=0">
+			and t.id = #{id}
+		</if>
+		order by t.materialcode desc
+	</select>
+	<!--添加时，判断是否允许添加 -->
+	<select id="queryCountAdd" parameterType="material" resultType="java.lang.Integer">
+		select count(0) from b_material_t t where t.materialname =#{materialname} and t.validflag>0
+			<if test="types == 1">
+				and t.materialcode like 'M%'
+			</if>
+			<if test="types == 2">
+				and t.materialcode like 'TM%'
+			</if>
+	</select>
+	<!--添加物料主表信息 -->
+	<insert id="insertMaterial" parameterType="material">
+		<selectKey resultType="java.lang.Long" order="BEFORE" keyProperty="id">
+			select b_material_s.nextval from dual
+		</selectKey>
+		insert into b_material_t t (
+		t.id,
+		t.validflag,
+		t.materialcode,
+		t.materialname,
+		t.queryword,
+		t.creator,
+		t.cdate,
+		t.usermemo
+		)
+		values(
+		#{id,jdbcType=NUMERIC},
+		1,
+		#{materialcode,jdbcType=VARCHAR},
+		#{materialname,jdbcType=VARCHAR},
+		#{queryword,jdbcType=VARCHAR},
+		#{creator,jdbcType=VARCHAR},
+		sysdate,
+		#{usermemo,jdbcType=VARCHAR}
+		)
+	</insert>
+	<!--判断信息是否允许修改 -->
+	<select id="queryCountUpdate" parameterType="material" resultType="java.lang.Integer">
+		select count(0)
+		from b_material_t t
+		where validflag > 0
+		and id != #{id}
+		and materialname = #{materialname} 
+		<if test="types == 1">
+				and t.materialcode like 'M%'
+			</if>
+		<if test="types == 2">
+			and t.materialcode like 'TM%'
+		</if>
+	</select>
+	<!--修改 -->
+	<update id="updateMaterial" parameterType="material">
+		update b_material_t t set
+		t.materialname=#{materialname,jdbcType=VARCHAR},
+		t.queryword=#{queryword,jdbcType=VARCHAR},
+		t.updater=#{updater,jdbcType=VARCHAR},
+		t.udate=sysdate,
+		t.usermemo=#{usermemo,jdbcType=VARCHAR}
+		where t.id =#{id}
+		and t.validflag > 0
+	</update>
+	<!--作废记录 -->
+	<update id="cancelMaterial" parameterType="material">
+		update b_material_t t
+		set t.validflag = 0, t.canceler = #{canceler,jdbcType = NUMERIC}, t.canceldate = sysdate
+		where t.id = #{id}
+		and t.validflag > 0
+	</update>
+</mapper>

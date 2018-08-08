@@ -1,0 +1,142 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xgmes.service.mapper.DocumentTypeMapper">
+	<select id="queryList" resultType="document" parameterType="document">
+		select id,
+		documentcode,
+		documentname,
+		decode(materiallflow, '1', '进厂', '2', '出厂') materiallflow,
+		worklinecode,
+		worklinename,
+		fdocumentcode,
+		fdocumentname,
+		sysmemo,
+		usermemo,
+		decode(auditlevel, '0', '无需审核', '1', '一级审核', '2', '二级审核') auditlevel,
+		createoperaname creator,
+		createdate cdate,
+		updateoperaname updater,
+		updatedate udate,
+		validflagoperaname canceler,
+		validflagdate canceldate,
+		validflag
+		from b_documenttype_t t
+		where validflag > 0
+
+		<if test="documentname!=null and documentname !=''">
+			and documentname like #{documentname}||'%'
+		</if>
+		<if test="materiallflow!=-1">
+			<if test="materiallflow!=null and materiallflow !=''">
+				and materiallflow like #{materiallflow}||'%'
+			</if>
+		</if>
+		<if test="auditlevel!=-1">
+			<if test="auditlevel !=null and auditlevel !=''">
+				and auditlevel=#{auditlevel}
+			</if>
+		</if>
+
+		order by createdate desc
+	</select>
+	<select id="queryInfoByid" parameterType="document" resultType="document">
+		select id,
+		documentcode,
+		documentname,
+		materiallflow,
+		worklinecode,
+		worklinename,
+		fdocumentcode,
+		fdocumentname,
+		sysmemo,
+		usermemo,
+		auditlevel,
+		createoperaname creator,
+		createdate cdate,
+		updateoperaname updater,
+		updatedate udate,
+		validflagoperaname canceler,
+		validflagdate canceldate,
+		validflag
+		from
+		b_documenttype_t t
+		where
+		validflag > 0 and
+		id=#{id,jdbcType=VARCHAR} and
+		rownum=1
+	</select>
+	<insert id="insertDocumenttype" parameterType="document">
+		insert into
+		b_documenttype_t
+		(id,
+		documentcode,
+		documentname,
+		materiallflow,
+		worklinecode,
+		worklinename,
+		fdocumentcode,
+		fdocumentname,
+		sysmemo,
+		usermemo,
+		auditlevel,
+		createoperacode,
+		createoperaname,
+		createdate)
+		values
+		(b_documenttype_s.nextval,
+		#{documentcode,jdbcType=VARCHAR},
+		#{documentname,jdbcType=VARCHAR},
+		#{materiallflow,jdbcType=VARCHAR},
+		#{worklinecode,jdbcType=VARCHAR},
+		#{worklinename,jdbcType=VARCHAR},
+		#{fdocumentcode,jdbcType=VARCHAR},
+		#{fdocumentname,jdbcType=VARCHAR},
+		#{sysmemo,jdbcType=VARCHAR},
+		#{usermemo,jdbcType=VARCHAR},
+		#{auditlevel,jdbcType=VARCHAR},
+		#{createoperacode,jdbcType=VARCHAR},
+		#{creator,jdbcType=VARCHAR},
+		sysdate)
+	</insert>
+
+	<update id="updateDocumenttype" parameterType="document">
+		update
+		b_documenttype_t
+		set 
+		documentname =#{documentname,jdbcType=VARCHAR},
+		materiallflow = #{materiallflow,jdbcType=VARCHAR},
+		worklinecode =#{worklinecode,jdbcType=VARCHAR},
+		worklinename = #{worklinename,jdbcType=VARCHAR},
+		fdocumentcode =#{fdocumentcode,jdbcType=VARCHAR},
+		fdocumentname = #{fdocumentname,jdbcType=VARCHAR},
+		sysmemo =#{sysmemo,jdbcType=VARCHAR},
+		usermemo = #{usermemo,jdbcType=VARCHAR},
+		auditlevel = #{auditlevel,jdbcType=VARCHAR},
+		updateoperaname = #{updater,jdbcType=VARCHAR},
+		updatedate = sysdate
+		where id = #{id,jdbcType=VARCHAR}
+	</update>
+	<update id="cancelDocumenttype" parameterType="document">
+		update
+		b_documenttype_t set
+		validflag =0,
+		validflagoperaname =#{canceler,jdbcType=VARCHAR},
+		validflagdate=sysdate
+		where id =#{id,jdbcType=VARCHAR}
+	</update>
+	<select id="queryCount" parameterType="document" resultType="int">
+		select count(1) from b_documenttype_t
+		where validflag>0
+		and
+		documentname=#{documentname,jdbcType=VARCHAR}
+	</select>
+	
+	<select id="queryCountById" parameterType="document" resultType="int">
+		select count(1) from b_documenttype_t
+		where id != #{id,jdbcType=VARCHAR} 
+		and validflag>0
+		and documentname=#{documentname,jdbcType=VARCHAR}
+	</select>
+
+</mapper>

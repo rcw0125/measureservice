@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xgmes.service.mapper.CheatlogMapper">
+
+	<select id="queryList" resultType="cheatlog" parameterType="cheatlog">
+		select t.id,
+		t.equipmentname,
+		t.msg,
+		t.createdate
+		from l_cheatlog_t t
+		where 1=1
+		<if test="begintime!=null and begintime!=''">
+    		<![CDATA[and t.createdate>=  to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+    		<![CDATA[and t.createdate <= to_date(#{endtime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="equipmentname !=null and equipmentname !=''">
+			and instr(t.equipmentname,#{model})>0
+		</if>
+		order by t.createdate desc
+	</select>
+
+	<insert id="insertCheatlog" parameterType="cheatlog">
+        <selectKey resultType="java.lang.Long" order="BEFORE" keyProperty="id">
+		 select l_cheatlog_s.nextval from dual		
+		</selectKey>
+		insert into
+		l_cheatlog_t t
+		(t.id,
+		t.msg,
+		t.equipmentname,
+		t.reserve1,
+		t.reserve2,
+		t.reserve3,
+		t.createdate)
+		values
+		(#{id,jdbcType=VARCHAR },
+		#{msg ,jdbcType=VARCHAR },
+		#{equipmentname,jdbcType=VARCHAR },
+		#{reserve1 ,jdbcType=VARCHAR },
+		#{reserve2 ,jdbcType=VARCHAR },
+		#{reserve3 ,jdbcType=VARCHAR },
+		sysdate)
+	</insert>
+</mapper>

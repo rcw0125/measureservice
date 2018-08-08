@@ -1,0 +1,565 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.talent.report.service.mapper.MeasureReportMapper">
+	<select id="queryReportDetail" resultType="measureReport" parameterType="measureReport">
+		select t.matchid,
+		t.carno,
+		t.taskcode,
+		t.planid,
+		t.materialname,
+		t.sourcename,
+		t.targetname,
+		nvl(round(t.tare * 0.001, 2),0) as tare,
+		to_char(t.taretime, 'yyyy-MM-dd hh24:mi:ss') taretime,
+		t.tareweigh,
+		nvl(round(t.gross * 0.001, 2),0) as gross,
+		to_char(t.grosstime,
+		'yyyy-MM-dd hh24:mi:ss') grosstime,
+		t.grossweigh,
+		nvl(round(t.deduction
+		* 0.001, 2), 0) as deduction,
+		nvl(round(t.suttle * 0.001, 2),0) as
+		suttle,
+		to_char(t.suttletime, 'yyyy-MM-dd hh24:mi:ss') suttletime,
+		substr(to_char(t.suttletime, 'yyyy-MM-dd hh24:mi:ss'),12) suttletimeHHMMSS,
+		t.suttleweigh,
+		t.grossoperaname,
+		t.tareoperaname,
+		t.suttleoperaname,
+		t.ship,
+		t.sourceplace,
+		o.operaname operatype,
+		nvl(t.tareb*0.001,0)tareb,
+		nvl(t.grossb*0.001,0)grossb,
+		t.grosstimeb,
+		nvl(round((t.suttle-t.deduction) * 0.001,
+		2),0) as suttleb,
+		round((case
+		when (t.suttle > 0
+		and t.suttleb >
+		0) then
+		(t.suttle - t.suttleb) / t.suttle * 1000
+		else
+		0
+		end),
+		2) accordrate,
+		decode((select count(m.matchid)
+		from M_PRINTBILL_T m
+		where m.matchid =
+		t.matchid
+		group by t.matchid),
+		'',
+		0,
+		(select count(m.matchid)
+		from
+		M_PRINTBILL_T m
+		where m.matchid = t.matchid
+		group by t.matchid))
+		printsum,t.usermemo memo,t.memo8 model,
+		decode((select p.materialflow from m_operaconfig_t p where t.operatype = p.operatype),1,t.sourcename,t.targetname) ks,
+		decode((select p.materialflow from m_operaconfig_t p where t.operatype = p.operatype),1,t.taregroupno,t.grossgroupno) groupno
+		from M_MEASURE_T t, m_operaconfig_t o
+		where t.operatype = o.operatype
+		and t.validflag > 0
+		<if test="begintime!=null and begintime!=''">
+			 <![CDATA[and ${selecttime}>=  to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+			<![CDATA[and ${selecttime} <= to_date(#{endtime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="planid!=null and planid !=''">
+			and instr(t.planid,upper(#{planid}))>0
+		</if>
+		<if test="taskcode!=null and taskcode !=''">
+			and instr(t.taskcode,#{taskcode})>0
+		</if>
+		<if test="matchid!=null and matchid !=''">
+			and instr(t.matchid,#{matchid})>0
+		</if>
+		<if test="carno !=null and carno !=''">
+			and instr(t.carno,upper(#{carno}))>0
+		</if>
+		<if test="materialname!=null and materialname !=''">
+			and instr(t.materialname,upper(#{materialname}))>0
+		</if>
+		<if test="targetname!=null and targetname!=''">
+			and instr(t.targetname,upper(#{targetname}))>0
+		</if>
+		<if test="sourcename!=null and sourcename!=''">
+			and instr(t.sourcename,upper(#{sourcename}))>0
+		</if>
+		<if test="operatype !=null and operatype !=''">
+			and t.operatype=#{operatype}
+		</if>
+		<if test="cartype !=null and cartype !=''">
+			and t.cartype=#{cartype}
+		</if>
+		<if test="memo8 !=null and memo8 !=''">
+			and instr(t.memo8,#{memo8})>0
+		</if>
+		<if test="grossweighid !=null and grossweighid !=''">
+			and t.grossweighid=#{grossweighid}
+		</if>
+		<if test="tareweighid !=null and tareweighid !=''">
+			and t.tareweighid=#{tareweighid}
+		</if>
+		<if test="suttleweighid !=null and suttleweighid !=''">
+			and t.suttleweighid=#{suttleweighid}
+		</if>
+		<if test="operatype !=null and operatype !=''">
+			and t.operatype=#{operatype}
+		</if>
+		<if test="materialflow !=-1">
+			and o.materialflow=#{materialflow}
+		</if>
+		order by t.createdate desc
+	</select>
+
+
+	<select id="queryReportLog" resultType="measureReport" parameterType="measureReport">
+		select t.matchid,
+		decode(t.measurestate, 'G', '计毛', 'T', '计皮') measurestate,
+		t.carno,
+		t.taskcode,
+		t.planid,
+		t.materialname,
+		t.sourcename,
+		t.targetname,
+		nvl(round(t.tare * 0.001, 2), 0) as tare,
+		to_char(t.taretime, 'yyyy-MM-dd hh24:mi:ss') taretime,
+		t.tareweigh,
+		nvl(round(t.gross * 0.001, 2), 0) as gross,
+		to_char(t.grosstime, 'yyyy-MM-dd hh24:mi:ss') grosstime,
+		t.grossweigh,
+		nvl(round(t.deduction * 0.001, 2), 0) as deduction,
+		nvl(round(t.suttle * 0.001, 2), 0) as suttle,
+		to_char(t.suttletime, 'yyyy-MM-dd hh24:mi:ss') suttletime,
+		t.suttleweigh,
+		t.grossoperaname,
+		t.tareoperaname,
+		t.suttleoperaname,
+		t.sourceplace,
+		o.operaname operatype,
+		nvl(t.tareb, 0) tareb,
+		nvl(t.grossb, 0) grossb,
+		nvl(round(t.suttleb * 0.001, 2), 0) as suttleb
+		from
+		m_measure_log_t t, m_operaconfig_t o
+		where t.operatype = o.operatype
+		and t.validflag > 0
+		<if test="begintime!=null and begintime!=''">
+			 <![CDATA[and ${selecttime}>=  to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+			<![CDATA[and ${selecttime} <= to_date(#{endtime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="planid!=null and planid !=''">
+			and instr(t.planid,upper(#{planid}))>0
+		</if>
+		<if test="taskcode!=null and taskcode !=''">
+			and instr(t.taskcode,#{taskcode})>0
+		</if>
+		<if test="matchid!=null and matchid !=''">
+			and instr(t.matchid,#{matchid})>0
+		</if>
+		<if test="carno !=null and carno !=''">
+			and instr(t.carno,upper(#{carno}))>0
+		</if>
+		<if test="materialname!=null and materialname !=''">
+			and instr(t.materialname,upper(#{materialname}))>0
+		</if>
+		<if test="targetname!=null and targetname!=''">
+			and instr(t.targetname,upper(#{targetname}))>0
+		</if>
+		<if test="sourcename!=null and sourcename!=''">
+			and instr(t.sourcename,upper(#{sourcename}))>0
+		</if>
+		<if test="operatype !=null and operatype !=''">
+			and t.operatype=#{operatype}
+		</if>
+		<if test="cartype !=null and cartype !=''">
+			and t.cartype=#{cartype}
+		</if>
+		<if test="grossweighid !=null and grossweighid !=''">
+			and t.grossweighid=#{grossweighid}
+		</if>
+		<if test="tareweighid !=null and tareweighid !=''">
+			and t.tareweighid=#{tareweighid}
+		</if>
+		<if test="suttleweighid !=null and suttleweighid !=''">
+			and t.suttleweighid=#{suttleweighid}
+		</if>
+		<if test="operatype !=null and operatype !=''">
+			and t.operatype=#{operatype}
+		</if>
+		<if test="materialflow !=-1">
+			and o.materialflow=#{materialflow}
+		</if>
+		order by t.createdate desc
+	</select>
+
+	<select id="queryCount" resultType="measureReport" parameterType="measureReport">
+		select
+		sum(nvl(round(t.tare * 0.001, 2),0)) as tare,
+		sum(nvl(round(t.gross * 0.001, 2),0)) as gross,
+		sum(nvl(round(t.suttle * 0.001, 2),0)) as suttle,
+		nvl(round(sum(t.deduction) * 0.001, 3), 0) as deduction,
+		nvl(round(sum(t.suttle-t.deduction) * 0.001, 3), 0) as suttleb
+		from M_MEASURE_T t, m_operaconfig_t o
+		where t.operatype = o.operatype
+		and t.validflag > 0
+		<if test="begintime!=null and begintime!=''">
+			 <![CDATA[and ${selecttime}>=  to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+			<![CDATA[and ${selecttime} <= to_date(#{endtime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="planid!=null and planid !=''">
+			and instr(t.planid,upper(#{planid}))>0
+		</if>
+		<if test="taskcode!=null and taskcode !=''">
+			and instr(t.taskcode,#{taskcode})>0
+		</if>
+		<if test="matchid!=null and matchid !=''">
+			and instr(t.matchid,#{matchid})>0
+		</if>
+		<if test="carno !=null and carno !=''">
+			and instr(t.carno,upper(#{carno}))>0
+		</if>
+		<if test="materialname!=null and materialname !=''">
+			and instr(t.materialname,upper(#{materialname}))>0
+		</if>
+		<if test="targetname!=null and targetname!=''">
+			and instr(t.targetname,upper(#{targetname}))>0
+		</if>
+		<if test="sourcename!=null and sourcename!=''">
+			and instr(t.sourcename,upper(#{sourcename}))>0
+		</if>
+		<if test="operatype !=null and operatype !=''">
+			and t.operatype=#{operatype}
+		</if>
+		<if test="cartype !=null and cartype !=''">
+			and t.cartype=#{cartype}
+		</if>
+		<if test="memo8 !=null and memo8 !=''">
+			and instr(t.memo8,#{memo8})>0
+		</if>
+		<if test="grossweighid !=null and grossweighid !=''">
+			and t.grossweighid=#{grossweighid}
+		</if>
+		<if test="tareweighid !=null and tareweighid !=''">
+			and t.tareweighid=#{tareweighid}
+		</if>
+		<if test="suttleweighid !=null and suttleweighid !=''">
+			and t.suttleweighid=#{suttleweighid}
+		</if>
+		<if test="operatype !=null and operatype !=''">
+			and t.operatype=#{operatype}
+		</if>
+		<if test="materialflow !=-1">
+			and o.materialflow=#{materialflow}
+		</if>
+		order by t.createdate desc
+	</select>
+
+	<select id="queryLogCount" resultType="measureReport" parameterType="measureReport">
+		select
+		sum(nvl(round(t.tare * 0.001, 2),0)) as tare,
+		sum(nvl(round(t.gross * 0.001, 2),0)) as gross,
+		sum(nvl(round(t.suttle * 0.001, 2),0)) as suttle,
+		sum(nvl(round(t.suttleb * 0.001,2),0)) as suttleb
+		from m_measure_log_t t, m_operaconfig_t o
+		where t.operatype = o.operatype
+		and t.validflag > 0
+		<if test="begintime!=null and begintime!=''">
+			 <![CDATA[and ${selecttime}>=  to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+			<![CDATA[and ${selecttime} <= to_date(#{endtime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="planid!=null and planid !=''">
+			and instr(t.planid,upper(#{planid}))>0
+		</if>
+		<if test="taskcode!=null and taskcode !=''">
+			and instr(t.taskcode,#{taskcode})>0
+		</if>
+		<if test="matchid!=null and matchid !=''">
+			and instr(t.matchid,#{matchid})>0
+		</if>
+		<if test="carno !=null and carno !=''">
+			and instr(t.carno,upper(#{carno}))>0
+		</if>
+		<if test="materialname!=null and materialname !=''">
+			and instr(t.materialname,upper(#{materialname}))>0
+		</if>
+		<if test="targetname!=null and targetname!=''">
+			and instr(t.targetname,upper(#{targetname}))>0
+		</if>
+		<if test="sourcename!=null and sourcename!=''">
+			and instr(t.sourcename,upper(#{sourcename}))>0
+		</if>
+		<if test="operatype !=null and operatype !=''">
+			and t.operatype=#{operatype}
+		</if>
+		<if test="cartype !=null and cartype !=''">
+			and t.cartype=#{cartype}
+		</if>
+		<if test="grossweighid !=null and grossweighid !=''">
+			and t.grossweighid=#{grossweighid}
+		</if>
+		<if test="tareweighid !=null and tareweighid !=''">
+			and t.tareweighid=#{tareweighid}
+		</if>
+		<if test="suttleweighid !=null and suttleweighid !=''">
+			and t.suttleweighid=#{suttleweighid}
+		</if>
+		<if test="operatype !=null and operatype !=''">
+			and t.operatype=#{operatype}
+		</if>
+		<if test="materialflow !=-1">
+			and o.materialflow=#{materialflow}
+		</if>
+		order by t.createdate desc
+	</select>
+
+	<select id="queryReportSum" resultType="measureReport" parameterType="measureReport">
+		select
+		<if test="grouptype!='' and grouptype !=null">
+			${grouptype},
+		</if>
+		count(1) as carcount,nvl(round(sum(t.gross)*0.001,3),0) as
+		gross,nvl(round(sum(t.tare)*0.001,3),0) as tare,
+		nvl(round(sum(t.suttle)*0.001,3),0) as suttle,
+		nvl(round(sum(t.suttle-t.deduction) * 0.001, 3), 0) as suttleb,
+		nvl(round(sum(t.deduction) * 0.001, 3), 0) as deduction,
+		round((case when
+		(sum(t.suttle)
+		> 0 and sum(t.suttleb) > 0)
+		then (sum(t.suttle) -
+		sum(t.suttleb)) /
+		sum(t.suttle) * 1000 else 0 end),2)
+		as accordrate
+		from m_measure_t t,m_operaconfig_t o
+		where t.validflag > 0 and t.operatype=o.operatype
+		<if test="begintime!=null and begintime!=''">
+			 <![CDATA[and ${selecttime}>=  to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+			<![CDATA[and ${selecttime} <= to_date(#{endtime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="planid!=null and planid !=''">
+			and instr(t.planid,upper(#{planid}))>0
+		</if>
+		<if test="taskcode!=null and taskcode !=''">
+			and instr(t.taskcode,#{taskcode})>0
+		</if>
+		<if test="carno !=null and carno !=''">
+			and instr(t.carno,upper(#{carno}))>0
+		</if>
+		<if test="materialname!=null and materialname !=''">
+			and instr(t.materialname,upper(#{materialname}))>0
+		</if>
+		<if test="targetname!=null and targetname!=''">
+			and instr(t.targetname,upper(#{targetname}))>0
+		</if>
+		<if test="sourcename!=null and sourcename!=''">
+			and instr(t.sourcename,upper(#{sourcename}))>0
+		</if>
+		<if test="operatype !=null and operatype!=''">
+			and t.operatype = trim(#{operatype})
+		</if>
+		<if test="cartype !=null and cartype !=''">
+			and t.cartype=#{cartype}
+		</if>
+		<if test="materialflow !=-1">
+			and o.materialflow=#{materialflow}
+		</if>
+		<if test=" equname !=null and equname !=''">
+			and (t.grossweighid =#{equname} or t.tareweighid = #{equname} or t.suttleweighid
+			= #{equname})
+		</if>
+		<if test="grouptype!=null and grouptype !=''">
+			group by ${grouptype}
+		</if>
+	</select>
+
+	<select id="querySumCount" resultType="measureReport" parameterType="measureReport">
+		select sum(carcount)carcount,sum(gross)gross,sum(tare)tare,sum(suttle)suttle,sum(deduction)deduction,sum(suttleb)suttleb from
+		(select
+		<if test="grouptype!='' and grouptype !=null">
+			${grouptype},
+		</if>
+		count(1) as carcount,
+		nvl(round(sum(t.gross) * 0.001, 3), 0) as gross,
+		nvl(round(sum(t.tare) * 0.001, 3), 0) as tare,
+		nvl(round(sum(t.suttle) * 0.001, 3), 0) as suttle,
+		nvl(round(sum(t.deduction) * 0.001, 3), 0) as deduction,
+		nvl(round(sum(t.suttle-t.deduction) * 0.001, 3), 0) as suttleb
+		from m_measure_t t,m_operaconfig_t o where t.validflag > 0 and t.operatype=o.operatype
+		<if test="begintime!=null and begintime!=''">
+			 <![CDATA[and ${selecttime}>=  to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+			<![CDATA[and ${selecttime} <= to_date(#{endtime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="planid!=null and planid !=''">
+			and instr(t.planid,upper(#{planid}))>0
+		</if>
+		<if test="taskcode!=null and taskcode !=''">
+			and instr(t.taskcode,#{taskcode})>0
+		</if>
+		<if test="carno !=null and carno !=''">
+			and instr(t.carno,upper(#{carno}))>0
+		</if>
+		<if test="materialname!=null and materialname !=''">
+			and instr(t.materialname,upper(#{materialname}))>0
+		</if>
+		<if test="targetname!=null and targetname!=''">
+			and instr(t.targetname,upper(#{targetname}))>0
+		</if>
+		<if test="sourcename!=null and sourcename!=''">
+			and instr(t.sourcename,upper(#{sourcename}))>0
+		</if>
+		<if test="operatype !=null and operatype!=''">
+			and t.operatype = trim(#{operatype})
+		</if>
+		<if test="cartype !=null and cartype !=''">
+			and t.cartype=#{cartype}
+		</if>
+		<if test="materialflow !=-1">
+			and o.materialflow=#{materialflow}
+		</if>
+		<if test=" equname !=null and equname !=''">
+			and (t.grossweighid =#{equname} or t.tareweighid = #{equname} or t.suttleweighid
+			= #{equname})
+		</if>
+		)
+	</select>
+
+
+	<select id="queryTareinfo" parameterType="tarelog" resultType="tarelog">
+		select m.carno,
+		nvl(m.tare*0.001,0)tare,
+		to_char(m.taretime,'yyyy-MM-dd hh24:mi:ss') taretime,
+		m.tareweigh,
+		m.tareoperaname
+		from m_tare_t m
+		where m.validflag>0
+		<if test="begintime!=null and begintime!=''">
+    		<![CDATA[and m.taretime>=  to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+    		<![CDATA[and m.taretime <= to_date(#{endtime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="carno !=null and carno !=''">
+			and instr(carno,upper(#{carno}))>0
+		</if>
+		<if test="cartype !=null and cartype !=''">
+			and m.cartype=#{cartype}
+		</if>
+		order by m.taretime desc
+	</select>
+
+	<select id="queryTareloginfo" parameterType="tarelog" resultType="tarelog">
+		select m.carno,
+		nvl(m.tare*0.001,0)tare,
+		to_char(m.taretime,'yyyy-MM-dd hh24:mi:ss') taretime,
+		m.tareweigh,
+		m.tareoperaname
+		from m_tare_log_t m
+		where m.validflag>0
+		<if test="begintime!=null and begintime!=''">
+    		<![CDATA[and m.taretime>=  to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+    		<![CDATA[and m.taretime <= to_date(#{endtime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="carno !=null and carno !=''">
+			and instr(carno,upper(#{carno}))>0
+		</if>
+		<if test="cartype !=null and cartype !=''">
+			and m.cartype=#{cartype}
+		</if>
+		order by m.taretime desc
+	</select>
+
+	<select id="queryPrintinfo" parameterType="printlog" resultType="printlog">
+		select t.matchid,
+		t.equname,
+		t.opname,
+		to_char(t.createtime,'yyyy-MM-dd hh24:mi:ss')createtime,
+		t.printtype
+		from m_printbill_t t
+		where t.matchid = #{matchid}
+	</select>
+
+	<!--更新计量表打印次数及打印序列 -->
+	<update id="updateMeasurePrintCount" parameterType="measureReport">
+		update m_measure_t t
+		set t.printcount = printcount + 1
+		where t.validflag = 1
+		and t.suttle > 0
+		<if test="nomatchids!=null and nomatchids !=''">
+			and t.matchid not in
+			<foreach collection="nomatchids" item="item" index="index" open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		<if test="materialname!=null and materialname !=''">
+			and t.materialname like #{materialname}||'%'
+		</if>
+		<if test="targetname!=null and targetname!=''">
+			and t.targetname like #{targetname} ||'%'
+		</if>
+		<if test="sourcename!=null and sourcename!=''">
+			and t.sourcename like #{sourcename}||'%'
+		</if>
+		<if test="grossweighid !=null and grossweighid !=''">
+			and t.grossweighid=#{grossweighid}
+		</if>
+		<if test="tareweighid !=null and tareweighid !=''">
+			and t.tareweighid=#{tareweighid}
+		</if>
+		<if test="suttleweighid !=null and suttleweighid !=''">
+			and t.suttleweighid=#{suttleweighid}
+		</if>
+		<if test="carno !=null and carno !=''">
+			and t.carno like '%'||#{carno}||'%'
+		</if>
+		<if test="planid!=null and planid !=''">
+			and t.planid like #{planid}||'%'
+		</if>
+		<if test="matchid!=null and matchid !=''">
+			and t.matchid like #{matchid}||'%'
+		</if>
+		<if test="cartype !=null and cartype !=''">
+			and t.cartype=#{cartype}
+		</if>
+		<if test="operatype !=null and operatype!=''">
+			and t.operatype = trim(#{operatype})
+		</if>
+		<if test="begintime!=null and begintime!=''">
+			<if test="selecttime=='t.grosstime'">
+				and <![CDATA[t.grosstime >=to_date(trim(#{begintime}),'yyyy-MM-dd hh24:mi:ss')]]>
+			</if>
+			<if test="selecttime=='t.suttletime'">
+				and <![CDATA[t.suttletime >=to_date(trim(#{begintime}),'yyyy-MM-dd hh24:mi:ss')]]>
+			</if>
+			<if test="selecttime=='t.taretime'">
+				and <![CDATA[t.taretime >=to_date(trim(#{begintime}),'yyyy-MM-dd hh24:mi:ss')]]>
+			</if>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+			<if test="selecttime=='t.grosstime'">
+				and <![CDATA[t.grosstime <=to_date(trim(#{endtime}),'yyyy-MM-dd hh24:mi:ss')]]>
+			</if>
+			<if test="selecttime=='t.suttletime'">
+				and <![CDATA[t.suttletime <=to_date(trim(#{endtime}),'yyyy-MM-dd hh24:mi:ss')]]>
+			</if>
+			<if test="selecttime=='t.taretime'">
+				and <![CDATA[t.taretime <=to_date(trim(#{endtime}),'yyyy-MM-dd hh24:mi:ss')]]>
+			</if>
+		</if>
+	</update>
+</mapper>

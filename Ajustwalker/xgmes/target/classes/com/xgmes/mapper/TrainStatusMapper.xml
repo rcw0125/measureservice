@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xgmes.service.mapper.TrainStatusMapper">
+
+	<!-- 查询 -->
+	<select id="queryList" resultType="trainstatus" parameterType="trainstatus">
+		select t.linecode,
+		t.linename,
+		t.vreceivecode,
+		t.vtraincode,
+		t.vtraintype,
+		t.istatus,
+		t.vinvname,
+		t.vstation,
+		t.measstatus,
+		to_char(t.createdate,'yyyy-MM-dd hh24:mi:ss') createdate
+		from b_trainstatus_t t
+		where 1=1
+		<if test="begintime!=null and begintime!=''">
+    		<![CDATA[and t.createdate>=  to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+    		<![CDATA[and t.createdate <= to_date(#{endtime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="vtraincode !=null and vtraincode !=''">
+			and instr(t.vtraincode,#{vtraincode})>0
+		</if>
+		<if test="vtraintype !=null and vtraintype !=''">
+			and instr(t.vtraintype,upper(#{vtraintype}))>0
+		</if>
+		<if test="vinvname !=null and vinvname !=''">
+			and instr(t.vinvname,upper(#{vinvname}))>0
+		</if>
+		<if test="vstation !=null and vstation !=''">
+			and instr(t.vstation,#{vstation})>0
+		</if>
+		order by t.createdate desc
+	</select>
+
+	<!-- 删除 -->
+	<delete id="delete" parameterType="trainstatus">
+		delete b_trainstatus_t t
+		where t.vreceivecode = #{vreceivecode}
+	</delete>
+
+	<!-- 查询发到站 -->
+	<select id="queryVstation" parameterType="combox" resultType="combox">
+		select t.vstation id,
+		t.vstation text
+		from b_trainstatus_vstation_v t
+		where 1=1
+		<if test="searchText!=null and searchText !=''">
+			and (t.vstation like '%' || #{searchText} ||'%')
+		</if>
+	</select>
+
+</mapper>

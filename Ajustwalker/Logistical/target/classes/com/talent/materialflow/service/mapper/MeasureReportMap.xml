@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.talent.materialflow.service.mapper.MeasureReportMapper">
+
+	<select id="queryMeasureDetail" parameterType="measure" resultType="measure">
+		select t.matchid,
+		       t.carno,
+		       t.taskcode,
+		       t.planid,
+		       t.materialname,
+		       t.sourcename,
+		       t.targetname,
+		       nvl(round(t.tare * 0.001, 2), 0) as tare,
+		       to_char(t.taretime, 'yyyy-mm-dd hh24:mi:ss') taretime,
+		       t.tareweigh,
+		       nvl(round(t.gross * 0.001, 2), 0) as gross,
+		       to_char(t.grosstime, 'yyyy-mm-dd hh24:mi:ss') grosstime,
+		       t.grossweigh,
+		       nvl(round(t.deduction * 0.001, 2), 0) as deduction,
+		       nvl(round(t.suttle * 0.001, 2), 0) as suttle,
+		       to_char(t.suttletime, 'yyyy-mm-dd hh24:mi:ss') suttletime,
+		       t.suttleweigh,
+		       t.grossoperaname,
+		       t.tareoperaname,
+		       t.suttleoperaname,
+		       t.ship,
+		       t.sourceplace,
+		       o.operaname operatype,
+		       nvl(t.tareb * 0.001, 0) tareb,
+		       nvl(t.grossb * 0.001, 0) grossb,
+		       t.grosstimeb,
+		       nvl(round(t.suttleb * 0.001, 2), 0) as suttleb,
+		       decode((select count(m.matchid)
+		                from m_printbill_t m
+		               where m.matchid = t.matchid
+		               group by t.matchid),
+		              '',
+		              0,
+		              (select count(m.matchid)
+		                 from m_printbill_t m
+		                where m.matchid = t.matchid
+		                group by t.matchid)) printsum,
+		       t.usermemo memo
+		  from m_measure_t t, m_operaconfig_t o
+		 where t.operatype = o.operatype
+		   and t.validflag > 0
+	<!-- 	<if test="begintime!=null and begintime!=''">
+    		<![CDATA[and a.createdate>=  to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+    		<![CDATA[and a.createdate <= to_date(#{endtime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if> -->
+		<if test="planid!=null and planid !=''">
+			and t.planid like '%' || #{planid}||'%'
+		</if>
+		<if test="matchid!=null and matchid !=''">
+			and t.matchid like '%' || #{matchid}||'%'
+		</if>
+		<if test="carno !=null and carno !=''">
+			and t.carno like '%' || #{carno}||'%'
+		</if>
+		<if test="materialname!=null and materialname !=''">
+			and t.materialname like '%' || #{materialname}||'%'
+		</if>
+		<if test="targetname!=null and targetname!=''">
+			and t.targetname like '%' || #{targetname} ||'%'
+		</if>
+		<if test="sourcename!=null and sourcename!=''">
+			and t.sourcename like '%' || #{sourcename}||'%'
+		</if>
+		<if test="operatype !=null and operatype !=''">
+			and t.operatype=#{operatype}
+		</if>
+		<if test="documentcode !=null and documentcode !=''">
+			and a.documentcode=#{documentcode}
+		</if>
+		order by a.createdate desc
+	</select>
+</mapper>

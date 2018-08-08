@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.talent.privilege.service.mapper.DashboardMapper">
+	<select id="getReminders" parameterType="String" resultType="java.util.Map">
+		select t.documentcode,b.documentname,count(1) as c from L_APPLICATIONBILL_T t,B_DOCUMENTTYPE_T b 
+		where t.documentcode = b.documentcode and t.approverfirst = #{carno,jdbcType = VARCHAR} 
+		and t.firsttime is null and t.validflag > 0
+		and trunc(to_date(t.inoutdate, 'yyyy:MM:dd hh24:mi:ss'),'dd') = trunc(sysdate,'dd') 
+		group by t.documentcode,b.documentname
+	</select>
+	
+	<select id="getMeasureUserPrivileges" parameterType="String" resultType="java.util.Map">
+		select distinct resourcecode, resourcename
+		  from (select r.resourcecode, r.resourcename
+		          from S_USER_T         u,
+		               s_userrole_t     ur,
+		               S_RESOURCEROLE_T rs,
+		               s_resource_t     r
+		         where u.id = ur.userid
+		           and ur.roleid = rs.roleid
+		           and rs.resourceid = r.id
+		           and r.fid in (SELECT id FROM S_RESOURCE_T WHERE resourcename = '计量' and fid = 0)
+		           and u.username = #{value}
+		        union all
+		        select r.resourcecode, r.resourcename
+		          from S_USER_T u, S_RESOURCEUSER_T us, s_resource_t r
+		         where u.id = us.userid
+		           and us.resourceid = r.id
+		           and r.fid in (SELECT id FROM S_RESOURCE_T WHERE resourcename = '计量' and fid = 0)
+		           and u.username = #{value})
+		
+	</select>
+	
+	<select id="getMeasureUserByName" parameterType="String" resultType="userms">
+		select t.password ,t.username  usercode ,t.displayname USERNAME ,  t.servicing from S_USER_T t where t.username = #{value}
+	</select>
+	
+	<select id="queryCount" resultType="int">
+		select count(distinct t.id） from l_entrylog_t t  where t.validflag > 0 and t.validflag = 2
+	</select>
+	<select id="isparameter" parameterType="int" resultType="String">
+		select t.parameter
+			from q_interfacematerial_t t
+			where  t.validflag = 1 AND t.ID = #{id,jdbcType=DECIMAL}
+	</select>
+	<select id="getAllMeasureUser" resultType="userms">
+    	SELECT DISTINCT U.ID,U.USERNAME USERCODE, U.displayname USERNAME, U.NATION
+	      FROM S_USER_T U, s_roleuser_t UR, S_RESOURCEROLE_T RR, S_RESOURCE_T R
+	     WHERE U.id = UR.Userid
+	       AND UR.ROLEID = RR.ROLEID
+	       AND RR.Resourceid = R.id
+	       AND R.RESOURCENAME = '计量坐席'
+    </select>
+    
+    <select id="queryPassword" parameterType="userms" resultType="userms">
+      select t.username usercode,t.password from S_USER_T t where t.username = #{usercode,jdbcType = VARCHAR}
+    </select>
+    <update id="updatePassword"  parameterType="userms" >
+        update S_USER_T set password= #{password,jdbcType = VARCHAR}  where username = #{usercode,jdbcType = VARCHAR}
+    </update>
+</mapper>

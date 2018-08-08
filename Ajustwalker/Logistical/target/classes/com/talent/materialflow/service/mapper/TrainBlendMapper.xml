@@ -1,0 +1,222 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.talent.materialflow.service.mapper.TrainBlendMapper">
+	<select id="queryTrainBlendList" resultType="measure"
+		parameterType="measure">
+		select t.matchid,
+		       t.carno,
+		       t.operatype,
+		       t.planid,
+		       t.taskcode,
+		       t.materialcode,
+		       t.materialname,
+		       t.materialspec,
+		       t.shipcode,
+		       t.ship,
+		       t.sourcecode,
+		       t.sourcename,
+		       t.targetcode,
+		       t.targetname,
+		       t.sourceplace,
+		       t.targetplace,
+		       t.gross * 0.001 gross,
+		       to_char(t.grosstime, 'yyyy-MM-dd hh24:mi:ss') grosstime,
+		       t.grossweighid,
+		       t.grossweigh,
+		       t.grossoperaname,
+		       t.grossoperacode,
+		       t.tare * 0.001 tare,
+		       to_char(t.taretime, 'yyyy-MM-dd hh24:mi:ss') taretime,
+		       t.tareweighid,
+		       t.tareweigh,
+		       t.tareoperaname,
+		       t.tareoperacode,
+		       t.deduction * 0.001 deduction,
+		       to_char(t.deductiontime, 'yyyy-MM-dd hh24:mi:ss') deductiontime,
+		       t.deductionname,
+		       t.suttle * 0.001 suttle,
+		       to_char(t.suttletime, 'yyyy-MM-dd hh24:mi:ss') suttletime,
+		       t.suttleweighid,
+		       t.suttleweigh,
+		       t.suttleoperaname,
+		       t.createdate,
+		       t.grossb * 0.001 grossb,
+		       t.tareb * 0.001 tareb,
+		       round((t.suttle - t.deduction), 3) * 0.001 suttleb,
+		       t.usermemo,
+		       t.basket,
+		       decode(t.basket, '', '未勾兑', '已勾兑') sysmemo,
+               m.operaman,
+               to_char(m.createdate, 'yyyy-MM-dd hh24:mi:ss') createdate2 
+      from m_measure_t t left join m_exception_log_t m on t.matchid=m.matchid
+     where  t.validflag > 0
+           and m.types=2
+		   and t.gross > 0
+		   and t.tare > 0
+		   and t.cartype = 'T'
+		   and t.operatype = '95'
+		<!-- <if test="planid!=null and planid !=''">
+			and t.planid like '%' || #{planid}||'%'
+		</if> -->
+		<if test="matchid!=null and matchid !=''">
+			and t.matchid like '%' || #{matchid}||'%'
+		</if>
+		<if test="carno !=null and carno !=''">
+			and t.carno like '%' || #{carno}||'%'
+		</if>
+		<if test="materialname!=null and materialname !=''">
+			and t.materialname like '%' || #{materialname}||'%'
+		</if>
+		<if test="targetname!=null and targetname!=''">
+			and t.targetname like '%' || #{targetname} ||'%'
+		</if>
+		<if test="sourcename!=null and sourcename!=''">
+			and t.sourcename like '%' || #{sourcename}||'%'
+		</if>
+		<if test="sourceplace!=null and sourceplace!=''">
+			and t.sourceplace like '%' || #{sourceplace}||'%'
+		</if>
+		<if test="operatype !=null and operatype !=''">
+			and t.operatype=#{operatype}
+		</if>
+		<if test="basket !=null and basket!=''">
+			<if test="basket=='0'.toString()">
+			    and basket is null
+			</if>
+			<if test="basket=='1'.toString()">
+			    and basket is not null
+			</if>
+		</if>
+		<if test="begintime!=null and begintime!=''">
+    		<![CDATA[and t.createdate>=  to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+    		<![CDATA[and t.createdate <= to_date(#{endtime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		order by t.createdate desc,t.carno asc
+	</select>
+    
+	<select id="queryTrainBlendBymatchid" resultType="measure"
+		parameterType="measure">
+		select t.icid,
+		       t.matchid,
+		       t.carno,
+		       t.operatype,
+		       t.planid,
+		       t.taskcode,
+		       t.materialcode,
+		       t.materialname,
+		       t.materialspec,
+		       t.shipcode,
+		       t.ship,
+		       t.sourcecode,
+		       t.sourcename,
+		       t.sourceplace,
+		       t.targetcode,
+		       t.targetname,
+		       t.targetplace,
+		       t.gross * 0.001 gross,
+		       to_char(t.grosstime, 'yyyy-MM-dd hh24:mi:ss') grosstime,
+		       t.grossweighid,
+		       t.grossweigh,
+		       t.grossgroupno,
+		       t.grossserial,
+		       t.grossoperaname,
+		       t.grossoperacode,
+		       t.tare * 0.001 tare,
+		       to_char(t.taretime, 'yyyy-MM-dd hh24:mi:ss') taretime,
+		       t.tareweighid,
+		       t.tareweigh,
+		       t.taregroupno,
+		       t.tareserial,
+		       t.tareoperaname,
+		       t.tareoperacode,
+		       t.deduction * 0.001 deduction,
+		       t.deductiontime,
+		       t.suttle * 0.001 suttle,
+		       t.suttletime,
+		       t.suttleweighid,
+		       t.suttleweigh,
+		       t.suttleoperaname,
+		       t.createdate,
+		       t.grossb * 0.001 grossb,
+		       t.tareb * 0.001 tareb,
+		       t.suttleb * 0.001 suttleb
+		  from m_measure_t t
+		 where t.validflag > 0
+		   and t.matchid = #{matchid,jdbcType = VARCHAR}
+	</select>
+
+	<update id="updateTrainBlend" parameterType="application">
+		update m_measure_t
+		set
+		basket =#{saleitemid,jdbcType=VARCHAR},
+		planid=#{planid,jdbcType=VARCHAR},
+		sourcecode=#{sourcecode,jdbcType=VARCHAR},
+		sourcename=#{reserve2,jdbcType=VARCHAR}
+		where matchid = #{matchid,jdbcType=VARCHAR}
+	</update>
+	<select id="queryBlendInterList" resultType="application" parameterType="application">
+		select t.planid,
+		       i.carno ship,
+		       t.usermemo,
+		       t.arrivetime,
+		       t.sourcecode,
+		       t.sourcename,
+		       decode(t.typeflag, 1, t.targetcode, i.targetcode) targetcode,
+		       decode(t.typeflag, 1, t.targetname, i.targetname) targetname,
+		       i.materialcode,
+		       i.materialname,
+		       trim(decode(t.typeflag, 1, i.carno, t.carno)) carno,
+		       (i.planmaterialcount-(select count(matchid) from m_measure_t m where m.validflag>0 and m.planid = t.planid)) snumber,
+		       i.suttleapp,
+		       i.middlemanname,
+		       i.measureunit,
+		       i.planmaterialcount,
+		       decode(t.typeflag, 1, '到货单', '发运单') sysmemo,
+		       i.saleitemid,
+		       t.createdate,
+		       t.sourceplace
+		  from l_interfaceinfo_t t
+		  left join l_interfaceinfo_item_t i
+		    on t.id = i.fid
+		 where t.validflag > 0
+		   and t.reserve1 = '火运'
+		<!-- <if test="planid!=null and planid !=''">
+			and t.planid like '%' || #{planid}||'%'
+		</if> -->
+		<if test="sourceplace !=null and sourceplace !=''">
+			and t.sourceplace like '%' || #{sourceplace}||'%'
+		</if>
+		<if test="materialname!=null and materialname !=''">
+			and i.materialname like '%' ||  #{materialname}||'%'
+		</if>
+		<if test="targetname!=null and targetname!=''">
+			and t.targetname like '%' || #{targetname} ||'%'
+		</if>
+		<if test="sourcename!=null and sourcename!=''">
+			and t.sourcename like '%' || #{sourcename}||'%'
+		</if>
+		<if test="ship!=null and ship!=''">
+			and i.carno like '%' || #{ship}||'%'
+		</if>
+		<if test="validflag!=null and validflag!=''">
+			and t.validflag = #{validflag}
+		</if>
+		<if test="begintime!=null and begintime!=''">
+    		<![CDATA[and to_date(t.arrivetime,'yyyy-MM-dd hh24:mi:ss')>=  to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+    		<![CDATA[and to_date(t.arrivetime,'yyyy-MM-dd hh24:mi:ss') <= to_date(#{endtime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		order by t.arrivetime,t.planid desc
+	</select>
+	<update id="updatePlanStatus" parameterType="application">
+		update l_interfaceinfo_t
+		set
+		validflag =8,
+		reserve4=#{creator,jdbcType=VARCHAR} || to_char(sysdate,'yyyy-MM-dd hh24:mi:ss')
+		where planid = #{planid,jdbcType=VARCHAR}
+	</update>
+</mapper>

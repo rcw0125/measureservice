@@ -1,0 +1,365 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.talent.materialflow.service.mapper.CardMapper">
+	<select id="queryList" resultType="bcard" parameterType="bcard">
+		select cardid,
+		decode(validflag,0,'挂失',1,'初始化','发卡')validflag,
+		decode(cardtype,0,'临时卡',1,'固定卡')cardtype,
+		cardno,
+		cardclass,
+		carno,
+		drivercode,
+		driver,
+		frommancode,
+		fromman,
+		to_char(fromdate, 'yyyy-MM-dd hh24:mi:ss')fromdate,
+		to_char(begintime, 'yyyy-MM-dd hh24:mi:ss')begintime,
+		to_char(endtime, 'yyyy-MM-dd hh24:mi:ss')endtime,
+		deposit,
+		backman,
+		backmancode,
+		backdate,
+		unitcode,
+		unitname,
+		unitman,
+		createdate cdate,
+		createman creator,
+		motorcadecode,
+		motorcadename,
+		memo as usermemo,
+		capacity,
+		decode(cartype,0,'业务车辆',1,'员工车辆',2,'操作员卡',3,'指令卡')cartype
+		from b_card_t t
+		where 1 = 1
+		<if test="begintime!=null and begintime!=''">
+    		<![CDATA[and createdate>=  to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+    		<![CDATA[and createdate <= to_date(#{endtime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="validflag!=-1">
+			and validflag = #{validflag}
+		</if>
+		<if test="cardtype!=-1">
+			and cardtype = #{cardtype}
+		</if>
+		<if test="cardclass!=-1">
+			and cardclass = #{cardclass}
+		</if>
+		<if test="cartype!=-1">
+			and cartype = #{cartype}
+		</if>
+		<if test="cardno!=null and cardno !=''">
+			and cardno like '%' || #{cardno}||'%'
+		</if>
+		<if test="carno !=null and carno !=''">
+			and carno like '%' || #{carno} ||'%'
+		</if>
+		<if test="cardid!=null and cardid !=''">
+			and cardid like '%' || #{cardid}||'%'
+		</if>
+		<if test="cardno !=null and cardno !=''">
+			and instr(t.cardno,#{cardno})>0
+		</if>
+		<if test="driver !=null and driver !=''">
+			and instr(t.driver,#{driver})>0
+		</if>
+		<if test="unitname !=null and unitname !=''">
+			and instr(t.unitname,#{unitname})>0
+		</if>
+		order by createdate desc
+	</select>
+	<select id="queryinfoBycardid" resultType="bcard" parameterType="bcard">
+		select cardid,
+		validflag,
+		cardtype,
+		cardno,
+		cardclass,
+		carno,
+		drivercode,
+		driver,
+		frommancode,
+		fromman,
+		fromdate,
+		deposit,
+		backman,
+		backmancode,
+		backdate,
+		unitcode,
+		unitname,
+		unitman,
+		createdate,
+		createman creator,
+		motorcadecode,
+		motorcadename,
+		memo usermemo,
+		capacity,
+		cartype,
+		to_char(begintime, 'yyyy-MM-dd hh24:mi:ss')begintime,
+		to_char(endtime, 'yyyy-MM-dd hh24:mi:ss')endtime
+		from b_card_t t
+		where
+		t.cardid = #{cardid,jdbcType=VARCHAR} and rownum=1
+	</select>
+	<insert id="initCard" parameterType="bcard">
+		insert into b_card_t
+		(id,
+		cardid,
+		validflag,
+		cardno,
+		cardclass,
+		unitcode,
+		unitname,
+		unitman,
+		createdate,
+		createman)
+		values
+		(B_CARD_S.Nextval,
+		#{cardid,jdbcType=VARCHAR},
+		1,
+		#{cardno,jdbcType=VARCHAR},
+		#{cardclass,jdbcType=VARCHAR},
+		#{unitcode,jdbcType=VARCHAR},
+		#{unitname,jdbcType=VARCHAR},
+		#{unitman,jdbcType=VARCHAR} ,
+		sysdate,
+		#{creator,jdbcType=VARCHAR})
+	</insert>
+	<select id="queryBycardid" parameterType="bcard" resultType="int">
+		select count(1) from b_card_t
+		where cardid = #{cardid,jdbcType=VARCHAR}
+	</select>
+	<update id="updateInitCard" parameterType="bcard">
+		update b_card_t
+		set
+		validflag = 1,
+		cardno = #{cardno,jdbcType= VARCHAR},
+		cardclass =#{cardclass,jdbcType = VARCHAR},
+		unitman = #{unitman,jdbcType =VARCHAR},
+		createdate = sysdate,
+		createman = #{creator,jdbcType=VARCHAR}
+		where cardid = #{cardid, jdbcType = VARCHAR}
+	</update>
+	<update id="fromCard" parameterType="bcard">
+		update b_card_t
+		set carno
+		=#{carno,jdbcType=VARCHAR},
+		validflag=3,
+		drivercode
+		=#{drivercode,jdbcType=VARCHAR},
+		driver = #{driver,jdbcType=VARCHAR},
+		frommancode = #{frommancode,jdbcType=VARCHAR},
+		fromman
+		=#{fromman,jdbcType=VARCHAR},
+		fromdate = sysdate,
+		deposit=#{deposit,jdbcType=VARCHAR},
+		motorcadecode
+		=#{motorcadecode,jdbcType=VARCHAR},
+		motorcadename
+		=#{motorcadename,jdbcType=VARCHAR},
+		memo = #{usermemo,jdbcType=VARCHAR},
+		capacity = #{capacity,jdbcType=VARCHAR},
+		cardtype
+		=#{cardtype,jdbcType=VARCHAR},
+		cartype = #{cartype,jdbcType=VARCHAR},
+		begintime=to_date(#{begintime,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss'),
+		endtime=to_date(#{endtime,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss'),
+		beginperiod=#{beginperiod,jdbcType=VARCHAR},
+		endperiod=#{endperiod,jdbcType=VARCHAR},
+		unitcode = #{unitcode,jdbcType=VARCHAR},
+		unitname = #{unitname,jdbcType=VARCHAR}
+		where cardid = #{cardid,jdbcType=VARCHAR}
+	</update>
+
+	<update id="backCard" parameterType="bcard">
+		update b_card_t
+		set
+		carno='',
+		validflag=1,
+		drivercode = '',
+		driver = '',
+		frommancode = '',
+		fromman='',
+		fromdate = '',
+		deposit = '',
+		motorcadecode = '',
+		motorcadename = '',
+		memo = '',
+		capacity = '',
+		cartype = '',
+		cardtype='',
+		backman=#{backman,jdbcType=VARCHAR},
+		backmancode=#{backmancode,jdbcType=VARCHAR},
+		backdate=sysdate
+		where
+		cardid = #{cardid,jdbcType=VARCHAR}
+	</update>
+	<update id="blackinitCard" parameterType="bcard">
+		update b_card_t
+		set
+		carno='',
+		validflag=1,
+		drivercode = '',
+		driver = '',
+		frommancode = '',
+		fromman='',
+		fromdate = '',
+		deposit = '',
+		motorcadecode = '',
+		motorcadename = '',
+		capacity = '',
+		cartype = '',
+		cardtype='',
+		createdate = sysdate,
+		createman = #{creator,jdbcType=VARCHAR},
+		memo='黑名单还原初始化'
+		where cardid = #{cardid,jdbcType=VARCHAR}
+	</update>
+	<update id="cancelCard" parameterType="bcard">
+		update b_card_t
+		set
+		validflag=0
+		where cardid = #{cardid,jdbcType=VARCHAR}
+	</update>
+	<select id="queryBlackinfo" parameterType="blacklist" resultType="blacklist">
+		select t.id,
+		decode(t.validflag,0,'已还原',1,'黑名单')validflag,
+		t.cardid,
+		decode(t.recordtype,
+		0,
+		'IC卡黑名单',
+		1,
+		'RFID卡黑名单',
+		2,
+		'车号黑名单') recordtype,
+		to_char(t.createdate,'yyyy-MM-dd hh24:mi:ss')createdate,
+		t.createman,
+		t.validman,
+		to_char(t.validtime,'yyyy-MM-dd hh24:mi:ss')validtime,
+		t.usermemo,
+		t.sysmemo
+		from b_blacklist_t t where t.usermemo not like '%重复进厂%' and t.usermemo not like '%重复出厂%'
+		and t.recordtype=2
+		<if test="begintime!=null and begintime!=''">
+    		<![CDATA[and t.createdate>=  to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+    		<![CDATA[and t.createdate <= to_date(#{endtime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="validflag!=-1">
+			and t.validflag = #{validflag}
+		</if>
+
+		<if test="cardid!=null and cardid !=''">
+			and instr(t.cardid,#{cardid})>0
+		</if>
+		order by t.createdate desc
+	</select>
+	<select id="queryCardinfo" parameterType="blacklist" resultType="blacklist">
+		select t.id,
+		decode(t.validflag,0,'已还原',1,'已挂失')validflag,
+		t.cardid,
+		decode(t.recordtype,
+		0,
+		'IC卡挂失',
+		1,
+		'RFID卡挂失') recordtype,
+		to_char(t.createdate,'yyyy-MM-dd hh24:mi:ss')createdate,
+		t.createman,
+		t.validman,
+		to_char(t.validtime,'yyyy-MM-dd hh24:mi:ss')validtime,
+		t.usermemo,
+		t.sysmemo
+		from b_blacklist_t t where 1=1
+		<if test="begintime!=null and begintime!=''">
+    		<![CDATA[and t.createdate>=  to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+    		<![CDATA[and t.createdate <= to_date(#{endtime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="validflag!=-1">
+			and t.validflag = #{validflag}
+		</if>
+		
+		<if test="recordtype==-1">
+			and (t.recordtype=1 or t.recordtype=0)
+		</if>
+		<if test="recordtype!=-1">
+			and t.recordtype = #{recordtype}
+		</if>
+
+		<if test="cardid!=null and cardid !=''">
+			and instr(t.cardid,#{cardid})>0
+		</if>
+		order by t.createdate desc
+	</select>
+	
+	<select id="queryBlackInOutInfo" parameterType="blacklist" resultType="blacklist">
+		select t.id,
+		decode(t.validflag,0,'已解除',1,'未解除')validflag,
+		t.cardid,
+		to_char(t.createdate,'yyyy-MM-dd hh24:mi:ss')createdate,
+		t.createman,
+		t.validman,
+		to_char(t.validtime,'yyyy-MM-dd hh24:mi:ss')validtime,
+		t.usermemo,
+		t.sysmemo
+		from b_blacklist_t t where (t.usermemo like '%重复进厂%' or t.usermemo like '%重复出厂%')
+		<if test="begintime!=null and begintime!=''">
+    		<![CDATA[and t.createdate>=  to_date(#{begintime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="endtime!=null and endtime!=''">
+    		<![CDATA[and t.createdate <= to_date(#{endtime}, 'yyyy-MM-dd hh24:mi:ss')]]>
+		</if>
+		<if test="validflag!=-1">
+			and t.validflag = #{validflag}
+		</if>
+		<if test="cardid!=null and cardid !=''">
+			and instr(t.cardid,#{cardid})>0
+		</if>
+		order by t.createdate desc
+	</select>
+	
+	<insert id="insertBlack" parameterType="blacklist">
+		insert into
+		B_BLACKLIST_T
+		(id, validflag, Cardid, Recordtype, Createman,
+		createdate, usermemo)
+		values
+		(B_BLACKLIST_s.Nextval,
+		1,
+		#{cardid,jdbcType=VARCHAR},
+		#{recordtype,jdbcType=VARCHAR},
+		#{creator,jdbcType=VARCHAR},
+		sysdate,
+		#{usermemo,jdbcType=VARCHAR})
+	</insert>
+	<update id="cancelBlack" parameterType="blacklist">
+		update b_blacklist_t set
+		validflag=0,validman=#{canceler,jdbcType=VARCHAR},validtime=sysdate
+		where id=#{id,jdbcType=VARCHAR}
+	</update>
+
+	<update id="updatetime" parameterType="blacklist">
+		update b_card_t set
+		begintime=to_date(#{begintime,jdbcType=VARCHAR},'yyyy-mm-dd hh24:mi:ss'),endtime=to_date(#{endtime,jdbcType=VARCHAR},'yyyy-mm-dd hh24:mi:ss'),updatedate=sysdate,updateman=#{updateman,jdbcType=VARCHAR},
+		memo=#{usermemo,jdbcType=VARCHAR}
+		where cardid = #{cardid,jdbcType=VARCHAR}
+	</update>
+	
+	<select id="queryRfidInfo" parameterType="String" resultType="int">
+		select count(1) from b_card_t t 
+		where t.cardid = #{cardid,jdbcType=VARCHAR} 
+		and t.carno = #{carno,jdbcType=VARCHAR} 
+		and t.validflag = 3 
+		and t.cardclass = 1
+	</select>
+	
+	<select id="queryInfoByCardno" resultType="bcard" parameterType="bcard">
+		select matchid
+		from l_curr_temp_t t
+		where t.validflag = 1 and
+		t.carno = #{carno,jdbcType=VARCHAR}
+	</select>
+</mapper>
