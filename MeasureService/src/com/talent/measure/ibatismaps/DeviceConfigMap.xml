@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="DeviceConfig">
+	<typeAlias alias="deviceconfig" type="com.talent.measure.model.DeviceConfig"/>
+	
+	<select id="query_list" resultClass="deviceconfig">
+		select id,configDetail from P_DEVICECONFIG_T t where t.deviceName = '$deviceName$' and t.ctrlType = '$ctrlType$' and t.ctrlGoal = '$ctrlGoal$'
+	</select>
+	
+	<select id="query_all_list" resultClass="deviceconfig">
+		select id,deviceName,ctrlType,ctrlGoal,configDetail from P_DEVICECONFIG_T
+	</select>
+	
+	<update id="delete" parameterClass="String">
+		delete from P_DEVICECONFIG_T t where t.id = $id$
+	</update>
+	
+	<insert id="insert" parameterClass="deviceconfig">
+		insert into P_DEVICECONFIG_T(id,deviceName,ctrlType,ctrlGoal,configDetail) values($id$,'$deviceName$','$ctrlType$','$ctrlGoal$','$configDetail$')
+	</insert>
+	
+	<select id="getNewID" resultClass="int">
+    	SELECT P_PLATFORM_S.NEXTVAL AS VALUE FROM DUAL
+    </select>
+</sqlMap>

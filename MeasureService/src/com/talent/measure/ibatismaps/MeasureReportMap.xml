@@ -1,0 +1,780 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="measureReport">
+	<typeAlias alias="mreport" type="com.talent.measure.model.MeasureReport" />
+	<typeAlias alias="summary" type="com.talent.base.model.Summary" />
+	<typeAlias alias="printlog" type="com.talent.measure.model.PrintLog" />
+	<typeAlias alias="taskinfo" type="com.talent.measure.model.Taskinfo" />
+	<typeAlias alias="tarelog" type="com.talent.measure.model.TareLog" />
+
+	<select id="queryReportDetail" resultClass="mreport"
+		parameterClass="mreport">
+		select t.matchid,
+		t.carno,
+		t.taskcode,
+		t.planid,
+		t.materialname,
+		t.sourcename,
+		t.targetname,
+		nvl(round(t.tare * 0.001, 2),0) as tare,
+		to_char(t.taretime, 'yyyy-MM-dd hh24:mi:ss') taretime,
+		t.tareweigh,
+		nvl(round(t.gross * 0.001, 2),0) as gross,
+		to_char(t.grosstime, 'yyyy-MM-dd hh24:mi:ss') grosstime,
+		t.grossweigh,
+		nvl(round(t.deduction * 0.001, 2), 0) as deduction,
+		nvl(round(t.suttle * 0.001, 2),0) as suttle,
+		to_char(t.suttletime, 'yyyy-MM-dd hh24:mi:ss') suttletime,
+		t.suttleweigh,
+		t.grossoperaname,
+		t.tareoperaname,
+		t.suttleoperaname,
+		t.ship,
+		t.sourceplace,
+		o.operaname operatype,
+		nvl(t.tareb*0.001,0)tareb,
+		nvl(t.grossb*0.001,0)grossb,
+		t.grosstimeb,
+		nvl(round(t.suttleb * 0.001, 2),0) as suttleb,
+		round((case
+		when (t.suttle > 0 and t.suttleb > 0) then
+		(t.suttle - t.suttleb) / t.suttle * 1000
+		else
+		0
+		end),
+		2) accordrate,
+		decode((select count(m.matchid)
+		from M_PRINTBILL_T m
+		where m.matchid = t.matchid
+		group by t.matchid),
+		'',
+		0,
+		(select count(m.matchid)
+		from M_PRINTBILL_T m
+		where m.matchid = t.matchid
+		group by t.matchid)) printsum,t.usermemo memo
+		from M_MEASURE_T t, m_operaconfig_t o
+		where t.operatype = o.operatype
+		and t.validflag > 0
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="begintime">
+                <![CDATA[$selecttime$ >=to_date(trim(#begintime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="endtime">
+                <![CDATA[$selecttime$ <=to_date(trim(#endtime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="materialname">
+				t.materialname like
+				trim(#materialname:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="sourcename">
+				t.sourcename like
+				trim(#sourcename:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="targetname">
+				t.targetname like
+				trim(#targetname:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="carno">
+				t.carno like
+				'%'||trim(#carno:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="taskcode">
+				t.taskcode like
+				'%'||trim(#taskcode:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="planid">
+				t.planid like
+				'%'||trim(#planid:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="matchid">
+				t.matchid like
+				'%'||trim(#matchid#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="grossweighid">
+				t.grossweighid like
+				'%'||trim(#grossweighid#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="tareweighid">
+				t.tareweighid like
+				'%'||trim(#tareweighid#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="suttleweighid">
+				t.suttleweighid like
+				'%'||trim(#suttleweighid#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="ship">
+				t.ship like
+				'%'||trim(#ship#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="sourceplace">
+				t.sourceplace like
+				'%'||trim(#sourceplace#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="operatype">
+				t.operatype like
+				'%'||trim(#operatype#) || '%'
+			</isNotEmpty>
+			<isNotEqual  property="recordtype" compareValue="-1">
+			    <isEqual prepend="and" property="recordtype" compareValue="0">
+			       
+			       ((t.tareoperaname != '司机自助' or t.tareoperaname is null) and
+       				(t.grossoperaname != '司机自助' or t.grossoperaname is null))
+			    </isEqual>
+			    <isEqual prepend="and" property="recordtype" compareValue="2">
+			       (t.tareoperaname ='司机自助' or t.grossoperaname ='司机自助')
+			    </isEqual>
+			</isNotEqual>
+		</dynamic>
+		order by t.createdate desc
+	</select>
+	<!-- 获取计量毛、皮重、净重记录 条数 -->
+	<select id="queryReportDetail_summary" resultClass="summary" parameterClass="mreport">
+		select
+		count(1) as count,
+		round(decode(sum(gross) * 0.001, '', 0,
+		sum(gross) * 0.001),2) as sumgross,
+		round(decode(sum(tare) * 0.001, '',
+		0, sum(tare) * 0.001),2) as sumtare,
+		round(decode(sum(suttle) * 0.001,
+		'', 0, sum(suttle) * 0.001),2) as sumsuttle,
+		round(decode(sum(suttleb)
+		* 0.001, '', 0, sum(suttleb) * 0.001),2) as sumsuttleb
+		from M_MEASURE_T
+		t, m_operaconfig_t o
+		where t.operatype = o.operatype
+		and t.validflag > 0
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="begintime">
+                <![CDATA[$selecttime$ >=to_date(trim(#begintime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="endtime">
+                <![CDATA[$selecttime$ <=to_date(trim(#endtime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="materialname">
+				t.materialname like
+				trim(#materialname:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="sourcename">
+				t.sourcename like
+				trim(#sourcename:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="targetname">
+				t.targetname like
+				trim(#targetname:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="carno">
+				t.carno like
+				'%'||trim(#carno:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="taskcode">
+				t.taskcode like
+				'%'||trim(#taskcode:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="planid">
+				t.planid like
+				'%'||trim(#planid:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="matchid">
+				t.matchid like
+				'%'||trim(#matchid#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="grossweighid">
+				t.grossweighid like
+				'%'||trim(#grossweighid#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="tareweighid">
+				t.tareweighid like
+				'%'||trim('$tareweighid$') || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="suttleweighid">
+				t.suttleweighid like
+				'%'||trim(#suttleweighid#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="ship">
+				t.ship like
+				'%'||trim(#ship#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="sourceplace">
+				t.sourceplace like
+				'%'||trim(#sourceplace#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="operatype">
+				t.operatype like
+				'%'||trim(#operatype#) || '%'
+			</isNotEmpty>
+			<isNotEqual  property="recordtype" compareValue="-1">
+			    <isEqual prepend="and" property="recordtype" compareValue="0">
+			       ((t.tareoperaname != '司机自助' or t.tareoperaname is null) and
+       				(t.grossoperaname != '司机自助' or t.grossoperaname is null))
+			    </isEqual>
+			    <isEqual prepend="and" property="recordtype" compareValue="2">
+			       (t.tareoperaname ='司机自助' or t.grossoperaname ='司机自助')
+			    </isEqual>
+			</isNotEqual>
+		</dynamic>
+	</select>
+
+	<select id="queryReportSum" resultClass="mreport"
+		parameterClass="mreport" remapResults="true">
+		select
+		<dynamic prepend="">
+			<isNotEmpty prepend="" property="grouptype">
+				$grouptype$,
+			</isNotEmpty>
+		</dynamic>
+		count(1) as carcount,nvl(round(sum(t.gross)*0.001,3),0) as
+		gross,nvl(round(sum(t.tare)*0.001,3),0) as
+		tare,nvl(round(sum(t.suttle)*0.001,3),0) as
+		suttle,nvl(round(sum(t.suttleb)*0.001,3),0) as
+		suttleb,sum(nvl(deduction,0))deduction,round((case when
+		(sum(t.suttle) > 0 and sum(t.suttleb) > 0)
+		then (sum(t.suttle) -
+		sum(t.suttleb)) / sum(t.suttle) * 1000 else 0 end),2)
+		as accordrate
+		from M_MEASURE_T t
+		where t.validflag > 0
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="begintime">
+                <![CDATA[t.$selecttime$ >=to_date('$begintime$','yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="endtime">
+                <![CDATA[t.$selecttime$ <=to_date('$endtime$','yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="materialname">
+				t.materialname like
+				trim(#materialname:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="sourcename">
+				t.sourcename like
+				trim(#sourcename:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="targetname">
+				t.targetname like
+				trim(#targetname:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="carno">
+				t.carno like
+				'%'||trim(#carno:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="taskcode">
+				t.taskcode like
+				'%'||trim(#taskcode:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="ship">
+				t.ship like
+				'%'||trim(#ship:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="operatype">
+				t.operatype =
+				trim(#operatype:varchar#)
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="grossweigh">
+				(t.grossweighid =
+				'$grossweigh$' or t.tareweighid = '$grossweigh$' or t.suttleweighid
+				= '$grossweigh$')
+			</isNotEmpty>
+			<isNotEmpty prepend="group by" property="grouptype">
+				$grouptype$
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+	<select id="queryReportSum_summary" resultClass="summary"
+		parameterClass="mreport" remapResults="true">
+		select count(1) as count,nvl(sum(carcount),0) as
+		sumcarcount,nvl(round(sum(suttle)*0.001,3),0) as
+		sumsuttle,nvl(round(sum(gross)*0.001,3),0) as
+		sumgross,nvl(round(sum(tare)*0.001,3),0) as
+		sumtare,nvl(round(sum(suttleb)*0.001,3),0) as sumsuttleb,nvl(round(sum(deduction)*0.001,3),0) as
+		deduction from (
+		select
+		<dynamic prepend="">
+			<isNotEmpty prepend="" property="grouptype">
+				$grouptype$,
+			</isNotEmpty>
+		</dynamic>
+		count(1) as carcount,decode(sum(t.gross),'',0,sum(t.gross)) as
+		gross,decode(sum(t.tare),'',0,sum(t.tare)) as
+		tare,decode(sum(t.suttle),'',0,sum(t.suttle)) as
+		suttle,decode(sum(t.suttleb),'',0,sum(t.suttleb)) as suttleb,sum(nvl(deduction,0))deduction from
+		M_MEASURE_T t
+		where t.validflag > 0
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="begintime">
+                <![CDATA[t.$selecttime$ >=to_date('$begintime$','yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="endtime">
+                <![CDATA[t.$selecttime$ <=to_date('$endtime$','yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="materialname">
+				t.materialname like
+				trim(#materialname:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="sourcename">
+				t.sourcename like
+				trim(#sourcename:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="targetname">
+				t.targetname like
+				trim(#targetname:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="carno">
+				t.carno like
+				'%'||trim(#carno:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="taskcode">
+				t.taskcode like
+				'%'||trim(#taskcode:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="ship">
+				t.ship like
+				'%'||trim(#ship:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="operatype">
+				t.operatype =
+				trim(#operatype:varchar#)
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="grossweigh">
+				(t.grossweighid =
+				'$grossweigh$' or t.tareweighid = '$grossweigh$' or t.suttleweighid
+				= '$grossweigh$')
+			</isNotEmpty>
+			<isNotEmpty prepend="group by" property="grouptype">
+				$grouptype$
+			</isNotEmpty>
+		</dynamic>
+		)
+	</select>
+	<select id="queryPrintinfo" parameterClass="java.lang.String"
+		resultClass="printlog">
+		select t.matchid, t.equname, t.opname,
+		to_char(t.createtime,'yyyy-MM-dd hh24:mi:ss')createtime, t.printtype
+		from M_PRINTBILL_T t
+		where t.matchid = '$matchid$'
+	</select>
+
+	<select id="queryReportLog" resultClass="mreport"
+		parameterClass="mreport">
+		select t.matchid,
+		decode(t.measurestate, 'G', '计毛', 'T', '计皮') measurestate,
+		t.carno,
+		t.taskcode,
+		t.planid,
+		t.materialname,
+		t.sourcename,
+		t.targetname,
+		nvl(round(t.tare * 0.001, 2), 0) as tare,
+		to_char(t.taretime, 'yyyy-MM-dd hh24:mi:ss') taretime,
+		t.tareweigh,
+		nvl(round(t.gross * 0.001, 2), 0) as gross,
+		to_char(t.grosstime, 'yyyy-MM-dd hh24:mi:ss') grosstime,
+		t.grossweigh,
+		nvl(round(t.deduction * 0.001, 2), 0) as deduction,
+		nvl(round(t.suttle * 0.001, 2), 0) as suttle,
+		to_char(t.suttletime, 'yyyy-MM-dd hh24:mi:ss') suttletime,
+		t.suttleweigh,
+		t.grossoperaname,
+		t.tareoperaname,
+		t.suttleoperaname,
+		t.ship,
+		t.sourceplace,
+		o.operaname operatype,
+		nvl(t.tareb, 0) tareb,
+		nvl(t.grossb, 0) grossb,
+		nvl(round(t.suttleb * 0.001, 2), 0) as suttleb
+		from M_MEASURE_log_T t, m_operaconfig_t o
+		where t.operatype = o.operatype
+		and t.validflag > 0
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="begintime">
+                <![CDATA[t.$selecttime$ >=to_date(trim(#begintime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="endtime">
+                <![CDATA[t.$selecttime$ <=to_date(trim(#endtime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="materialname">
+				t.materialname like
+				trim(#materialname:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="sourcename">
+				t.sourcename like
+				trim(#sourcename:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="targetname">
+				t.targetname like
+				trim(#targetname:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="carno">
+				t.carno like
+				'%'||trim(#carno:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="taskcode">
+				t.taskcode like
+				'%'||trim(#taskcode:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="planid">
+				t.planid like
+				'%'||trim(#planid:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="matchid">
+				t.matchid like
+				'%'||trim(#matchid#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="grossweighid">
+				t.grossweighid like
+				'%'||trim(#grossweighid#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="tareweighid">
+				t.tareweighid like
+				'%'||trim(#tareweighid#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="suttleweighid">
+				t.suttleweighid like
+				'%'||trim(#suttleweighid#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="ship">
+				t.ship like
+				'%'||trim(#ship#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="sourceplace">
+				t.sourceplace like
+				'%'||trim(#sourceplace#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="operatype">
+				t.operatype like
+				'%'||trim(#operatype#) || '%'
+			</isNotEmpty>
+		</dynamic>
+		order by t.createdate desc
+	</select>
+	<!-- 获取计量毛、皮重、净重记录 条数 -->
+	<select id="queryReportLog_summary" resultClass="summary"
+		parameterClass="mreport">
+		select
+		count(1) as count,
+		round(decode(sum(gross) * 0.001, '', 0,
+		sum(gross) * 0.001),2) as sumgross,
+		round(decode(sum(tare) * 0.001, '',
+		0, sum(tare) * 0.001),2) as sumtare,
+		round(decode(sum(suttle) * 0.001,
+		'', 0, sum(suttle) * 0.001),2) as sumsuttle,
+		round(decode(sum(suttleb)
+		* 0.001, '', 0, sum(suttleb) * 0.001),2) as sumsuttleb
+		from
+		M_MEASURE_log_T t, m_operaconfig_t o
+		where t.operatype = o.operatype
+		and t.validflag > 0
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="begintime">
+                <![CDATA[t.$selecttime$ >=to_date(trim(#begintime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="endtime">
+                <![CDATA[t.$selecttime$ <=to_date(trim(#endtime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="materialname">
+				t.materialname like
+				trim(#materialname:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="sourcename">
+				t.sourcename like
+				trim(#sourcename:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="targetname">
+				t.targetname like
+				trim(#targetname:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="carno">
+				t.carno like
+				'%'||trim(#carno:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="taskcode">
+				t.taskcode like
+				'%'||trim(#taskcode:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="planid">
+				t.planid like
+				'%'||trim(#planid:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="matchid">
+				t.matchid like
+				'%'||trim(#matchid#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="grossweighid">
+				t.grossweighid like
+				'%'||trim(#grossweighid#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="tareweighid">
+				t.tareweighid like
+				'%'||trim('$tareweighid$') || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="suttleweighid">
+				t.suttleweighid like
+				'%'||trim(#suttleweighid#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="ship">
+				t.ship like
+				'%'||trim(#ship#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="sourceplace">
+				t.sourceplace like
+				'%'||trim(#sourceplace#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="operatype">
+				t.operatype like
+				'%'||trim(#operatype#) || '%'
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+	<select id="queryTareinfo" parameterClass="tarelog" resultClass="tarelog">
+	  select m.carno, nvl(m.tare*0.001,0)tare, to_char(m.taretime,'yyyy-MM-dd hh24:mi:ss') taretime, m.tareweigh, m.tareoperaname
+	  from m_tare_t m  where m.validflag>0
+	  <dynamic prepend="">
+			<isNotEmpty prepend="AND" property="begintime">
+                <![CDATA[m.taretime >=to_date(trim(#begintime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="endtime">
+                <![CDATA[m.taretime <=to_date(trim(#endtime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="carno">
+				m.carno like
+				'%'||trim(#carno:varchar#) || '%'
+			</isNotEmpty>
+		</dynamic>
+	  order by m.taretime desc
+	  
+	</select>
+	 
+	 <select id="queryTareinfo_count" resultClass="summary"  parameterClass="tarelog" >
+	   select count(1) count
+	  from m_tare_t m  where m.validflag>0
+	  <dynamic prepend="">
+			<isNotEmpty prepend="AND" property="begintime">
+                <![CDATA[m.taretime >=to_date(trim(#begintime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="endtime">
+                <![CDATA[m.taretime <=to_date(trim(#endtime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="carno">
+				m.carno like
+				'%'||trim(#carno:varchar#) || '%'
+			</isNotEmpty>
+		</dynamic>
+	 </select>
+	 
+	 <select id="queryTareloginfo" parameterClass="tarelog" resultClass="tarelog">
+	  select m.carno, nvl(m.tare*0.001,0)tare, to_char(m.taretime,'yyyy-MM-dd hh24:mi:ss') taretime, m.tareweigh, m.tareoperaname
+	  from m_tare_log_t m  where m.validflag>0
+	  <dynamic prepend="">
+			<isNotEmpty prepend="AND" property="begintime">
+                <![CDATA[m.taretime >=to_date(trim(#begintime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="endtime">
+                <![CDATA[m.taretime <=to_date(trim(#endtime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="carno">
+				m.carno like
+				'%'||trim(#carno:varchar#) || '%'
+			</isNotEmpty>
+		</dynamic>
+	  order by m.taretime desc
+	  
+	</select>
+	 
+	 <select id="queryTareloginfo_count" resultClass="summary"  parameterClass="tarelog" >
+	   select count(1) count
+	  from m_tare_log_t m  where m.validflag>0
+	  <dynamic prepend="">
+			<isNotEmpty prepend="AND" property="begintime">
+                <![CDATA[m.taretime >=to_date(trim(#begintime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="endtime">
+                <![CDATA[m.taretime <=to_date(trim(#endtime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="carno">
+				m.carno like
+				'%'||trim(#carno:varchar#) || '%'
+			</isNotEmpty>
+		</dynamic>
+	 </select>
+	
+	<select id="queryReportException" resultClass="mreport"
+		parameterClass="mreport">
+		select e.matchid,
+      
+         '修改人：' || e.operaman || ' || 修改时间：' || to_char(e.createdate,'yyyy-MM-dd hh24:mi:ss') || ' || 修改备注：'|| e.usermemo memo,
+       t.carno,
+       t.taskcode,
+       t.planid,
+       t.materialname,
+       t.sourcename,
+       t.targetname,
+       nvl(round(t.tare * 0.001, 2), 0) as tare,
+       to_char(t.taretime, 'yyyy-MM-dd hh24:mi:ss') taretime,
+       t.tareweigh,
+       nvl(round(t.gross * 0.001, 2), 0) as gross,
+       to_char(t.grosstime, 'yyyy-MM-dd hh24:mi:ss') grosstime,
+       t.grossweigh,
+       nvl(round(t.suttle * 0.001, 2), 0) as suttle,
+       to_char(t.suttletime, 'yyyy-MM-dd hh24:mi:ss') suttletime,
+       t.suttleweigh,
+       t.grossoperaname,
+       t.tareoperaname,
+       t.suttleoperaname,
+       t.ship,
+       t.sourceplace,
+       o.operaname operatype,
+       nvl(t.tareb, 0) tareb,
+       nvl(t.grossb, 0) grossb,
+       nvl(round(t.suttleb * 0.001, 2), 0) as suttleb
+  from m_exception_log_t e, M_MEASURE_T t, m_operaconfig_t o
+ where e.matchid = t.matchid
+   and t.operatype = o.operatype
+   and t.validflag > 0
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="begintime">
+                <![CDATA[$selecttime$ >=to_date(trim(#begintime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="endtime">
+                <![CDATA[$selecttime$ <=to_date(trim(#endtime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="materialname">
+				t.materialname like
+				trim(#materialname:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="sourcename">
+				t.sourcename like
+				trim(#sourcename:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="targetname">
+				t.targetname like
+				trim(#targetname:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="carno">
+				t.carno like
+				'%'||trim(#carno:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="taskcode">
+				t.taskcode like
+				'%'||trim(#taskcode:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="planid">
+				t.planid like
+				'%'||trim(#planid:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="matchid">
+				t.matchid like
+				'%'||trim(#matchid#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="grossweighid">
+				t.grossweighid like
+				'%'||trim(#grossweighid#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="tareweighid">
+				t.tareweighid like
+				'%'||trim(#tareweighid#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="suttleweighid">
+				t.suttleweighid like
+				'%'||trim(#suttleweighid#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="ship">
+				t.ship like
+				'%'||trim(#ship#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="sourceplace">
+				t.sourceplace like
+				'%'||trim(#sourceplace#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="operatype">
+				t.operatype like
+				'%'||trim(#operatype#) || '%'
+			</isNotEmpty>
+		</dynamic>
+		order by t.createdate desc
+	</select>
+	<!-- 获取计量毛、皮重、净重记录 条数 -->
+	<select id="queryReportException_summary" resultClass="summary"
+		parameterClass="mreport">
+		select
+		count(1) as count,
+		round(decode(sum(gross) * 0.001, '', 0,
+		sum(gross) * 0.001),2) as sumgross,
+		round(decode(sum(tare) * 0.001, '',
+		0, sum(tare) * 0.001),2) as sumtare,
+		round(decode(sum(suttle) * 0.001,
+		'', 0, sum(suttle) * 0.001),2) as sumsuttle,
+		round(decode(sum(suttleb)
+		* 0.001, '', 0, sum(suttleb) * 0.001),2) as sumsuttleb
+		  from m_exception_log_t e, M_MEASURE_T t, m_operaconfig_t o
+		 where e.matchid = t.matchid
+		   and t.operatype = o.operatype
+		   and t.validflag > 0
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="begintime">
+                <![CDATA[$selecttime$ >=to_date(trim(#begintime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="endtime">
+                <![CDATA[$selecttime$ <=to_date(trim(#endtime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="materialname">
+				t.materialname like
+				trim(#materialname:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="sourcename">
+				t.sourcename like
+				trim(#sourcename:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="targetname">
+				t.targetname like
+				trim(#targetname:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="carno">
+				t.carno like
+				'%'||trim(#carno:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="taskcode">
+				t.taskcode like
+				'%'||trim(#taskcode:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="planid">
+				t.planid like
+				'%'||trim(#planid:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="matchid">
+				t.matchid like
+				'%'||trim(#matchid#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="grossweighid">
+				t.grossweighid like
+				'%'||trim(#grossweighid#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="tareweighid">
+				t.tareweighid like
+				'%'||trim('$tareweighid$') || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="suttleweighid">
+				t.suttleweighid like
+				'%'||trim(#suttleweighid#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="ship">
+				t.ship like
+				'%'||trim(#ship#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="sourceplace">
+				t.sourceplace like
+				'%'||trim(#sourceplace#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="operatype">
+				t.operatype like
+				'%'||trim(#operatype#) || '%'
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	 
+	 
+	 
+</sqlMap>

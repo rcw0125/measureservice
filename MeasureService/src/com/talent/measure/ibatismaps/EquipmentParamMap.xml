@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="EquipmentParam">
+	<typeAlias alias="equipmentParam" type="com.talent.measure.model.EquipmentParam" />
+	<select id="query_list" resultClass="equipmentParam" parameterClass="equipmentParam">
+		select "ID","EQUCODE","EQUNAME","PARAMINFOS" from M_EQUIPMENT_PARAM_T t where 1 = 1
+		<isNotEmpty prepend="and" property="equcode">
+			equcode = '$equcode$'
+		</isNotEmpty>
+	</select>
+</sqlMap>
+

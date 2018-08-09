@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="MeasureRule">
+	<typeAlias alias="measureRule" type="com.talent.measure.model.MeasureRule" />
+	<select id="query_list" resultClass="measureRule"
+		parameterClass="measureRule">
+		select p.ID,  p.OPERTYPE, p.logisticaltype MEASURETYPE, p.MATERIALCODE,o.operaname
+		from P_MEASUREROLE_T p, m_operaconfig_t o
+		where p.opertype = o.operatype
+	
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="id">
+				<isNotEqual property="id" compareValue="-1">
+					id = #id#
+				</isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="opertype">
+				OPERTYPE = '$opertype$'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="measuretype">
+				logisticaltype like
+				'$measuretype$'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="materialcode">
+				(MATERIALCODE like
+				'%$materialcode$%' or MATERIALCODE = '-1')
+			</isNotEmpty>
+		</dynamic>
+		order by id desc
+	</select>
+
+	<select id="query_count" resultClass="int" parameterClass="measureRule">
+		select count(1)
+		from P_MEASUREROLE_T p, m_operaconfig_t o
+		where p.opertype = o.operatype
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="id">
+				<isNotEqual property="id" compareValue="-1">
+					id = #id#
+				</isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="opertype">
+				OPERTYPE = '$opertype$'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="measuretype">
+				logisticaltype like
+				'$measuretype$'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="materialcode">
+				(MATERIALCODE like
+				'%$materialcode$%' or MATERIALCODE = '-1')
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+	<update id="delete" parameterClass="String">
+		delete from P_MEASUREROLE_T
+		where id in ($ids$)
+	</update>
+
+	<update id="update" parameterClass="measureRule">
+		update P_MEASUREROLE_T set
+		OPERTYPE = '$opertype$',logisticaltype = '$measuretype$',MATERIALCODE =
+		'$materialcode$' where ID = #id#
+	</update>
+
+	<insert id="insert" parameterClass="measureRule">
+		insert into P_MEASUREROLE_T (ID,OPERTYPE,logisticaltype,MATERIALCODE)
+		values (#id#,'$opertype$','$measuretype$','$materialcode$')
+	</insert>
+	<select id="getNewID" resultClass="int">
+		SELECT P_PLATFORM_S.NEXTVAL AS VALUE FROM DUAL
+	</select>
+</sqlMap>

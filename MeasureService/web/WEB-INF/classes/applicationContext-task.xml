@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Application context definition for PetClinic on JDBC. -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:task="http://www.springframework.org/schema/task" 
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	   					   http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+	   					   http://www.springframework.org/schema/task
+	   					   http://www.springframework.org/schema/task/spring-task-3.2.xsd">
+
+	<!-- 配置Redis数据同步定时器 -->
+	<bean id="batchJobTask" class="com.talent.base.task.BatchJobTask">
+		<property name="jobLauncher" ref="jobLauncher"/>
+		<property name="onStartJob" ref="onStartJob"/>
+		<!-- <property name="oneMinuteJob" ref="oneMinuteJob"/> -->
+	</bean>
+	
+	<!--系统启动成功10秒后执行一次的任务-->
+	<bean id="onStartTaskBean" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject">
+			<ref bean="batchJobTask" />
+		</property>
+		<property name="targetMethod">
+			<value>onStart</value>
+		</property>
+	</bean>
+	
+	<!--系统启动成功后，每个一分钟执行一次的任务-->
+	<bean id="oneMinutesTaskBean" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject">
+			<ref bean="batchJobTask" />
+		</property>
+		<property name="targetMethod">
+			<value>everyMinute</value>
+		</property>
+	</bean>
+	
+	<!--系统启动成功后，执行一次的任务的触发器 -->
+	<bean id="onStartTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerBean">
+		<property name="jobDetail">
+			<ref bean="onStartTaskBean" />
+		</property>
+		<!-- 以毫秒为单位，启动10秒后触发 -->
+		<property name="startDelay">
+			<value>10000</value>
+		</property>
+		<property name="repeatCount">
+			<value>0</value>
+		</property>
+        <property name="repeatInterval">
+        	<value>1</value>
+        </property>
+	</bean>
+	
+	<bean id="oneMinutesTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerBean">
+		<property name="jobDetail">
+			<ref bean="oneMinutesTaskBean" />
+		</property>
+		<!-- 以毫秒为单位，启动后30秒后触发 -->
+		<property name="startDelay">
+			<value>30000</value>
+		</property>
+		<!-- 每间隔1分钟触发一次 -->
+		<property name="repeatInterval">
+			<value>60000</value>
+		</property>
+	</bean>
+	
+	<!-- Spring触发工厂 -->
+	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<ref bean="onStartTrigger"/>
+				<!-- <ref bean="oneMinutesTrigger"/> -->
+			</list>
+		</property>
+	</bean>
+</beans>

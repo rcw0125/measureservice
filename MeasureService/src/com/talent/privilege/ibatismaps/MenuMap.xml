@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="Menu">
+	<typeAlias alias="menu" type="com.talent.privilege.model.Menu" />	
+	<select id="query_list" resultClass="menu" parameterClass="menu">
+		select id,fid,resourcename as name,icon,link
+		from P_RESOURCE_T
+		where 1 = 1
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="id">
+				<isGreaterThan property="id" compareValue="0">
+					id = #id#
+				</isGreaterThan>
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="fid">
+				<isGreaterThan property="fid" compareValue="-1">
+					fid = #fid#
+				</isGreaterThan>
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="name">
+				resourcename like '%$name$%'
+			</isNotEmpty>
+		</dynamic>
+		order by resourcename asc,id desc
+	</select>
+	
+    <select id="selectMenuUser" resultClass="menu" parameterClass="com.talent.privilege.model.User" >
+    	SELECT r.fid,r.id,r.resourcename as name,r.icon,r.link
+		  FROM P_USER_T U, P_USEROLE_T UR, P_RESOURCEROLE_T RR, P_RESOURCE_T R
+		 WHERE U.USERCODE = UR.USERCODE
+		   AND UR.ROLECODE = RR.ROLECODE
+		   AND RR.RESOURCECODE = R.RESOURCECODE
+		   AND U.USERCODE = '$usercode$'
+    </select>
+</sqlMap>

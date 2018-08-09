@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="WirebarCompareMap">
+    <typeAlias alias="qualityInterface" type="com.talent.measure.model.QualityInterface" />
+	<select id="queryWireValue" parameterClass="qualityInterface" resultClass="String">
+		select round(Acctrue_WMS.dbo.get_train_net_weight('$cph$','$begintime$','$endtime$'),3)
+	</select>
+</sqlMap>

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="Mointor">
+	<typeAlias alias="mointor" type="com.talent.measure.model.Mointor" />
+	
+	<select id="query_list" resultClass="mointor">
+		<![CDATA[select a.weightcode, a.weightname,decode(a.weightcount,null,0,a.weightcount) as weightcount,decode(b.timecount,null,0,b.timecount) as timecount, c.errormsg
+				  from (select weightcode, weightname, sum(weightcount) as weightcount
+				          from (select t.grossweighid as weightcode,
+				                       t.grossweigh as weightname,
+				                       count(1) as weightcount
+				                  from M_MEASURE_LOG_T t
+				                 where t.gross > 0
+				                   and t.grosstime >= trunc(sysdate)
+				                   and t.grosstime < trunc(sysdate) + 1
+				                   and t.measurestate = 'G'
+				                 group by t.grossweighid, t.grossweigh
+				                union all
+				                select t.tareweighid as weightcode,
+				                       t.tareweigh as weightname,
+				                       count(1) as weightcount
+				                  from M_MEASURE_LOG_T t
+				                 where t.tare > 0
+				                   and t.taretime >= trunc(sysdate)
+				                   and t.taretime < trunc(sysdate) + 1
+				                   and t.measurestate = 'T'
+				                 group by t.tareweighid, t.tareweigh)
+				         group by weightcode, weightname) a
+				  left join (select t.equcode, t.equname, decode(max(t.timecount),null,0,max(t.timecount)) as timecount
+				               from M_RC_TASK_DORESULT_T t
+				              where t.createtime >= trunc(sysdate)
+				                and t.createtime < trunc(sysdate) + 1
+				                and t.equcode is not null
+				                and t.timecount > 0
+				              group by t.equcode, t.equname) b
+				    on a.weightcode = b.equcode
+				  left join (select t.weightcode,
+				                    t.weightname,
+				                    wm_concat(t.errormsg) as errormsg
+				               from p_mointor_t t
+				              where t.createdate >= trunc(sysdate)
+				                and t.createdate < trunc(sysdate) + 1
+				                and t.weightcode is not null
+				              group by t.weightcode, t.weightname) c
+				    on a.weightcode = c.weightcode]]>
+	</select>
+	<insert id="insert" parameterClass="mointor">
+		insert into P_MOINTOR_T(ID,WEIGHTNAME,WEIGHTCODE,ERRORMSG,STACKTRACE) values ('$id$','$weightname$','$weightcode$','$errormsg$',#stacktrace,handler=org.springframework.orm.ibatis.support.ClobStringTypeHandler#)
+	</insert>
+	<select id="getNewID" resultClass="int">
+    	SELECT P_PLATFORM_S.NEXTVAL AS VALUE FROM DUAL
+    </select>
+    <select id="queryMointorinfo" parameterClass="mointor" resultClass="mointor">
+       select t.weightname,
+		       t.weightcode,
+		       t.errormsg,
+		       t.stacktrace,
+		       to_char(t.createdate, 'yyyy-MM-dd hh24:mi:ss') createdate
+		  from P_MOINTOR_T t
+		 where t.weightname is not null
+		 <isNotEmpty prepend="AND" property="begintime">
+                <![CDATA[t.createdate >=to_date(trim(#begintime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="endtime">
+                <![CDATA[t.createdate <=to_date(trim(#endtime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="weightname">
+				(t.weightname like trim(#weightname:varchar#) || '%'　or t.weightcode like trim(#weightname:varchar#) || '%') 　
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="errormsg">
+				t.errormsg like 　'%'||trim('$errormsg$') || '%'
+			</isNotEmpty>
+			order by t.id desc
+    </select>
+    <select id="queryMointorinfo_count" parameterClass="mointor" resultClass="int">
+       select count(1)
+		  from P_MOINTOR_T t
+		 where t.weightname is not null
+		 <isNotEmpty prepend="AND" property="begintime">
+                <![CDATA[t.createdate >=to_date(trim(#begintime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="endtime">
+                <![CDATA[t.createdate <=to_date(trim(#endtime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="weightname">
+				(t.weightname like trim(#weightname:varchar#) || '%'　or t.weightcode like trim(#weightname:varchar#) || '%') 　
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="errormsg">
+				t.errormsg like 　'%'||trim(#errormsg:varchar#) || '%'
+			</isNotEmpty>
+    </select>
+</sqlMap>

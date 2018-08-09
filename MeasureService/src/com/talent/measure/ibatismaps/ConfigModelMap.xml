@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="ConfigModel">
+	<typeAlias alias="configmodel" type="com.talent.measure.model.ConfigModel"/>	
+	
+	<select id="query_list" resultClass="configmodel" parameterClass="configmodel">
+		select t.operatype,t.orderno,t.displayname,t.fieldname,t.isdisplay,t.points,t.aboutweight,t.quicksuggest,t.quicksuggesturl,t.writeable from M_CONFIGMODEL_T t
+	    where t.operatype = '$operatype$' and t.points = '$points$'order by t.orderno asc
+	</select>
+	
+	<insert id="insert" parameterClass="configmodel">
+		insert into m_configmodel_t
+		  (operatype,
+		   points,
+		   orderno,
+		   displayname,
+		   fieldname,
+		   isdisplay,		   
+		   quicksuggesturl,
+		   writeable)
+		values
+	   ('$operatype$',
+	    '$points$',
+	    $orderno$,
+	    '$displayname$',
+	    '$fieldname$',
+	    $isdisplay$,
+	    '$quicksuggesturl$',
+	    '$writeable$')
+   </insert>
+   <update id="update" parameterClass="configmodel">
+   		update m_configmodel_t set orderno = $orderno$
+	   	<isNotEmpty prepend="," property="optrfield">
+			$optrfield$ = '$optrvalue$'
+		</isNotEmpty>
+	    where operatype = '$operatype$' and points = '$points$' and fieldname = '$fieldname$'
+   </update>
+   
+   <select id="query_order" resultClass="configmodel" parameterClass="configmodel">
+		select t.operatype,t.orderno,t.fieldname,t.points from M_CONFIGMODEL_T t
+	    where t.operatype = '$operatype$' and t.points = '$points$' and orderno = $orderno$
+	</select>
+	
+	<update id="update_order" parameterClass="configmodel">
+   		update m_configmodel_t set orderno = $orderno$ 
+	    where operatype = '$operatype$' and points = '$points$' and fieldname = '$fieldname$'
+   </update>
+</sqlMap>

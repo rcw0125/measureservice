@@ -1,0 +1,100 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="Role">
+	<typeAlias alias="role" type="com.talent.privilege.model.Role" />	
+	<select id="query_list" resultClass="role" parameterClass="role">
+		select id,rolecode,rolename,validflag,createtime,createman,updatetime,updateman,rolememo
+		from P_ROLE_T
+		where 1 = 1
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="id">
+				<isGreaterThan property="id" compareValue="0">
+					id = #id#
+				</isGreaterThan>
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="rolecode">
+				rolecode = '$rolecode$'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="rolename">
+				rolename like '%$rolename$%'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="validflag">
+				validflag = $validflag$
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="rolememo">
+				rolememo like '%$rolememo$%'
+			</isNotEmpty>
+		</dynamic>
+		order by rolename asc,id desc
+	</select>
+	
+	<select id="query_count" resultClass="int" parameterClass="role">
+		select count(1)
+		from P_ROLE_T
+		where 1 = 1
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="id">
+				<isGreaterThan property="id" compareValue="0">
+					id = #id#
+				</isGreaterThan>
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="rolecode">
+				rolecode = '$rolecode$'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="rolename">
+				rolename like '%$rolename$%'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="validflag">
+				validflag = $validflag$
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="rolememo">
+				rolememo like '%$rolememo$%'
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<update id="delete" parameterClass="String">
+		delete from P_ROLE_T where id in ($ids$)
+	</update>
+	
+	<update id="update" parameterClass="role">
+		update P_ROLE_T set createtime = '$createtime$',createman = '$createman$'
+		
+		<isNotEmpty prepend="," property="rolename">
+			rolename = '$rolename$'
+		</isNotEmpty>
+		
+		<isNotEmpty prepend="," property="rolecode">
+			rolecode = '$rolecode$'
+		</isNotEmpty>
+		
+		<isNotEmpty prepend="," property="validflag">
+			validflag = $validflag$
+		</isNotEmpty>
+		
+		<isNotEmpty prepend="," property="rolememo">
+			rolememo = '$rolememo$'
+		</isNotEmpty>
+		
+		where ID = $id$
+	</update>
+	
+	<insert id="insert" parameterClass="role">
+        	insert into P_ROLE_T (id,rolecode,rolename,validflag,createtime,createman,rolememo) 
+        		values (#id#,'$rolecode$','$rolename$',$validflag$,'$createtime$','$createman$','$rolememo$')
+    </insert>
+    
+    <select id="getNewID" resultClass="int">
+    	SELECT P_PLATFORM_S.NEXTVAL AS VALUE FROM DUAL
+    </select>
+</sqlMap>

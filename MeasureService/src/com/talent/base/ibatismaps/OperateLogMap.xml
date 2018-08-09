@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="OperateLog">
+	<typeAlias alias="OperateLog" type="com.talent.base.model.OperateLog" />
+	
+	<insert id="insert" parameterClass="OperateLog">
+		<selectKey keyProperty="id">
+			select P_OPERATELOG_S.nextval from dual
+		</selectKey>
+		insert into P_OPERATELOG_T(id,ip,modulename,operator,operatetime,method,modelClass,action,data) values($id$,'$ip$','$modulename$','$operator$','$operatetime$','$method$','$modelClass$','$action$','$data$')
+	</insert>
+</sqlMap>

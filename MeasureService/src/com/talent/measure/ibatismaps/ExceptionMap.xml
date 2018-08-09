@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="exceptions">
+	<typeAlias alias="exception" type="com.talent.measure.model.Exceptions" />
+	<!--查询计量信息 -->
+	<resultMap id="exception_Map" class="com.talent.measure.model.Exceptions">
+		<result property="matchid" column="matchid" />
+		<result property="applicationno" column="applicationno" />
+		<result property="operatype" column="operatype" />
+		<result property="carno" column="carno" />
+		<result property="planid" column="planid" />
+		<result property="taskcode" column="taskcode" />
+		<result property="materialcode" column="materialcode" />
+		<result property="materialname" column="materialname" />
+		<result property="materialspec" column="materialspec" />
+		<result property="shipcode" column="shipcode" />
+		<result property="ship" column="ship" />
+		<result property="sourcecode" column="sourcecode" />
+		<result property="sourcename" column="sourcename" />
+		<result property="targetcode" column="targetcode" />
+		<result property="targetname" column="targetname" />
+		<result property="gross" column="gross" nullValue="0" />
+		<result property="grosstime" column="grosstime" />
+		<result property="grossweighid" column="grossweighid" />
+		<result property="grossweigh" column="grossweigh" />
+		<result property="tare" column="tare" nullValue="0" />
+		<result property="taretime" column="taretime" />
+		<result property="tareweighid" column="tareweighid" />
+		<result property="tareweigh" column="tareweigh" />
+		<result property="deduction" column="deduction" />
+		<result property="deductiontime" column="deductiontime" />
+		<result property="suttle" column="suttle" nullValue="0" />
+		<result property="suttletime" column="suttletime" />
+		<result property="suttleweighid" column="suttleweighid" />
+		<result property="suttleweigh" column="suttleweigh" />
+		<result property="createdate" column="createdate" />
+		<result property="grossb" column="grossb" nullValue="0" />
+		<result property="tareb" column="tareb" nullValue="0" />
+		<result property="suttleb" column="suttleb" nullValue="0" />
+		<result property="snumber" column="snumber" nullValue="0" />
+		<result property="suttleapp" column="suttleapp" nullValue="0" />
+		<result property="flag" column="flag" nullValue="0" />
+		<result property="msg" column="msg" />
+		<result property="tareoperaname" column="tareoperaname" />
+		<result property="grossoperaname" column="grossoperaname" />
+		<result property="usermemo" column="usermemo" />
+		<result property="mtypes" column="mtypes" />
+	</resultMap>
+	<!--获取计量毛、皮重、净重记录 -->
+	<select id="queryException" resultMap="exception_Map"
+		parameterClass="exception">
+		select t.applicationno matchid,
+		t.applicationno ,
+		t.carno,
+		t.operatype,
+		t.planid,
+		t.taskcode,
+		t.materialcode,
+		t.materialname,
+		t.materialspec,
+		t.shipcode,
+		t.ship,
+		t.sourcecode,
+		t.sourcename,
+		t.targetcode,
+		t.targetname,
+		t.gross*0.001 gross,
+		t.grosstime,
+		t.grossweighid,
+		t.grossweigh,
+		t.tare*0.001 tare,
+		t.taretime,
+		t.tareweighid,
+		t.tareweigh,
+		t.deduction,
+		t.deductiontime,
+		t.suttle*0.001 suttle,
+		t.suttletime,
+		t.suttleweighid,
+		t.suttleweigh,
+		t.createdate,
+		t.grossb*0.001 grossb,
+		t.tareb*0.001 tareb,
+		t.suttleb*0.001
+		suttleb,t.snumber,t.suttleapp,flag,msg,tareoperaname,grossoperaname,usermemo,mtypes
+		from m_applicationform_t t
+		where 1=1
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="begintime">
+                <![CDATA[t.$selecttime$ >=to_date(trim(#begintime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="endtime">
+                <![CDATA[t.$selecttime$ <=to_date(trim(#endtime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="materialname">
+				t.materialname like
+				'%'||trim(#materialname:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="sourcename">
+				t.sourcename like
+				'%'||trim(#sourcename:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="targetname">
+				t.targetname like
+				'%'||trim(#targetname:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="carno">
+				t.carno like
+				'%'||trim(#carno:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="taskcode">
+				t.taskcode like
+				'%'||trim(#taskcode:varchar#) || '%'
+			</isNotEmpty>
+
+			<isNotEmpty prepend="AND" property="matchid">
+				t.applicationno like
+				'%'||trim(#matchid:varchar#) || '%'
+			</isNotEmpty>
+		</dynamic>
+		order by t.createdate desc
+	</select>
+	<!-- 获取计量毛、皮重、净重记录 条数 -->
+	<select id="queryException_count" resultClass="int"
+		parameterClass="exception">
+		select count(1) from m_applicationform_t t
+		where 1=1
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="begintime">
+                <![CDATA[t.$selecttime$ >=to_date(trim(#begintime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="endtime">
+                <![CDATA[t.$selecttime$ <=to_date(trim(#endtime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="materialname">
+				t.materialname like
+				'%'||trim(#materialname:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="sourcename">
+				t.sourcename like
+				'%'||trim(#sourcename:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="targetname">
+				t.targetname like
+				'%'||trim(#targetname:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="carno">
+				t.carno like
+				'%'||trim(#carno:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="taskcode">
+				t.taskcode like
+				'%'||trim(#taskcode:varchar#) || '%'
+			</isNotEmpty>
+
+			<isNotEmpty prepend="AND" property="matchid">
+				t.applicationno like
+				'%'||trim(#matchid:varchar#) || '%'
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	<select id="queryInfo" resultMap="exception_Map" parameterClass="java.lang.String">
+		select t.applicationno matchid,
+		t.applicationno,
+		t.carno,
+		o.operaname
+		operatype,
+		t.planid,
+		t.taskcode,
+		t.materialcode,
+		t.materialname,
+		t.materialspec,
+		t.shipcode,
+		t.ship,
+		t.sourcecode,
+		t.sourcename,
+		t.targetcode,
+		t.targetname,
+		t.gross*0.001 gross,
+		t.grosstime,
+		t.grossweighid,
+		t.grossweigh,
+		t.tare*0.001 tare,
+		t.taretime,
+		t.tareweighid,
+		t.tareweigh,
+		t.deduction,
+		t.deductiontime,
+		t.suttle*0.001
+		suttle,
+		t.suttletime,
+		t.suttleweighid,
+		t.suttleweigh,
+		t.createdate,
+		t.grossb*0.001 grossb,
+		t.tareb*0.001 tareb,
+		t.suttleb*0.001 suttleb,
+		t.snumber,
+		t.suttleapp,
+		flag,
+		msg,
+		tareoperaname,
+		grossoperaname,t.usermemo,mtypes
+		from m_applicationform_t t
+		left join
+		m_operaconfig_t o
+		on t.operatype = o.lmstype
+		where applicationno =
+		'$memo1$'
+
+	</select>
+	<parameterMap class="java.util.Map" id="saveexception_map">
+		<parameter property="v_applicationno" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+
+		<parameter property="v_gross" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="v_grosstime" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+
+		<parameter property="v_grossweighid" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_grossweigh" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_grossoperacode" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_grossoperaname" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_tare" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="v_taretime" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+
+		<parameter property="v_tareweighid" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_tareweigh" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_tareoperacode" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_tareoperaname" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_usermemo" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_createman" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_flag" jdbcType="DECIMAL" javaType="java.lang.Integer"
+			mode="OUT" />
+		<parameter property="v_msg" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="OUT" />
+	</parameterMap>
+
+	<procedure id="saveException" parameterMap="saveexception_map"
+		resultClass="measure">
+		{call
+		M_EXCEPTION_UPDATE_P(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}
+	</procedure>
+	<select id="queryOperatype" resultClass="com.talent.measure.model.MeasurePhoto">
+		select t.operatype id,
+		t.operaname text from M_OPERACONFIG_T t where
+		t.validflag>0
+	</select>
+	<select id="queryEquipment" resultClass="com.talent.measure.model.MeasurePhoto">
+		select t.equcode id,
+		t.equname text
+		from M_EQUIPMENT_T t
+		where t.equtype = 'C'
+	</select>
+	<select id="queryOperaconfig" resultClass="com.talent.measure.model.Operaconfig"
+		parameterClass="java.lang.String">
+		select operatype,
+		sflag,
+		notstoreoutdo,
+		notstoreindo,
+		gflag,
+		notentergatedo,
+		notleavegatedo,
+		printsetgross,
+		printsettare,
+		printsetsuttle,
+		qflag,
+		notslampedo,
+		tareoutdo,
+		nvl(tareoutup, 0) tareoutup,
+		nvl(tareoutdown, 0) tareoutdown,
+		grossoutdo,
+		nvl(grossoutup, 0) grossoutup,
+		nvl(grossoutdown, 0) grossoutdown,
+		suttleoutdo,
+		nvl(suttleoutup, 0) suttleoutup,
+		nvl(suttleoutdown, 0) suttleoutdown,
+		regrossdo,
+		retaredo,
+		resuttledo,
+		tarehour,
+		grosstimeout,
+		nvl(taretimeout, 0) taretimeout,
+		grosstimeoutdo,
+		taretimeoutdo,
+		nvl(checktaredo, 0) taretimeout,
+		nvl(tarehourdo, 0) tarehourdo,
+		nvl(sametareoutup, 0) sametareoutup,
+		nvl(sametareoutdown, 0) sametareoutdown,
+		nvl(samegrossoutup, 0) samegrossoutup,
+		nvl(samegrossoutdown, 0) samegrossoutdown,
+		nvl(samegrosstime, 0) samegrosstime,
+		nvl(sametaretime, 0) sametaretime,
+		nvl(sameweightdo, 0) sameweightdo,
+		nvl(deduction2, 0) deduction2,
+		nvl(deductionunit, 0) deductionunit,
+		nvl(checkoperatimedo, 0) checkoperatimedo,
+		nvl(checkoperatime, 0) checkoperatime,
+		nvl(checkplanweighdo, 0) checkplanweighdo,
+		nvl(planweighout, 0) planweighout,
+		nvl(checkplancarcountdo, 0) checkplancarcountdo,
+		nvl(plancarcountout, 0) plancarcountout,
+		nvl(checkplanmaterialcountdo, 0) checkplanmaterialcountdo,
+		nvl(planmaterialcountout, 0) planmaterialcountout,
+		nvl(checktarelast, 0) checktarelast
+		from m_operaconfig_t t
+		where t.operatype='$operatype$'
+
+	</select>
+	<select id="queryOperaconfig_count" resultClass="int">
+		select count(1)
+		from m_operaconfig_t t
+
+	</select>
+
+	<update id="updateOperaconfig" parameterClass="com.talent.measure.model.Operaconfig">
+		update
+		m_operaconfig_t set sflag ='$sflag$',
+		notstoreoutdo =
+		'$notstoreoutdo$',
+		notstoreindo = '$notstoreindo$',
+		gflag = '$gflag$',
+		notentergatedo = '$notentergatedo$',
+		notleavegatedo =
+		'$notleavegatedo$',
+		printsetgross = '$printsetgross$',
+		printsettare =
+		'$printsettare$',
+		printsetsuttle = '$printsetsuttle$',
+		qflag =
+		'$qflag$',
+		notslampedo = '$notslampedo$',
+		tareoutdo = '$tareoutdo$',
+		tareoutup = '$tareoutup$',
+		tareoutdown = '$tareoutdown$',
+		grossoutdo =
+		'$grossoutdo$',
+		grossoutup = '$grossoutup$',
+		grossoutdown =
+		'$grossoutdown$',
+		suttleoutdo = '$suttleoutdo$',
+		suttleoutup =
+		'$suttleoutup$',
+		suttleoutdown = '$suttleoutdown$',
+		regrossdo =
+		'$regrossdo$',
+		retaredo = '$retaredo$',
+		resuttledo = '$resuttledo$',
+		tarehour = '$tarehour$',
+		grosstimeout = '$grosstimeout$',
+		taretimeout =
+		'$taretimeout$',
+		grosstimeoutdo = '$grosstimeoutdo$',
+		taretimeoutdo =
+		'$taretimeoutdo$',
+		checktaredo = '$checktaredo$',
+		tarehourdo =
+		'$tarehourdo$',
+		sametareoutup = '$sametareoutup$',
+		sametareoutdown =
+		'$sametareoutdown$',
+		samegrossoutup = '$samegrossoutup$',
+		samegrossoutdown = '$samegrossoutdown$',
+		samegrosstime =
+		'$samegrosstime$',
+		sametaretime = '$sametaretime$',
+		sameweightdo =
+		'$sameweightdo$',
+		deduction2 = '$deduction2$',
+		deductionunit =
+		'$deductionunit$',
+		checkoperatimedo = '$checkoperatimedo$',
+		checkoperatime = '$checkoperatime$',
+		checkplanweighdo =
+		'$checkplanweighdo$',
+		planweighout = '$planweighout$',
+		checkplancarcountdo = '$checkplancarcountdo$',
+		plancarcountout =
+		'$plancarcountout$',
+		checkplanmaterialcountdo =
+		'$checkplanmaterialcountdo$',
+		planmaterialcountout =
+		'$planmaterialcountout$',
+		checktarelast='$checktarelast$'
+		where
+		operatype = '$operatype$'
+	</update>
+
+</sqlMap>

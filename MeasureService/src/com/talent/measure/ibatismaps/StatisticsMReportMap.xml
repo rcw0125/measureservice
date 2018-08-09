@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="statisReport">
+	<typeAlias alias="mreport" type="com.talent.measure.model.MeasureReport" />
+	<typeAlias alias="summary" type="com.talent.base.model.Summary" />
+	<typeAlias alias="taskinfo" type="com.talent.measure.model.Taskinfo" />
+	<typeAlias alias="statis" type="com.talent.measure.model.Statistics" />
+
+
+
+	<select id="querytaskinfo" resultClass="taskinfo">
+		select t.opname opername, round(avg(t.timecount)) avgtime, count(1)
+		carcount
+		from m_rc_task_doresult_t t
+		where t.taskdoresult = '正常结束'
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="begintime">
+                <![CDATA[t.createtime >=to_date(trim(#begintime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="endtime">
+                <![CDATA[t.createtime <=to_date(trim(#endtime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+
+		</dynamic>
+		group by t.opname
+		order by t.opname
+
+	</select>
+	<select id="queryavgtaskinfo" resultClass="taskinfo">
+		select nvl(round(sum(carcount) / count(1), 1),0) avgcarcount,
+		nvl(round(sum(avgtime) / count(1)),0) avgcounttime
+		from (select
+		t.opname, round(avg(t.timecount)) avgtime, count(1) carcount
+		from
+		m_rc_task_doresult_t t
+		where t.taskdoresult = '正常结束'
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="begintime">
+                <![CDATA[t.createtime >=to_date(trim(#begintime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="endtime">
+                <![CDATA[t.createtime <=to_date(trim(#endtime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+
+		</dynamic>
+		group by t.opname
+		order by t.opname)
+
+	</select>
+	<select id="querytaskdata" resultClass="taskinfo"
+		parameterClass="taskinfo">
+
+		select t.opname opername,
+		round(avg(t.timecount)) avgtime,
+		nvl(count(1), 0) carcount,
+		nvl((select count(1) carcount
+		from
+		m_rc_task_doresult_t r
+		where r.taskdoresult = '任务回退'
+		and r.opname =
+		t.opname
+		<isNotEmpty prepend="AND" property="begintime">
+                <![CDATA[r.createtime >=to_date(trim(#begintime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="endtime">
+                <![CDATA[r.createtime <=to_date(trim(#endtime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+		</isNotEmpty>
+		group by r.opname),
+		0) backtask,
+		nvl((select count(1) carcount
+		from
+		m_rc_task_doresult_t r
+		where r.taskdoresult = '移卡之后终止计量'
+		and r.opname =
+		t.opname
+		<isNotEmpty prepend="AND" property="begintime">
+                <![CDATA[r.createtime >=to_date(trim(#begintime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="endtime">
+                <![CDATA[r.createtime <=to_date(trim(#endtime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+		</isNotEmpty>
+		group by r.opname),
+		0) mvcardtask,
+		nvl((select count(1) carcount
+		from
+		m_rc_task_doresult_t r
+		where r.taskdoresult = '终止计量'
+		and r.opname =
+		t.opname
+		<isNotEmpty prepend="AND" property="begintime">
+                <![CDATA[r.createtime >=to_date(trim(#begintime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="endtime">
+                <![CDATA[r.createtime <=to_date(trim(#endtime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+		</isNotEmpty>
+		group by r.opname),
+		0) finishtask,
+		nvl((select count(1) carcount
+		from
+		m_rc_task_doresult_t r
+		where r.taskdoresult = '系统自动回退'
+		and r.opname =t.opname
+		and r.seatid in ('201','202','203','204','205')
+		<isNotEmpty prepend="AND" property="begintime">
+                <![CDATA[r.createtime >=to_date(trim(#begintime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="endtime">
+                <![CDATA[r.createtime <=to_date(trim(#endtime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+		</isNotEmpty>
+		group by r.opname),
+		0)autobacktask
+		from m_rc_task_doresult_t t
+		where
+		t.taskdoresult = '正常结束'
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="begintime">
+                <![CDATA[t.createtime >=to_date(trim(#begintime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="endtime">
+                <![CDATA[t.createtime <=to_date(trim(#endtime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="opername">
+				t.opname like
+				'%'||trim(#opername:varchar#) || '%'
+			</isNotEmpty>
+		</dynamic>
+		group by t.opname
+		order by t.opname
+	</select>
+	<select id="queryMeasureByOperatype" parameterClass="statis"
+		resultClass="statis">
+		select decode(m.operatype, 80, '销售出厂', 90, '采购进厂', 12, '港口调拨')
+		operatype,
+		decode(m.operatype, '90', '入库', '80', '出库', '12', '入库')
+		classes,
+		m.materialname,
+		m.ship,
+		sum(m.suttle * 0.001) monthsuttle,
+		nvl(decode(m.operatype, 12,(select sum(suttle * 0.001)
+		from m_measure_t
+		t
+		where t.operatype = m.operatype
+		and t.materialname = m.materialname
+		and t.ship = m.ship
+		and t.validflag>0
+		 and t.sourcename != '日钢岚山港管带机货场采购库'
+		and <![CDATA[t.suttletime >=
+	               to_date(trim('$datetime$'||'00:00:00'), 'yyyy-MM-dd hh24:mi:ss')]]>
+		and <![CDATA[t.suttletime <=
+	               to_date(trim('$datetime$'||'23:59:59'), 'yyyy-MM-dd hh24:mi:ss')]]>),(select
+		sum(suttle * 0.001)
+		from m_measure_t t
+		where t.operatype = m.operatype
+		and t.materialname = m.materialname
+		and t.validflag>0
+		and <![CDATA[t.suttletime >=
+	               to_date(trim('$datetime$'||'00:00:00'), 'yyyy-MM-dd hh24:mi:ss')]]>
+		and <![CDATA[t.suttletime <=
+	               to_date(trim('$datetime$'||'23:59:59'), 'yyyy-MM-dd hh24:mi:ss')]]>)),0)
+		daysuttle
+		from m_measure_t m
+		where ((m.operatype = '90') or
+       (m.operatype = '12' and m.sourcename != '日钢岚山港管带机货场采购库')or
+        (m.operatype = '80' and
+        m.sourcename in ('2150带钢厂废副产品库',
+                          '酸再生废副产品库',
+                          '横切废副产品库',
+                          '纵切废副产品库')))
+        and m.validflag>0                  
+		and<![CDATA[ m.suttletime >=
+	       to_date(trim('$monthtime$'||'00:00:00'), 'yyyy-MM-dd hh24:mi:ss')]]>
+		and <![CDATA[m.suttletime <=
+	       to_date(trim('$datetime$'|| '23:59:59'), 'yyyy-MM-dd hh24:mi:ss')]]>
+
+		group by m.operatype, m.materialname, m.ship
+		order by m.operatype desc, m.materialname desc
+
+	</select>
+	<select id="queryMeasureByOperatype_count" parameterClass="statis"
+		resultClass="summary">
+		select count(count(1)) count
+		from m_measure_t m
+		where ((m.operatype in
+		('90', '12')) or
+		(m.operatype = '80' and
+		m.sourcename in
+		('2150带钢厂废副产品库',
+		'酸再生废副产品库',
+		'横切废副产品库',
+		'纵切废副产品库')))
+		and m.validflag>0
+		and<![CDATA[ m.suttletime >=
+	       to_date(trim('$monthtime$'||'00:00:00'), 'yyyy-MM-dd hh24:mi:ss')]]>
+		and <![CDATA[m.suttletime <=
+	       to_date(trim('$datetime$'|| '23:59:59'), 'yyyy-MM-dd hh24:mi:ss')]]>
+
+		group by m.operatype, m.materialname, m.ship
+		order by m.operatype desc
+
+	</select>
+	<select id="queryunitweight" parameterClass="statis"
+		resultClass="statis">
+		select t.productline,
+		t.unitname,
+		t.classes,
+		t.materialname,
+		nvl(t.dayweight,0) daysuttle,
+		nvl(t.monthweight,0) monthsuttle,
+		t.seq
+		from M_UNITWEIGHT_T t
+		where t.validflag>0
+		and flag='$flag$'
+		and<![CDATA[ t.datetime =
+	       to_date(trim('$datetime$'), 'yyyy-MM-dd')]]>
+		order by t.seq asc,t.materialname asc
+	</select>
+	<select id="queryunitweight_count" parameterClass="statis"
+		resultClass="summary">
+		select count(1) count
+		from M_UNITWEIGHT_T t
+		where t.validflag>0
+		and flag='$flag$'
+		and<![CDATA[ t.datetime =
+	       to_date(trim('$datetime$'), 'yyyy-MM-dd')]]>
+		order by t.seq asc
+	</select>
+	<parameterMap class="java.util.Map" id="createunitweight_map">
+		<parameter property="v_datetime" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_flag" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="OUT" />
+	</parameterMap>
+
+	<procedure id="createunitweight" parameterMap="createunitweight_map"
+		resultClass="measure">
+		{call m_createunitweight_p(?,?)}
+	</procedure>
+</sqlMap>

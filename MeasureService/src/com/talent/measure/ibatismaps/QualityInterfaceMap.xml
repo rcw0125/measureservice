@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="QualityInterface">
+	<typeAlias alias="qualityInterface" type="com.talent.measure.model.QualityInterface" />
+
+	<insert id="insertNoticebillHead" parameterClass="qualityInterface">
+		insert into
+		dbo.tb_noticebill_head(dbo.tb_noticebill_head.cph,dbo.tb_noticebill_head.noticebillid,dbo.tb_noticebill_head.icno,dbo.tb_noticebill_head.status)
+		VALUES('$cph$','$noticebillid$','$icno$','$status$')
+	</insert>
+	
+	<select id="queryCountByNoticebid" parameterClass="qualityInterface" resultClass="int">
+		select count(1) from dbo.tb_noticebill_head where dbo.tb_noticebill_head.noticebillid='$noticebillid$';
+	</select>
+	
+	<update id="updateNoticebillHead" parameterClass="qualityInterface">
+		update dbo.tb_noticebill_head set dbo.tb_noticebill_head.icno = '$icno$' where dbo.tb_noticebill_head.noticebillid='$noticebillid$'
+	</update>
+
+	<insert id="insertNoticebillBody" parameterClass="qualityInterface">
+		insert into
+		dbo.tb_noticebill_body(dbo.tb_noticebill_body.noticebillbodyid,dbo.tb_noticebill_body.noticebillid,dbo.tb_noticebill_body.billid,dbo.tb_noticebill_body.billbodyid,dbo.tb_noticebill_body.remark,dbo.tb_noticebill_body.xh,dbo.tb_noticebill_body.status)
+		VALUES('$noticebillbodyid$','$noticebillid$','$billid$','$billbodyid$','$remark$',1,2)
+	</insert>
+	<select id="queryByNoticebid" parameterClass="qualityInterface"
+		resultClass="int">
+		select count(1) from dbo.tb_noticebill_body where
+		dbo.tb_noticebill_body.billbodyid='$billbodyid$';
+	</select>
+
+
+	<insert id="insertDhdHead" parameterClass="qualityInterface">
+		insert into dbo.tb_dhd_head
+		  (dbo.tb_dhd_head.cvendorbaseid,
+	       dbo.tb_dhd_head.djno,
+	       dbo.tb_dhd_head.ywlx,
+	       dbo.tb_dhd_head.billtype,
+	       dbo.tb_dhd_head.dreceivedate,
+	       dbo.tb_dhd_head.cemployeeid,
+	       dbo.tb_dhd_head.cdeptid,
+	       dbo.tb_dhd_head.cooperator,
+	       dbo.tb_dhd_head.djstatus,
+	       dbo.tb_dhd_head.comefrom,
+	       dbo.tb_dhd_head.wqdh,
+	       dbo.tb_dhd_head.vdef16,
+	       dbo.tb_dhd_head.vdef17,
+	       dbo.tb_dhd_head.vdef18,
+	       dbo.tb_dhd_head.vdef19,
+	       dbo.tb_dhd_head.vdef20)
+		values
+		  ('$cvendorbaseid$',
+		   '$djno$',
+		   '到货单',
+		   'DH',
+		   '$dreceivedate$',
+		   '$cemployeeid$',
+		   '$cdeptid$',
+		   '$cooperator$',
+		   0,
+		   0,
+		   0,
+		   '$memo$',
+		   '$memo1$',
+		   '$memo2$',
+		   '$memo3$',
+		   '$memo4$')
+	</insert>
+
+	<select id="queryBydjno" parameterClass="qualityInterface"
+		resultClass="int">
+		select count(1) from dbo.tb_dhd_head where
+		dbo.tb_dhd_head.djno='$djno$';
+	</select>
+
+	<select id="queryBybid" parameterClass="qualityInterface"
+		resultClass="int">
+		select count(1) from dbo.tb_dhd_body where
+		dbo.tb_dhd_body.carriveorder_bid='$carriveorder_bid$';
+	</select>
+
+	<insert id="insertDhdBody" parameterClass="qualityInterface">
+		insert into dbo.tb_dhd_body
+		  (dbo.tb_dhd_body.carriveorder_bid,
+		   dbo.tb_dhd_body.djno,
+		   dbo.tb_dhd_body.sjsl,
+		   dbo.tb_dhd_body.cph,
+		   dbo.tb_dhd_body.cs,
+		   dbo.tb_dhd_body.w1,
+		   dbo.tb_dhd_body.w2,
+		   dbo.tb_dhd_body.t1,
+		   dbo.tb_dhd_body.t2,
+		   dbo.tb_dhd_body.cbaseid,
+		   dbo.tb_dhd_body.cupsourcebillid,
+		   dbo.tb_dhd_body.cupsourcebillrowid,
+		   dbo.tb_dhd_body.csourcebillid,
+		   dbo.tb_dhd_body.csourcebillrowid,
+		   dbo.tb_dhd_body.vdef16,
+		   dbo.tb_dhd_body.vdef17,
+		   dbo.tb_dhd_body.vdef18,
+		   dbo.tb_dhd_body.vdef19,
+		   dbo.tb_dhd_body.vdef20)
+		values
+		  ('$carriveorder_bid$',
+		   '$djno$',
+		   $sjsl$,
+		   '$cph$',
+		   1,
+		   $w1$,
+		   $w2$,
+		   '$t1$',
+		   '$t2$',
+		   '$cbaseid$',
+		   '$cupsourcebillid$',
+		   '$cupsourcebillrowid$',
+		   '$csourcebillid$',
+		   '$csourcebillrowid$',
+		   '$vdef16$',
+		   '$vdef17$',
+		   '$vdef18$',
+		   '$vdef19$',
+		   '$vdef20$')
+	</insert>
+
+	<update id="updateSuttleData" parameterClass="qualityInterface">
+		update
+		dbo.tb_dhd_body set dbo.tb_dhd_body.sjsl = $sjsl$,dbo.tb_dhd_body.w1 =
+		$w1$,dbo.tb_dhd_body.w2 = $w2$,dbo.tb_dhd_body.t1 =
+		'$t1$',dbo.tb_dhd_body.t2 = '$t2$' where
+		dbo.tb_dhd_body.carriveorder_bid = '$carriveorder_bid$'
+	</update>
+
+	<select id="queryCountByMatchid" parameterClass="qualityInterface" resultClass="int">
+		select count(1) from dbo.TB_TaskFlow where dbo.TB_TaskFlow.NoticeID='$noticebillid$' and dbo.TB_TaskFlow.Result='$result$';
+	</select>
+	
+	<insert id="insertInoutGate" parameterClass="qualityInterface">
+		insert into
+		dbo.TB_TaskFlow(dbo.TB_TaskFlow.NoticeID,dbo.TB_TaskFlow.NoticeItemID,dbo.TB_TaskFlow.xh,dbo.TB_TaskFlow.WCCode,dbo.TB_TaskFlow.OperatorID,dbo.TB_TaskFlow.BeginTime,dbo.TB_TaskFlow.EndTime,dbo.TB_TaskFlow.Result,dbo.TB_TaskFlow.Status)
+		VALUES('$noticebillid$','$noticebillbodyid$',1,'WCCode','OperatorID','$begintime$','$endtime$','$result$',1)
+	</insert>
+	
+	<update id="updateInoutGate" parameterClass="qualityInterface">
+		update
+		dbo.TB_TaskFlow set 
+		dbo.TB_TaskFlow.BeginTime='$begintime$',
+		dbo.TB_TaskFlow.EndTime='$endtime$'
+		where dbo.TB_TaskFlow.NoticeID='$noticebillid$' and dbo.TB_TaskFlow.Result='$result$';
+	</update>
+
+	<update id="returnSampleFlag" parameterClass="qualityInterface">
+		update
+		l_curr_temp_t t set
+		t.sampletime = to_char(sysdate,'yyyy-MM-dd hh24:mi:ss'),
+		t.sampleunitcode = '$sampleunitcode$',
+		t.sampleunitname = '$sampleunitname$',
+		t.deduction = '$deduction$' * 1000,
+		t.deduction2 = '$deduction2$' * 1000 where matchid = '$matchid$'
+	</update>
+	
+	<update id="returnMeasureDeduction" parameterClass="qualityInterface">
+		update
+		m_measure_t t set
+		t.deduction = '$deduction$' * 1000,
+		t.deduction2 = '$deduction2$' * 1000,
+		t.memo15='取样信息回传，扣水：$deduction$，扣杂：$deduction2$'
+		where matchid = '$matchid$'
+	</update>
+	<update id="cancelSampleFlag" parameterClass="qualityInterface">
+		update
+		l_curr_temp_t t set
+		t.sampletime = '',
+		t.sampleunitcode = '',
+		t.sampleunitname = '' where matchid = '$matchid$'
+	</update>
+
+	<update id="cancelQualityInfo" parameterClass="qualityInterface">
+		update
+		Q_QUALITY_T
+		t set
+		t.validflag = 0,
+		t.validflagoperaname='$samplername$'||'$samplercode$',
+		t.validflagtime=sysdate
+		where matchid = '$matchid$'
+	</update>
+	<insert id="insertQualityInfo" parameterClass="qualityInterface">
+		insert into
+		Q_QUALITY_T
+		(id,
+		validflag,
+		carno,
+		matchid,
+		qmpostioncode,
+		qmpostion,
+		createoperacode,
+		createoperaname,
+		createdate,
+		cardid)
+		values
+		(Q_QUALITY_S.Nextval,
+		1,
+		'$cph$',
+		'$matchid$',
+		'$sampleunitcode$',
+		'$sampleunitname$',
+		'$samplercode$',
+		'$samplername$',
+		sysdate,
+		'$icno$')
+	</insert>
+	<select id="queryMeasureInfoReturnQA" parameterClass="String"
+		resultClass="qualityInterface">
+		select m.basket as carriveorder_bid ,
+		m.suttle*0.001 sjsl,
+		m.gross*0.001 w1,
+		m.tare*0.001 w2,
+		to_char(m.grosstime,'yyyy-mm-dd hh24:mi:ss') t1,
+		to_char(m.taretime,'yyyy-mm-dd hh24:mi:ss') t2,
+		(select count(w.id) from l_workline_item_t w where (l.routeid = w.fid
+		and
+		nodecode = 'SP')) counts, m.operatype
+		from m_measure_t m
+		left join
+		l_applicationbill_t l
+		on m.matchid = l.matchid
+		where m.matchid =
+		'$matchid$'
+	</select>
+	<update id="updateSatus" parameterClass="qualityInterface">
+		update
+		tb_noticebill_head set status = 5 where
+		tb_noticebill_head.noticebillid='$matchid$'
+	</update>
+	<update id="updatenoticebill" parameterClass="qualityInterface">
+		update dbo.tb_noticebill_body set
+		dbo.tb_noticebill_body.billbodyid=dbo.tb_noticebill_body.billbodyid+'1'
+		where dbo.tb_noticebill_body.billbodyid='$noticebillbodyid$'
+	</update>
+
+	<update id="updateDhdbill" parameterClass="qualityInterface">
+		update
+		dbo.tb_dhd_body set dbo.tb_dhd_body.carriveorder_bid
+		=dbo.tb_dhd_body.carriveorder_bid+'1' where
+		dbo.tb_dhd_body.carriveorder_bid = '$noticebillbodyid$'
+	</update>
+	<select id="queryNoticebillid" parameterClass="String" resultClass="String">
+		select t.saleitemid noticebillbodyid
+		from L_APPLICATIONBILL_ITEM_T t
+		where t.validflag = 1
+		and t.matchid = '$matchid$'
+	</select>
+</sqlMap>

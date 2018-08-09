@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="msameweight">
+	<typeAlias alias="mweight" type="com.talent.measure.model.Msameweight" />
+	
+	<insert id="insertmsweight" parameterClass="mweight">
+	  insert into m_sameweight_t t
+	    (t.matchid, t.sametype, t.fmatchid, t.memo)
+	  values
+	    ('$matchid$', '$sametype$', '$fmatchid$', '$memo$')
+	</insert>
+	<select id="queryMcount" parameterClass="Mweight" resultClass="int">
+	
+	 select count(1) from m_sameweight_t m where m.fmatchid='$fmatchid$' and sametype = '$sametype$'
+	</select>
+	<update id="updateValidflag" parameterClass="Mweight" >
+	  update m_sameweight_t set validflag=0 where fmatchid='$fmatchid$' and sametype = '$sametype$'
+	</update>
+	<select id="querySameweight" parameterClass="mweight" resultClass="mweight" >
+     select s.fmatchid, 
+            s.matchid,
+           t.carno,
+           t.taskcode,
+           t.materialname,
+           t.sourcename,
+           t.targetname,
+           round(nvl(t.tare*0.001,0),3)tare,
+           to_char(t.taretime, 'yyyy-MM-dd hh24:mi:ss') taretime,
+           t.tareweigh,
+           round(nvl(t.gross*0.001,0),3)gross,
+           to_char(t.grosstime, 'yyyy-MM-dd hh24:mi:ss') grosstime,
+           t.grossweigh,
+           round(nvl(t.suttle*0.001,0),3) suttle ,
+           to_char(t.suttletime, 'yyyy-MM-dd hh24:mi:ss') suttletime,
+           t.suttleweigh,
+           t.grossoperaname,
+           t.tareoperaname,
+           s.memo
+      from M_SAMEWEIGHT_T s
+      left join m_measure_t t
+        on s.matchid = t.matchid
+     where s.validflag = 1  and t.validflag > 0 
+     <dynamic prepend="">
+			<isNotEmpty prepend="AND" property="begintime">
+                <![CDATA[t.$selecttime$ >=to_date(trim(#begintime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="endtime">
+                <![CDATA[t.$selecttime$ <=to_date(trim(#endtime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="materialname">
+				t.materialname like
+				'%'||trim(#materialname:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="sourcename">
+				t.sourcename like
+				'%'||trim(#sourcename:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="targetname">
+				t.targetname like
+				'%'||trim(#targetname:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="carno">
+				t.carno like
+				'%'||trim(#carno:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="taskcode">
+				t.taskcode like
+				'%'||trim(#taskcode:varchar#) || '%'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="matchid">
+				t.matchid like
+				'%'||trim(#matchid#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="grossweighid">
+				t.grossweighid like
+				'%'||trim(#grossweighid#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="tareweighid">
+				t.tareweighid like
+				'%'||trim(#tareweighid#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="suttleweighid">
+				t.suttleweighid like
+				'%'||trim(#suttleweighid#) || '%'
+			</isNotEmpty>
+			
+		</dynamic>
+		order by s.createdate desc,t.suttletime asc
+  </select>
+  <select id="querySameweight_count" parameterClass="mweight" resultClass="int" >
+     select count(1)
+      from M_SAMEWEIGHT_T s
+      left join m_measure_t t
+        on s.matchid = t.matchid
+     where s.validflag = 1  and t.validflag > 0 
+     <dynamic prepend="">
+			<isNotEmpty prepend="AND" property="begintime">
+                <![CDATA[t.$selecttime$ >=to_date(trim(#begintime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="endtime">
+                <![CDATA[t.$selecttime$ <=to_date(trim(#endtime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="materialname">
+				t.materialname like
+				'%'||trim(#materialname:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="sourcename">
+				t.sourcename like
+				'%'||trim(#sourcename:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="targetname">
+				t.targetname like
+				'%'||trim(#targetname:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="carno">
+				t.carno like
+				'%'||trim(#carno:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="taskcode">
+				t.taskcode like
+				'%'||trim(#taskcode:varchar#) || '%'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="matchid">
+				t.matchid like
+				'%'||trim(#matchid#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="grossweighid">
+				t.grossweighid like
+				'%'||trim(#grossweighid#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="tareweighid">
+				t.tareweighid like
+				'%'||trim(#tareweighid#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="suttleweighid">
+				t.suttleweighid like
+				'%'||trim(#suttleweighid#) || '%'
+			</isNotEmpty>
+			
+		</dynamic>
+     order by s.createdate desc
+  </select>
+</sqlMap>

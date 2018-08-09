@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="measureTaskReport">
+	<typeAlias alias="measuerTaskReport" type="com.talent.measure.model.MeasuerTaskReport" />
+	<typeAlias alias="measurePhoto" type="com.talent.measure.model.MeasurePhoto" />
+	<typeAlias alias="measureTaskDoResult" type="com.talent.measure.model.MeasureTaskDoResult" />
+	<typeAlias alias="measurePrintBill" type="com.talent.measure.model.MeasurePrintBill" />
+	<select id="getCarWeightTaskCount" parameterClass="MeasuerTaskReport" resultClass="MeasuerTaskReport">
+		select equcode,equname,sum(gCount) as gCount,sum(tCount) as tCount,
+		sum(tSumWeight) as tSumWeight,sum(gSumWeight) as gSumWeight from (
+			select t.TAREWEIGHID  as equcode, t.TAREWEIGH as equname, 
+			0 as gCount, count(1) as tCount, sum(t.TARE) as tSumWeight, 0 as gSumWeight
+		  from M_MEASURE_T t
+		 where t.validflag = 1 and t.TARE > 0 
+		 <dynamic prepend="">
+			<isNotEmpty prepend="AND" property="equcode">
+			 <isNotEqual property="equcode" compareValue="-1" >
+			    t.TAREWEIGHID =trim('$equcode$')
+			 </isNotEqual>
+			</isNotEmpty>			
+				<isNotEmpty prepend="AND" property="equname">
+			 <isNotEqual property="equname" compareValue="-1" >
+			    t.TAREWEIGH =trim('$equname$')
+			 </isNotEqual>			 
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="begintime">
+                <![CDATA[t.TARETIME >=to_date(trim(#begintime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="endtime">
+                <![CDATA[t.TARETIME <=to_date(trim(#endtime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+		</dynamic>
+		 group by t.TAREWEIGHID, t.TAREWEIGH
+		union all
+		select t.GROSSWEIGHID  as equcode, t.GROSSWEIGH as equname, 
+		count(1) as gCount,0 as tCount, 0 as tSumWeight, sum(t.GROSS) as gSumWeight 
+		  from M_MEASURE_T t
+		 where t.validflag = 1 and t.TARE > 0 
+		 <dynamic prepend="">
+			<isNotEmpty prepend="AND" property="equcode">
+			 <isNotEqual property="equcode" compareValue="-1" >
+			    t.GROSSWEIGHID =trim('$equcode$')
+			 </isNotEqual>
+			</isNotEmpty>
+			
+				<isNotEmpty prepend="AND" property="equname">
+			 <isNotEqual property="equname" compareValue="-1" >
+			    t.GROSSWEIGH =trim('$equname$')
+			 </isNotEqual>			 
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="begintime">
+                <![CDATA[t.GROSSTIME >=to_date(trim(#begintime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="endtime">
+                <![CDATA[t.GROSSTIME <=to_date(trim(#endtime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+		</dynamic>
+		group by t.GROSSWEIGHID, t.GROSSWEIGH
+		) group by equcode,equname
+	
+	</select>
+	
+	
+	
+	
+	<select id="getCarUserCompleteCount" parameterClass="MeasuerTaskReport" resultClass="MeasuerTaskReport">
+		select usercode,username,sum(gCount) as gCount,sum(tCount) as tCount,
+		sum(tSumWeight) as tSumWeight,sum(gSumWeight) as gSumWeight from (
+			select t.TAREoperacode  as  usercode , t.TAREoperaname as username, 
+			0 as gCount, count(1) as tCount, sum(t.TARE) as tSumWeight, 0 as gSumWeight
+		  from M_MEASURE_T t
+		 where t.validflag = 1 and t.TARE > 0 
+		 <dynamic prepend="">
+			<isNotEmpty prepend="AND" property="usercode">
+			 <isNotEqual property="usercode" compareValue="-1" >
+			    t.TAREoperacode =trim('$usercode$')
+			 </isNotEqual>
+			</isNotEmpty>			
+				<isNotEmpty prepend="AND" property="username">
+			 <isNotEqual property="username" compareValue="-1" >
+			    t.TAREoperaname =trim('$username$')
+			 </isNotEqual>			 
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="begintime">
+                <![CDATA[t.TARETIME >=to_date(trim(#begintime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="endtime">
+                <![CDATA[t.TARETIME <=to_date(trim(#endtime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+		</dynamic>
+		 group by t.TAREoperacode, t.TAREoperaname
+		union all
+		select t.GROSSoperacode  as usercode, t.GROSSoperaname as username, 
+		count(1) as gCount,0 as tCount, 0 as tSumWeight, sum(t.GROSS) as gSumWeight 
+		  from M_MEASURE_T t
+		 where t.validflag = 1 and t.TARE > 0 
+		 <dynamic prepend="">
+			<isNotEmpty prepend="AND" property="usercode">
+			 <isNotEqual property="usercode" compareValue="-1" >
+			    t.GROSSoperacode =trim('$usercode$')
+			 </isNotEqual>
+			</isNotEmpty>
+			
+				<isNotEmpty prepend="AND" property="username">
+			 <isNotEqual property="username" compareValue="-1" >
+			    t.GROSSoperaname =trim('$username$')
+			 </isNotEqual>			 
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="begintime">
+                <![CDATA[t.GROSSTIME >=to_date(trim(#begintime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="endtime">
+                <![CDATA[t.GROSSTIME <=to_date(trim(#endtime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+		</dynamic>
+		group by t.GROSSoperacode, t.GROSSoperaname
+		) group by usercode,username
+	
+	</select>
+	 <!--保存坐席处理结果lt…… -->
+	<insert id="saveTaskDoResult"  	parameterClass="measureTaskDoResult">
+		<selectKey keyProperty="id">
+			select M_RC_TASK_DORESULT_S.nextval from dual
+		</selectKey>
+		insert into M_RC_TASK_DORESULT_T(ID,OPNAME,OPCODE,TASKBEGINTIME,TASKENDTIME,EQUCODE,EQUNAME
+		,CARNO,TIMECOUNT,TASKDORESULT,MEMO,EQUTYPE,seatid ,seatname)
+		VALUES($id$, '$opname$','$opcode$',$taskbegintime$,$taskendtime$,'$equcode$','$equname$','$carno$',
+		$timecount$,'$taskdoresult$','$memo$','$equtype$','$seatid$','$seatname$')
+	</insert> 
+	
+	<select id="getTaskDoResult" parameterClass="measureTaskDoResult" resultClass="measureTaskDoResult">
+		select ID,
+		       OPNAME,
+		       OPCODE,
+		       to_char(to_date(to_char(TASKBEGINTIME), 'yyyymmddhh24miss'),
+		               'yyyy-mm-dd hh24:mi:ss') as TASKBEGINTIME,
+		       to_char(to_date(to_char(TASKENDTIME), 'yyyymmddhh24miss'),
+		               'yyyy-mm-dd hh24:mi:ss') as TASKENDTIME,
+		       EQUCODE,
+		       EQUNAME,
+		       CARNO,
+		       TIMECOUNT,
+		       TASKDORESULT,
+		       MEMO,
+		       EQUTYPE
+		  from M_RC_TASK_DORESULT_T t
+		 where 1=1 
+		 <dynamic prepend="">
+			<isNotEmpty prepend="AND" property="opname">
+			 <isNotEqual property="opname" compareValue="-1" >
+			    t.opname =trim('$opname$')
+			 </isNotEqual>
+			</isNotEmpty>	
+					
+				<isNotEmpty prepend="AND" property="opcode">
+			 <isNotEqual property="opcode" compareValue="-1" >
+			    t.opcode =trim('$opcode$')
+			 </isNotEqual>			 
+			</isNotEmpty>
+			
+				<isNotEmpty prepend="AND" property="equcode">
+			 <isNotEqual property="equcode" compareValue="-1" >
+			    t.equcode =trim('$equcode$')
+			 </isNotEqual>			 
+			</isNotEmpty>
+			
+				<isNotEmpty prepend="AND" property="equname">
+			 <isNotEqual property="equname" compareValue="-1" >
+			    t.equname =trim('$equname$')
+			 </isNotEqual>			 
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="carno">
+			 <isNotEqual property="carno" compareValue="-1" >
+			    t.carno  like '%$carno$%'
+			 </isNotEqual>			 
+			</isNotEmpty> 
+			
+			<isNotEmpty prepend="AND" property="taskbegintime">
+                <![CDATA[t.CREATETIME >=to_date(trim('$taskbegintime$'),'yyyy-mm-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="taskendtime">
+              <![CDATA[t.CREATETIME <=to_date(trim('$taskendtime$'),'yyyy-mm-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+		</dynamic> 
+	</select>
+
+	<select id="getAllTaskDoResultAvgTime" parameterClass="measureTaskDoResult" resultClass="measureTaskDoResult">
+		 SELECT OPNAME,OPCODE,TASKDORESULT,SUMCOUNT AS totalcount, 
+	 	CASE WHEN SUMCOUNT=0 THEN 0 ELSE ROUND(TIMECOUNT/SUMCOUNT,2) END AS  TIMECOUNT
+	 	FROM ( select   OPNAME,OPCODE,TASKDORESULT,COUNT(1) AS SUMCOUNT,
+		SUM(TIMECOUNT) AS TIMECOUNT 
+		  from M_RC_TASK_DORESULT_T t
+		 where 1=1 
+		 <dynamic prepend="">
+			<isNotEmpty prepend="AND" property="opname">
+			 <isNotEqual property="opname" compareValue="-1" >
+			    t.opname =trim('$opname$')
+			 </isNotEqual>
+			</isNotEmpty>	
+					
+				<isNotEmpty prepend="AND" property="opcode">
+			 <isNotEqual property="opcode" compareValue="-1" >
+			    t.opcode =trim('$opcode$')
+			 </isNotEqual>			 
+			</isNotEmpty>
+			
+				<isNotEmpty prepend="AND" property="equcode">
+			 <isNotEqual property="equcode" compareValue="-1" >
+			    t.equcode =trim('$equcode$')
+			 </isNotEqual>			 
+			</isNotEmpty>
+			
+				<isNotEmpty prepend="AND" property="equname">
+			 <isNotEqual property="equname" compareValue="-1" >
+			    t.equname =trim('$equname$')
+			 </isNotEqual>			 
+			</isNotEmpty>
+			
+				<isNotEmpty prepend="AND" property="carno">
+			 <isNotEqual property="carno" compareValue="-1" >
+			    t.carno  like '%$carno$%'
+			 </isNotEqual>			 
+			</isNotEmpty> 
+			
+			<isNotEmpty prepend="AND" property="taskbegintime">
+                <![CDATA[t.CREATETIME >=to_date(trim('$taskbegintime$'),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="taskendtime">
+              <![CDATA[t.CREATETIME <=to_date(trim('$taskendtime$'),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+		</dynamic> 
+		GROUP BY  OPNAME,OPCODE,TASKDORESULT )
+	</select>
+	
+		 <!--保存照片路径lt…… -->
+	<insert id="saveMeasurePhoto"  	parameterClass="measurePhoto">
+		<selectKey keyProperty="id">
+			select m_photo_s.nextval from dual
+		</selectKey>
+		insert into m_photo_t(ID,MEASURETYPE,MATCHID,PHOTO,EQUCODE,EQUNAME)
+		VALUES($id$,'$measuretype$','$matchid$','$photo$','$equcode$','$equname$')
+	</insert> 
+	
+	<select id="getMeasurePhoto" parameterClass="measurePhoto" resultClass="measurePhoto">
+		select  ID,MEASURETYPE,MATCHID,PHOTO,EQUCODE,EQUNAME
+		  from m_photo_t t
+		 where 1=1 
+		 <dynamic prepend="">
+			<isNotEmpty prepend="AND" property="measuretype">
+			 <isNotEqual property="measuretype" compareValue="-1" >
+			    t.MEASURETYPE =trim('$measuretype$')
+			 </isNotEqual>
+			</isNotEmpty>	
+					
+				<isNotEmpty prepend="AND" property="matchid">
+			 <isNotEqual property="matchid" compareValue="-1" >
+			    t.MATCHID =trim('$matchid$')
+			 </isNotEqual>			 
+			</isNotEmpty>	
+					
+				<isNotEmpty prepend="AND" property="equcode">
+			 <isNotEqual property="equcode" compareValue="-1" >
+			    t.equcode =trim('$equcode$')
+			 </isNotEqual>			 
+			</isNotEmpty>	
+					
+				<isNotEmpty prepend="AND" property="equname">
+			 <isNotEqual property="equname" compareValue="-1" >
+			    t.equname =trim('$equname$')
+			 </isNotEqual>			 
+			</isNotEmpty>		 
+		</dynamic> 
+	</select>
+	<select id="getprintcount" parameterClass="measurePrintBill" resultClass="int">
+		select count(1) from M_PRINTBILL_T t where t.matchid = '$matchid$' and t.printmodeltype = '$printModelType$'
+	</select>
+	
+	<!--保存计量打印票据lt…… -->
+	<insert id="savePrintBill"  parameterClass="measurePrintBill">
+		<selectKey keyProperty="id">
+			select m_printbill_s.nextval from dual
+		</selectKey>
+		insert into m_printbill_t(ID,MATCHID,EQUCODE,EQUNAME,OPNAME,OPCODE,CARNO,printtype,printModelType)
+		VALUES($id$,'$matchid$','$equcode$','$equname$','$opname$','$opcode$','$carno$','$printtype$','$printModelType$')
+	</insert> 
+		<select id="checkPhotoIsIn" parameterClass="measurePhoto" resultClass="int">
+		select  count(1)
+		  from m_photo_t t
+		 where 1=1 
+		 <dynamic prepend="">
+			<isNotEmpty prepend="AND" property="photo">
+			 <isNotEqual property="photo" compareValue="-1" >
+			    t.photo =trim('$photo$')
+			 </isNotEqual>
+			</isNotEmpty>	
+					
+				<isNotEmpty prepend="AND" property="matchid">
+			 <isNotEqual property="matchid" compareValue="-1" >
+			    t.MATCHID =trim('$matchid$')
+			 </isNotEqual>			 
+			</isNotEmpty>
+		</dynamic> 
+	</select>
+</sqlMap>

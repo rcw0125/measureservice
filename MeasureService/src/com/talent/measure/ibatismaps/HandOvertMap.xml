@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="handover">
+	<typeAlias alias="hover" type="com.talent.measure.model.HandOver" />
+	<insert id="insertHandover" parameterClass="hover">
+		<selectKey keyProperty="id">
+			select M_HANDOVER_S.Nextval from dual
+		</selectKey>
+
+		insert into m_handover_t t
+		(id,datetime,
+		workgroup,
+		workgroupsqe,
+		handoverman,
+		successor,
+		equipmentstatus,
+		handroomstatus,
+		general,
+		nextworknote,
+		createman,createdate)
+		values
+		($id$,to_date('$datetime$','yyyy-MM-dd'),
+		'$workgroup$',
+		'$workgroupsqe$',
+		'$handoverman$',
+		'$successor$',
+		'$equipmentstatus$',
+		'$handroomstatus$',
+		'$general$',
+		'$nextworknote$',
+		'$createman$',sysdate)
+	</insert>
+	<select id="queryHcount" parameterClass="Mweight" resultClass="int">
+		select count(1) from m_handover_t m where id='$id$'
+	</select>
+
+	<update id="updateHandover" parameterClass="hover">
+		update m_handover_t
+		set
+		datetime = to_date('$datetime$','yyyy-MM-dd'),
+		workgroup='$workgroup$',
+		workgroupsqe='$workgroupsqe$',
+		handoverman='$handoverman$',
+		successor='$successor$',
+		equipmentstatus='$equipmentstatus$',
+		handroomstatus='$handroomstatus$',
+		general='$general$',
+		nextworknote='$nextworknote$',
+		updateman='$createman$',
+		updatedate=sysdate
+		where id='$id$'
+	</update>
+	<update id="cancelHandover" parameterClass="hover">
+		update m_handover_t
+		set
+		validflag=0,
+		cancelman='$cancelman$',
+		canceldate=sysdate
+		where
+		id='$id$'
+	</update>
+	<select id="queryHandoverByid" parameterClass="hover"
+		resultClass="hover">
+		select id,
+		workgroup,
+		workgroupsqe,
+		handoverman,
+		successor,
+		equipmentstatus,
+		handroomstatus,
+		general,
+		nextworknote,
+		createman,
+		to_char(datetime, 'yyyy-MM-dd')datetime,
+		to_char(createdate,
+		'yyyy-MM-dd hh24:mi:ss') createdate,
+		updateman,
+		to_char(updatedate,
+		'yyyy-MM-dd hh24:mi:ss') updatedate,
+		cancelman,
+		to_char(canceldate,
+		'yyyy-MM-dd hh24:mi:ss') canceldate,
+		validflag
+		from M_HANDOVER_T t where
+		id = '$id$'
+	</select>
+	<select id="queryHandover" parameterClass="hover" resultClass="hover">
+		select id,
+		       workgroup,
+		       workgroupsqe,
+		       handoverman,
+		       successor,
+		       substr(equipmentstatus, 0, 10) equipmentstatus,
+		       substr(handroomstatus,0, 10) handroomstatus,
+		       substr(general, 0, 10) general,
+		       substr(nextworknote, 0, 10) nextworknote,
+		       createman,
+		       to_char(datetime, 'yyyy-MM-dd') datetime,
+		       to_char(createdate, 'yyyy-MM-dd hh24:mi:ss') createdate,
+		       updateman,
+		       to_char(updatedate, 'yyyy-MM-dd hh24:mi:ss') updatedate,
+		       cancelman,
+		       to_char(canceldate, 'yyyy-MM-dd hh24:mi:ss') canceldate,
+		       decode(validflag, '0', '作废', '正常') validflag
+		  from M_HANDOVER_T t
+		 where 1 = 1
+
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="begintime">
+                <![CDATA[t.datetime >=to_date(trim('$begintime$'),'yyyy-MM-dd')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="endtime">
+                <![CDATA[t.datetime <=to_date(trim('$endtime$'),'yyyy-MM-dd')]]>
+			</isNotEmpty>
+			<isNotEqual prepend="and" property="workgroup"
+				compareValue="-1">
+				t.workgroup =trim('$workgroup$')
+			</isNotEqual>
+
+			<isNotEqual prepend="and" property="workgroupsqe"
+				compareValue="-1">
+				t.workgroupsqe =trim('$workgroupsqe$')
+			</isNotEqual>
+
+			<isNotEqual prepend="and" property="validflag"
+				compareValue="-1">
+				t.validflag='$validflag$'
+			</isNotEqual>
+			<isNotEmpty prepend="AND" property="handoverman">
+				t.handoverman like
+				'%'||trim('$handoverman$') || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="successor">
+				t.successor like
+				'%'||trim('$successor$') || '%'
+			</isNotEmpty>
+		</dynamic>
+		order by t.datetime desc, t.createdate desc
+	</select>
+	<select id="queryHandover_count" parameterClass="hover"
+		resultClass="int">
+		select count(1)
+		from M_HANDOVER_T t
+		where 1=1
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="begintime">
+                <![CDATA[t.datetime >=to_date(trim('$begintime$'),'yyyy-MM-dd')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="endtime">
+                <![CDATA[t.datetime <=to_date(trim('$endtime$'),'yyyy-MM-dd')]]>
+			</isNotEmpty>
+			<isNotEqual prepend="and" property="workgroup"
+				compareValue="-1">
+				t.workgroup =trim('$workgroup$')
+			</isNotEqual>
+			<isNotEqual prepend="and" property="workgroupsqe"
+				compareValue="-1">
+				t.workgroupsqe =trim('$workgroupsqe$')
+			</isNotEqual>
+			<isNotEqual prepend="and" property="validflag"
+				compareValue="-1">
+				t.validflag='$validflag$'
+			</isNotEqual>
+			<isNotEmpty prepend="AND" property="handoverman">
+				t.handoverman like
+				'%'||trim('$handoverman$') || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="successor">
+				t.successor like
+				'%'||trim('$successor$') || '%'
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+</sqlMap>

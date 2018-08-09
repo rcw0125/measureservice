@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/batch"
+	   xmlns:beans="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+           http://www.springframework.org/schema/beans 
+	   	   http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+           http://www.springframework.org/schema/batch
+           http://www.springframework.org/schema/batch/spring-batch-2.2.xsd">
+           
+    <beans:bean id="jobRepository" class="org.springframework.batch.core.repository.support.SimpleJobRepository">
+	    <beans:constructor-arg>
+	        <beans:bean class="com.talent.base.batch.LimitMapJobInstanceDao"/>
+	    </beans:constructor-arg>
+	    <beans:constructor-arg>
+	        <beans:bean class="com.talent.base.batch.LimitMapJobExecutionDao" />
+	    </beans:constructor-arg>
+	    <beans:constructor-arg>
+	        <beans:bean class="com.talent.base.batch.LimitMapStepExecutionDao"/>
+	    </beans:constructor-arg>
+	    <beans:constructor-arg>
+	        <beans:bean class="com.talent.base.batch.LimitMapExecutionContextDao"/>
+	    </beans:constructor-arg>
+	</beans:bean>
+
+    <beans:bean id="batchManager" class="org.springframework.batch.support.transaction.ResourcelessTransactionManager"/>
+
+	<beans:bean id="logs" class="com.talent.base.model.Logs"></beans:bean>
+	
+    <beans:bean id="jobLauncher" class="org.springframework.batch.core.launch.support.SimpleJobLauncher">
+        <beans:property name="jobRepository" ref="jobRepository"/>
+        <beans:property name="taskExecutor">
+			<beans:bean class="org.springframework.core.task.SimpleAsyncTaskExecutor"></beans:bean>
+		</beans:property>
+    </beans:bean>
+
+    <job id="logJob">
+        <step id="step_save">
+            <tasklet transaction-manager="batchManager" allow-start-if-complete="true">
+            	<chunk reader="logreaderTask" writer="logitemwriterTask" commit-interval="10"></chunk>
+            </tasklet>
+        </step>
+    </job>
+    
+    <job id="onStartJob">
+    	<step id="dubboStep" next="initStep">
+    		<tasklet ref="dubboServiceTask" transaction-manager="batchManager" allow-start-if-complete="true"></tasklet>
+    	</step>
+        <step id="initStep">
+            <tasklet ref="cacheSyncTask" transaction-manager="batchManager" allow-start-if-complete="true"/>
+        </step>
+    </job>
+    
+    <job id="ruleSyncJob">
+        <step id="ruleSyncStep">
+            <tasklet ref="measureruleTask" transaction-manager="batchManager" allow-start-if-complete="true"/>
+        </step>
+    </job>
+    
+    <job id="resourceSyncJob">
+        <step id="resourceSyncStep">
+            <tasklet ref="resourceTask" transaction-manager="batchManager" allow-start-if-complete="true"/>
+        </step>
+    </job>
+    
+    <job id="hardwareSyncJob">
+        <step id="hardwareSyncStep">
+            <tasklet ref="hardwareTask" transaction-manager="batchManager" allow-start-if-complete="true"/>
+        </step>
+    </job>
+    
+    <beans:bean id="logreaderTask" class="com.talent.base.job.ReadLogsJob" scope="step">
+		<beans:property name="operator" value="#{jobParameters['operator']}" />
+		<beans:property name="inParams" value="#{jobParameters['inParams']}" />
+		<beans:property name="outResults" value="#{jobParameters['outResults']}" />
+		<beans:property name="createTime" value="#{jobParameters['createTime']}" />
+	</beans:bean>
+	
+    <beans:bean id="indexlogTask" class="com.talent.base.job.IndexLogsJob"/>
+    
+    <beans:bean id="measureruleTask" class="com.talent.measure.job.RuleSyncJob"/>
+    
+    <beans:bean id="resourceTask" class="com.talent.measure.job.ResourceSyncJob"/>
+    
+    <beans:bean id="hardwareTask" class="com.talent.measure.job.HardwareCtrlSyncJob"/>
+    
+    <beans:bean id="cacheSyncTask" class="com.talent.measure.job.CacheSyncJob"/>
+    
+    <beans:bean id="dubboServiceTask" class="com.talent.base.job.DubboServiceJob">
+    	<beans:property name="messageSource" ref="configProperties"/>
+    </beans:bean>
+    
+    <!-- 读取日志文件 -->
+    <beans:bean id="logIndexReader" class="org.springframework.batch.item.file.FlatFileItemReader" scope="step">
+        <beans:property name="resource" value="/log/templete.csv"/>
+        <beans:property name="lineMapper">
+            <beans:bean class="org.springframework.batch.item.file.mapping.DefaultLineMapper">
+                <beans:property name="lineTokenizer" ref="lineTokenizer"/>
+                <beans:property name="fieldSetMapper">
+                    <beans:bean class="org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper">
+                        <beans:property name="prototypeBeanName" value="logs"></beans:property>
+                    </beans:bean>
+                </beans:property>
+            </beans:bean>
+        </beans:property>
+    </beans:bean>
+	
+    <beans:bean id="lineTokenizer" class="org.springframework.batch.item.file.transform.DelimitedLineTokenizer">
+        <beans:property name="delimiter" value=","/>
+        <beans:property name="names">
+            <beans:list>
+                <beans:value>operator</beans:value>
+                <beans:value>inParams</beans:value>
+                <beans:value>outResults</beans:value>
+                <beans:value>createTime</beans:value>
+            </beans:list>
+        </beans:property>
+    </beans:bean>
+    
+    <beans:bean id="logitemwriterTask" class="org.springframework.batch.item.file.FlatFileItemWriter" scope="step">
+        <beans:property name="encoding" value="gb2312"/>
+        <beans:property name="resource" value="file:/data/log/service/log.log"/>
+        <beans:property name="appendAllowed" value="true"/>
+        <beans:property name="lineAggregator">
+            <beans:bean class="org.springframework.batch.item.file.transform.DelimitedLineAggregator">
+                <beans:property name="delimiter" value=","/>
+                <beans:property name="fieldExtractor">
+                    <beans:bean class="org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor">
+                        <beans:property name="names" value="operator,inParams,outResults,createTime"/>
+                    </beans:bean>
+                </beans:property>
+            </beans:bean>
+        </beans:property>
+    </beans:bean>
+</beans:beans>

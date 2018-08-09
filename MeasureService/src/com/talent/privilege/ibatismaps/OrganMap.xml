@@ -1,0 +1,118 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="Organ">
+	<typeAlias alias="organ" type="com.talent.privilege.model.Organ" />	
+	<select id="query_list" resultClass="organ" parameterClass="organ">
+		select id,fid,organcode,organname,validflag,createtime,createman,updatetime,updateman,organmemo
+		from P_ORGAN_T
+		where 1 = 1
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="id">
+				<isGreaterThan property="id" compareValue="0">
+					id = #id#
+				</isGreaterThan>
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="fid">
+				<isGreaterThan property="fid" compareValue="-1">
+					fid = #fid#
+				</isGreaterThan>
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="organcode">
+				organcode = '$organcode$'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="organname">
+				organname like '%$organname$%'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="validflag">
+				validflag = $validflag$
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="organmemo">
+				organmemo like '%$organmemo$%'
+			</isNotEmpty>
+		</dynamic>
+		order by organname asc,id desc
+	</select>
+	
+	<select id="query_count" resultClass="int" parameterClass="organ">
+		select count(1)
+		from P_ORGAN_T
+		where 1 = 1
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="id">
+				<isGreaterThan property="id" compareValue="0">
+					id = #id#
+				</isGreaterThan>
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="fid">
+				<isGreaterThan property="fid" compareValue="-1">
+					fid = #fid#
+				</isGreaterThan>
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="organcode">
+				organcode = '$organcode$'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="organname">
+				organname like '%$organname$%'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="validflag">
+				validflag = $validflag$
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="organmemo">
+				organmemo like '%$organmemo$%'
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<update id="delete" parameterClass="String">
+		delete from P_ORGAN_T where id in ($ids$)
+	</update>
+	
+	<update id="update" parameterClass="organ">
+		update P_ORGAN_T set createtime = '$createtime$',createman = '$createman$'
+		
+		<isNotEmpty prepend="," property="fid">
+			<isGreaterThan property="fid" compareValue="-1">
+				fid = #fid#
+			</isGreaterThan>
+		</isNotEmpty>
+		
+		<isNotEmpty prepend="," property="organname">
+			organname = '%$organname$%'
+		</isNotEmpty>
+		
+		<isNotEmpty prepend="," property="organcode">
+			organcode = '$organcode$'
+		</isNotEmpty>
+		
+		<isNotEmpty prepend="," property="validflag">
+			validflag = $validflag$
+		</isNotEmpty>
+		
+		<isNotEmpty prepend="," property="organmemo">
+			organmemo = '$organmemo$'
+		</isNotEmpty>
+		
+		where ID = $id$
+	</update>
+	
+	<insert id="insert" parameterClass="organ">
+        	insert into P_ORGAN_T (id,fid,organcode,organname,validflag,createtime,createman,organmemo) 
+        		values (#id#,$fid$,'$organcode$','$organname$',$validflag$,'$createtime$','$createman$','$organmemo$')
+    </insert>
+    
+    <select id="getNewID" resultClass="int">
+    	SELECT P_PLATFORM_S.NEXTVAL AS VALUE FROM DUAL
+    </select>
+</sqlMap>

@@ -1,0 +1,466 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="businessconfig">
+	<typeAlias alias="bc" type="com.talent.measure.model.Measure" />
+	<typeAlias alias="exception" type="com.talent.measure.model.Exceptions" />
+	<typeAlias alias="msameweight" type="com.talent.measure.model.Msameweight" />
+	<!--查询计量信息 -->
+	<resultMap id="exception_Map" class="com.talent.measure.model.Exceptions">
+		<result property="matchid" column="matchid" />
+		<result property="applicationno" column="applicationno" />
+		<result property="operatype" column="operatype" />
+		<result property="carno" column="carno" />
+		<result property="planid" column="planid" />
+		<result property="taskcode" column="taskcode" />
+		<result property="materialcode" column="materialcode" />
+		<result property="materialname" column="materialname" />
+		<result property="materialspec" column="materialspec" />
+		<result property="shipcode" column="shipcode" />
+		<result property="ship" column="ship" />
+		<result property="sourcecode" column="sourcecode" />
+		<result property="sourcename" column="sourcename" />
+		<result property="targetcode" column="targetcode" />
+		<result property="targetname" column="targetname" />
+		<result property="gross" column="gross" nullValue="0" />
+		<result property="grosstime" column="grosstime" />
+		<result property="grossweighid" column="grossweighid" />
+		<result property="grossweigh" column="grossweigh" />
+		<result property="tare" column="tare" nullValue="0" />
+		<result property="taretime" column="taretime" />
+		<result property="tareweighid" column="tareweighid" />
+		<result property="tareweigh" column="tareweigh" />
+		<result property="deduction" column="deduction" />
+		<result property="deductiontime" column="deductiontime" />
+		<result property="suttle" column="suttle" nullValue="0" />
+		<result property="suttletime" column="suttletime" />
+		<result property="suttleweighid" column="suttleweighid" />
+		<result property="suttleweigh" column="suttleweigh" />
+		<result property="createdate" column="createdate" />
+		<result property="grossb" column="grossb" nullValue="0" />
+		<result property="tareb" column="tareb" nullValue="0" />
+		<result property="suttleb" column="suttleb" nullValue="0" />
+		<result property="snumber" column="snumber" nullValue="0" />
+		<result property="suttleapp" column="suttleapp" nullValue="0" />
+		<result property="flag" column="flag" nullValue="0" />
+		<result property="msg" column="msg" />
+		<result property="tareoperaname" column="tareoperaname" />
+		<result property="grossoperaname" column="grossoperaname" />
+	</resultMap>
+	<resultMap id="measure_Map" class="com.talent.measure.model.Measure">
+		<result property="suttle" column="suttle" nullValue="0" />
+		<result property="materialcount" column="materialcount"
+			nullValue="0" />
+		<result property="plancarcount" column="plancarcount"
+			nullValue="0" />
+	</resultMap>
+	<!--获取计量毛、皮重、净重记录 -->
+	<select id="queryException" resultMap="exception_Map"
+		parameterClass="exception">
+		select t.applicationno matchid,
+		t.applicationno ,
+		t.carno,
+		t.operatype,
+		t.planid,
+		t.taskcode,
+		t.materialcode,
+		t.materialname,
+		t.materialspec,
+		t.shipcode,
+		t.ship,
+		t.sourcecode,
+		t.sourcename,
+		t.targetcode,
+		t.targetname,
+		t.gross,
+		t.grosstime,
+		t.grossweighid,
+		t.grossweigh,
+		t.tare,
+		t.taretime,
+		t.tareweighid,
+		t.tareweigh,
+		t.deduction,
+		t.deductiontime,
+		t.suttle,
+		t.suttletime,
+		t.suttleweighid,
+		t.suttleweigh,
+		t.createdate,
+		t.grossb,
+		t.tareb,
+		t.suttleb,t.snumber,t.suttleapp,flag,msg,tareoperaname,grossoperaname
+		from m_applicationform_t t
+		where t.validflag > 0
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="begintime">
+                <![CDATA[t.$selecttime$ >=to_date(trim(#begintime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="endtime">
+                <![CDATA[t.$selecttime$ <=to_date(trim(#endtime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="materialname">
+				t.materialname like
+				'%'||trim(#materialname:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="sourcename">
+				t.sourcename like
+				'%'||trim(#sourcename:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="targetname">
+				t.targetname like
+				'%'||trim(#targetname:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="carno">
+				t.carno like
+				'%'||trim(#carno:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="taskcode">
+				t.taskcode like
+				'%'||trim(#taskcode:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="planid">
+				t.planid like
+				'%'||trim(#planid:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="applicationno">
+				t.applicationno like
+				'%'||trim(#applicationno:varchar#) || '%'
+			</isNotEmpty>
+		</dynamic>
+		order by t.createdate desc
+	</select>
+	<!-- 获取计量毛、皮重、净重记录 条数 -->
+	<select id="queryException_count" resultClass="int"
+		parameterClass="exception">
+		select count(1) from m_applicationform_t t
+		where t.validflag > 0
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="begintime">
+                <![CDATA[t.$selecttime$ >=to_date(trim(#begintime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="endtime">
+                <![CDATA[t.$selecttime$ <=to_date(trim(#endtime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="materialname">
+				t.materialname like
+				'%'||trim(#materialname:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="sourcename">
+				t.sourcename like
+				'%'||trim(#sourcename:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="targetname">
+				t.targetname like
+				'%'||trim(#targetname:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="carno">
+				t.carno like
+				'%'||trim(#carno:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="taskcode">
+				t.taskcode like
+				'%'||trim(#taskcode:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="planid">
+				t.planid like
+				'%'||trim(#planid:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="applicationno">
+				t.applicationno like
+				'%'||trim(#applicationno:varchar#) || '%'
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	<!-- 查询相似重量配置 -->
+	<select id="querySameweightconfig" resultClass="bc"
+		parameterClass="bc">
+		select nvl(sametareoutup, 100) sametareoutup,
+		nvl(sametareoutdown, 100) sametareoutdown,
+		nvl(samegrossoutup, 100)
+		samegrossoutup,
+		nvl(samegrossoutdown, 100) samegrossoutdown,
+		nvl(samegrosstime, 60) samegrosstime,
+		nvl(sametaretime, 60)
+		sametaretime
+		from M_OPERACONFIG_T t
+		where t.operatype = '$operatype$'
+	</select>
+
+	<select id="querySameweightInfo" parameterClass="bc"
+		resultClass="bc">
+		select m.matchid,
+		m.carno,
+		m.materialname,
+		m.sourcename,
+		m.targetname,
+		m.gross,
+		m.grosstime,
+		m.tare,
+		m.taretime
+		from m_measure_t m
+		where (m.tare
+		between ($tare$ - $sametareoutdown$) and ($tare$ +
+		$sametareoutup$))
+		and (m.gross between ($gross$ - $samegrossoutdown$) and ($gross$ +
+		$samegrossoutup$))
+		and <![CDATA[m.grosstime >(sysdate-$samegrosstime$/1440) ]]>
+		and <![CDATA[m.taretime >(sysdate-$sametaretime$/1440) ]]>
+		<isNotEmpty prepend="AND" property="operatype">
+			m.operatype
+			=trim('$operatype$')
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="materialname">
+			m.materialname
+			=trim('$materialname$')
+		</isNotEmpty>
+	</select>
+	<!-- 查询最后一条数据 -->
+	<select id="queryLasttare" parameterClass="java.lang.String"
+		resultClass="java.lang.Double">
+		select t.tare from M_TARE_T t where t.carno = '$carno$'
+	</select>
+	<!-- 查询已经执行的净重 -->
+	<select id="queryRealsuttle" parameterClass="bc" resultMap="measure_Map">
+		select sum(t.suttle) suttle, 0 materialcount, 0 plancarcount from
+		M_MEASURE_T t where carno='$carno$'
+	</select>
+	<!-- 查询已经执行的支数 -->
+	<select id="queryRealmaterialcount" parameterClass="bc"
+		resultMap="measure_Map">
+		select 0 suttle, sum(t.materialcount)materialcount, 0
+		plancarcount from M_MEASURE_T t where carno='$carno$'
+	</select>
+	<!-- 查询已经执行的车数 -->
+	<select id="queryRealcarcount" parameterClass="bc" resultMap="measure_Map">
+		select 0 suttle, 0 materialcount, count(1) plancarcount from
+		M_MEASURE_T t where carno='$carno$'
+	</select>
+	<!-- 查询历史皮重信息 -->
+	<select id="queryHistorytare" parameterClass="bc"
+		resultClass="com.talent.measure.model.TareLog">
+		select * from (select t.matchid,
+		t.carno,
+		round(t.tare*0.001, 3) tare,
+		round(t.tare-$tare$)dvalue,
+		to_char(t.taretime, 'yyyy-MM-dd
+		hh24:mi:ss') taretime,
+		t.tareweighid,
+		t.tareweigh,
+		t.tarelogid,
+		tareoperacode,
+		tareoperaname
+		from M_TARE_LOG_T t
+		where t.carno =
+		'$carno$'
+		order by t.taretime desc)
+		where <![CDATA[rownum<=5 ]]>
+	</select>
+	<parameterMap class="java.util.Map" id="measureweigh_map">
+		<parameter property="operatype" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="weighid" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="mtype" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="materialcode" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+	</parameterMap>
+
+
+	<!-- 根据业务类型、衡器编码、计量方式、物料查询过磅衡器 -->
+	<select id="queryMeasureweighBM" parameterMap="measureweigh_map"
+		resultClass="int">
+		select count(1)
+		from M_MEASUREWEIGH_T t
+		where
+		t.operatype=?
+		and t.weighid=?
+		and t.mtype=?
+		and (t.materialcode=? or
+		t.materialcode='-1') and t.validflag>0
+	</select>
+	<parameterMap class="java.util.Map" id="measureweigh_maps">
+		<parameter property="operatype" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="weighid" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="mtype" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+
+
+	</parameterMap>
+	<!-- 根据业务类型、衡器编码、计量方式、物料查询过磅衡器 -->
+	<select id="queryMeasureweigh" parameterMap="measureweigh_maps"
+		resultClass="int">
+		select count(1)
+		from M_MEASUREWEIGH_T t
+		where t.operatype=?
+		and t.weighid=?
+		and t.mtype=?
+	</select>
+
+	<resultMap id="mweigh_Map" class="com.talent.measure.model.Exceptions">
+		<result property="id" column="id" nullValue="0" />
+		<result property="operatype" column="operatype" />
+		<result property="tareweighid" column="tareweighid" />
+		<result property="tareweigh" column="tareweigh" />
+		<result property="mtype" column="mtype" />
+		<result property="materialcode" column="materialcode" />
+		<result property="materialname" column="materialname" />
+	</resultMap>
+	<select id="queryMeasureweighinfo" resultMap="mweigh_Map">
+		select t.id ,
+		m.operaname operatype,
+		t.weighid tareweighid,
+		t.weighname tareweigh,
+		decode(t.mtype, 'G', '计毛', '计皮') mtype,
+		decode(t.materialcode, '-1',
+		'', t.materialcode) materialcode,
+		decode(t.materialname, '-1', '',
+		t.materialname) materialname
+		from M_MEASUREWEIGH_T t, m_operaconfig_t m
+		where t.operatype = m.operatype and t.validflag>0
+	</select>
+	<select id="queryMeasureweighinfo_count" resultClass="int">
+		select
+		count(1)
+		from M_MEASUREWEIGH_T t, m_operaconfig_t m
+		where t.operatype =
+		m.operatype and t.validflag>0
+	</select>
+	<update id="cancelMeasureweigh" parameterClass="exception">
+		update
+		M_MEASUREWEIGH_T t set t.validflag=0,t.validflagdate =
+		sysdate,t.validflagman='$createman$' where id = '$id$'
+	</update>
+	<insert id="insertMeasureweigh" parameterClass="exception">
+		<selectKey keyProperty="id">
+			select M_MEASUREWEIGH_T_S.nextval
+			from dual
+		</selectKey>
+		insert into M_MEASUREWEIGH_T
+		(id,
+		operatype,
+		weighid,
+		weighname,
+		mtype,
+		materialcode,
+		materialname,
+		createman)
+		values
+		($id$,
+		'$operatype$',
+		'$tareweighid$',
+		'$tareweigh$',
+		'$mtype$',
+		'$materialcode$',
+		'$materialname$',
+		'$createman$')
+	</insert>
+	<insert id="updateMeasureweigh" parameterClass="exception">
+		update
+		M_MEASUREWEIGH_T
+		set operatype = '$operatype$',
+		weighid =
+		'$tareweighid$',
+		weighname = '$tareweigh$',
+		mtype = '$mtype$',
+		materialcode = '$materialcode$',
+		materialname = '$materialname$',
+		updatedate = sysdate,
+		updateman = '$createman$'
+		where id = $id$
+	</insert>
+	<select id="queryMweighinfoByid" resultMap="mweigh_Map">
+		select t.id ,
+		t.operatype,
+		t.weighid tareweighid,
+		t.weighname tareweigh,
+		t.mtype,
+		t.materialcode,
+		t.materialname
+		from M_MEASUREWEIGH_T t
+		where
+		t.validflag>0 and id='$id$'
+	</select>
+	<select id="queryEqumentByid" parameterClass="exception"
+		resultClass="exception">
+		select t.equcode tareweighid, t.equname tareweigh
+		from
+		M_EQUIPMENT_T t
+		where t.equcode in ($sql$)
+	</select>
+	<insert id="insertfunctionlog" parameterClass="com.talent.measure.model.FunctionLog">
+		insert into
+		m_operatype_log_t m
+		(m.functionname, m.paraminfo, m.msg, m.success,
+		m.flag)
+		values
+		('$functionname$', '$paraminfo$', '$msg$', '$success$',
+		'$flag$')
+	</insert>
+	<select id="querytimeBymatchid" parameterClass="com.talent.measure.model.WeighterData"
+		resultClass="com.talent.measure.model.WeighterData">
+		select t.matchid, t.begintime, t.endtime
+		from
+		M_WEIGHTERDATA_T t
+		where t.matchid = '$matchid$'
+	</select>
+	<select id="queryrange" parameterClass="com.talent.measure.model.Equipment"
+		resultClass="com.talent.measure.model.Equipment">
+		select t.equcode,t.range*1000 range from M_EQUIPMENT_T t
+		where
+		t.equcode='$equcode$' and rownum=1
+	</select>
+	<select id="queryRfidBycarno" parameterClass="com.talent.measure.model.Card"
+		resultClass="com.talent.measure.model.Card">
+		select t.cardid rfidid from b_card_t t where t.carno
+		='$carno$' and
+		t.cardclass = 1
+	</select>
+
+	<select id="queryInfoBymateiracode" parameterClass="String"
+		resultClass="String">
+		select GET_MATERIALPROPERTY_F('$mateiralcode$') info from dual
+	</select>
+
+	<select id="queryNode" parameterClass="msameweight" resultClass="int">
+		select count(1)
+		from l_workline_item_t l
+		where l.fid = (select c.routeid
+		from l_curr_temp_t c
+		where c.matchid = '$matchid$'
+		and c.validflag >0
+		and rownum = 1)
+		and l.nodecode = '$nodecode$'
+	</select>
+	<select id="queryLastNode" parameterClass="msameweight"
+		resultClass="String">
+		select wm_concat(t.nodecode)nodecode
+	      from l_workline_item_t t
+	      where t.fid = '$routeid$'
+	      and <![CDATA[sn < (select sn
+	      from l_workline_item_t t
+	      where t.fid = '$routeid$'
+	      and nodecode = '$nodecode$')]]>
+	</select>
+	<select id="queryAllNode" parameterClass="msameweight"
+		resultClass="String">
+		select wm_concat(t.nodecode)nodecode
+		  from l_workline_item_t t
+		 where t.fid = '$routeid$'
+	</select>
+	<select id="queryRouteidbymatchid" parameterClass="String"
+		resultClass="String">
+		select c.routeid from l_curr_temp_t c
+		where c.matchid = '$matchid$' and c.validflag >0 and rownum = 1
+	</select>
+	<select id="querywnamebycode" parameterClass="msameweight"
+		resultClass="msameweight">
+		select wm_concat(w.workpointname) workpointname from
+		b_workpoint_t w where
+		w.workpointcode in ('$workpointcode$')
+	</select>
+</sqlMap>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="Reportunit">
+	<typeAlias alias="unit" type="com.talent.measure.model.Reportunit" />
+	<select id="queryReportunit" parameterClass="unit" resultClass="unit">
+		select t.id,
+		t.classes,
+		t.unitname,
+		t.productline,
+		decode(t.flag, '1',
+		'钢后', '2', '铁前') flag,
+		t.seq,
+		t.operatype
+		from m_reportunit_t t
+		where 1=1
+		<isNotEqual prepend="and" property="classes" compareValue="-1">
+			classes ='$classes$'
+		</isNotEqual>
+		<isNotEmpty prepend="and" property="unitname">
+			unitname = '$unitname$'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="productline">
+			productline like
+			'$productline$'||'%'
+		</isNotEmpty>
+		<isNotEqual prepend="and" property="flag" compareValue="-1">
+			flag ='$flag$'
+		</isNotEqual>
+		order by t.seq asc
+	</select>
+	<select id="queryReportunit_count" parameterClass="unit"		resultClass="int">
+		select count(1)
+		from m_reportunit_t t
+		where 1=1
+		<isNotEqual prepend="and" property="classes" compareValue="-1">
+			classes ='$classes$'
+		</isNotEqual>
+		<isNotEmpty prepend="and" property="unitname">
+			unitname = '$unitname$'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="productline">
+			productline like
+			'$productline$'||'%'
+		</isNotEmpty>
+		<isNotEqual prepend="and" property="flag" compareValue="-1">
+			flag ='$flag$'
+		</isNotEqual>
+	</select>
+	<insert id="insertReportunit" parameterClass="unit">
+		<selectKey keyProperty="id">
+			select M_REPORTUNIT_S.Nextval from
+			dual
+		</selectKey>
+		insert into m_reportunit_t
+		(id, classes, unitname, productline, flag,
+		seq, operatype,createman,createdate)
+		values
+		('$id$',
+		'$classes$',
+		'$unitname$',
+		'$productline$',
+		'$flag$',
+		'$seq$',
+		'$operatype$','$createman$',sysdate)
+	</insert>
+	<update id="updateReportunit" parameterClass="unit">
+		update
+		m_reportunit_t
+		set classes = '$classes$',
+		unitname = '$unitname$',
+		productline = '$productline$',
+		flag = '$flag$',
+		seq = '$seq$',
+		operatype
+		= '$operatype$',
+		updateman ='$createman$',
+		updatedate = sysdate
+		where id
+		= '$id$'
+	</update>
+	<delete id="cancelReportunit">
+		delete from m_reportunit_t where id = '$id$'
+	</delete>
+
+	<select id="queryReportunitByid" parameterClass="unit"
+		resultClass="unit">
+		select id, classes, unitname, productline, flag, seq,
+		operatype
+		from m_reportunit_t t
+		where id='$id$'
+	</select>
+	<select id="queryCount" parameterClass="unit" resultClass="int">
+		select count(1) from m_reportunit_t t where
+		t.classes='$classes$' and
+		t.unitname='$unitname$' and t.productline='$productline$'
+	</select>
+   <select id="queryoperaname" parameterClass="java.lang.String" resultClass="java.lang.String">
+    select wm_concat(t.operaname) from M_OPERACONFIG_T t where t.operatype in ('$operatype$')
+   </select>
+</sqlMap>

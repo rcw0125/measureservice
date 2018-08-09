@@ -1,0 +1,2379 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="measure">
+	<typeAlias alias="measure" type="com.talent.measure.model.Measure" />
+	<typeAlias alias="taskcode" type="com.talent.measure.model.Taskcode" />
+	<!--打印模板 -->
+	<typeAlias alias="printModel" type="com.talent.measure.model.PrintModel" />
+	<!--历史皮重 -->
+	<typeAlias alias="measureTareHistory"
+		type="com.talent.measure.model.MeasureTareHistory" />
+	<!--查询获取供应商、客户、库房、厂内单位 -->
+	<resultMap id="fieldname_map" class="com.talent.measure.model.Measure">
+		<result property="fieldname" column="materialcode" />
+		<result property="fieldname" column="materialname" />
+	</resultMap>
+	<!--查询物料 -->
+	<resultMap id="Materialname_map" class="com.talent.measure.model.Measure">
+		<result property="materialcode" column="materialcode" />
+		<result property="materialname" column="materialname" />
+	</resultMap>
+	<!--查询计量信息 -->
+	<resultMap id="MeasureReport_Map" class="com.talent.measure.model.Measure">
+		<result property="matchid" column="matchid" />
+		<result property="operatype" column="operatype" />
+		<result property="carno" column="carno" />
+		<result property="cartype" column="cartype" />
+		<result property="planid" column="planid" />
+		<result property="taskcode" column="taskcode" />
+		<result property="materialcode" column="materialcode" />
+		<result property="materialname" column="materialname" />
+		<result property="materialspeccode" column="materialspeccode" />
+		<result property="materialspec" column="materialspec" />
+		<result property="shipcode" column="shipcode" />
+		<result property="ship" column="ship" />
+		<result property="sourcecode" column="sourcecode" />
+		<result property="sourcename" column="sourcename" />
+		<result property="targetcode" column="targetcode" />
+		<result property="targetname" column="targetname" />
+		<result property="basket" column="basket" />
+		<!--<result property="materialcount" column="materialcount" nullValue="0" 
+			/> -->
+		<result property="gross" column="gross" nullValue="0" />
+		<result property="grosstime" column="grosstime" />
+		<result property="grossweighid" column="grossweighid" />
+		<result property="grossweigh" column="grossweigh" />
+		<result property="grossgroupno" column="grossgroupno"
+			nullValue="0" />
+		<result property="grossserial" column="grossserial" nullValue="0" />
+		<result property="grosslogid" column="grosslogid" />
+		<result property="tare" column="tare" nullValue="0" />
+		<result property="taretime" column="taretime" />
+		<result property="tareweighid" column="tareweighid" />
+		<result property="tareweigh" column="tareweigh" />
+		<result property="taregroupno" column="taregroupno" nullValue="0" />
+		<result property="tareserial" column="tareserial" nullValue="0" />
+		<result property="tarelogid" column="tarelogid" />
+		<result property="deduction" column="deduction" />
+		<result property="deductiontime" column="deductiontime" />
+		<result property="suttle" column="suttle" nullValue="0" />
+		<result property="suttletime" column="suttletime" />
+		<result property="suttleweighid" column="suttleweighid" />
+		<result property="suttleweigh" column="suttleweigh" />
+		<result property="createdate" column="createdate" />
+		<result property="grossb" column="grossb" nullValue="0" />
+		<result property="tareb" column="tareb" nullValue="0" />
+		<result property="suttleb" column="suttleb" nullValue="0" />
+		<result property="operatype" column="operatype" nullValue="0" />
+		<result property="operaname" column="operaname" />
+	</resultMap>
+
+	<resultMap id="measure_map" class="com.talent.measure.model.Measure">
+		<result property="carno" column="carno" />
+		<result property="cartype" column="cartype" />
+		<result property="icid" column="icid" />
+		<result property="ictype" column="ictype" />
+		<result property="icno" column="icno" />
+		<result property="rfidid" column="rfidid" />
+		<result property="rfidtype" column="rfidtype" />
+		<result property="rfidno" column="rfidno" />
+		<result property="matchid" column="matchid" />
+		<result property="matchidb" column="matchidb" />
+		<result property="operatype" column="operatype" />
+		<result property="operaname" column="operaname" />
+		<result property="planid" column="planid" />
+		<result property="taskcode" column="taskcode" />
+		<result property="basket" column="basket" />
+		<result property="materialcode" column="materialcode" />
+		<result property="materialname" column="materialname" />
+		<result property="materialspeccode" column="materialspeccode" />
+		<result property="materialspec" column="materialspec" />
+		<result property="shipcode" column="shipcode" />
+		<result property="ship" column="ship" />
+		<result property="sourcecode" column="sourcecode" />
+		<result property="sourcename" column="sourcename" />
+		<result property="sourceplace" column="sourceplace" />
+		<result property="sourcetime" column="sourcetime" />
+		<result property="sourceoperacode" column="sourceoperacode" />
+		<result property="sourceoperaname" column="sourceoperaname" />
+		<result property="targetcode" column="targetcode" />
+		<result property="targetname" column="targetname" />
+		<result property="targetplace" column="targetplace" />
+		<result property="targettime" column="targettime" />
+		<result property="targetoperacode" column="targetoperacode" />
+		<result property="targetoperaname" column="targetoperaname" />
+		<result property="materialcount" column="materialcount"
+			nullValue="0" />
+		<result property="planweight" column="planweight" nullValue="0" />
+		<result property="planmaterialcount" column="planmaterialcount"
+			nullValue="0" />
+		<result property="plancarcount" column="plancarcount"
+			nullValue="0" />
+		<result property="gross" column="gross" nullValue="0" />
+		<result property="grosstime" column="grosstime" />
+		<result property="grossweighid" column="grossweighid" />
+		<result property="grossweigh" column="grossweigh" />
+		<result property="grossweighgroup" column="grossweighgroup" />
+		<result property="grossoperacode" column="grossoperacode" />
+		<result property="grossoperaname" column="grossoperaname" />
+		<result property="grossgroupno" column="grossgroupno"
+			nullValue="0" />
+		<result property="grossserial" column="grossserial" nullValue="0" />
+		<result property="grosslogid" column="grosslogid" />
+		<result property="tare" column="tare" nullValue="0" />
+		<result property="taretime" column="taretime" />
+		<result property="tareweighid" column="tareweighid" />
+		<result property="tareweigh" column="tareweigh" />
+		<result property="tareweighgroup" column="tareweighgroup" />
+		<result property="tareoperacode" column="tareoperacode" />
+		<result property="tareoperaname" column="tareoperaname" />
+		<result property="taregroupno" column="taregroupno" nullValue="0" />
+		<result property="tareserial" column="tareserial" nullValue="0" />
+		<result property="tarelogid" column="tarelogid" />
+		<result property="deduction" column="deduction" nullValue="0" />
+		<result property="deductiontime" column="deductiontime" />
+		<result property="deductioncode" column="deductioncode" />
+		<result property="deductionname" column="deductionname" />
+		<result property="deductionoperacode" column="deductionoperacode" />
+		<result property="deductionoperaname" column="deductionoperaname" />
+		<result property="suttle" column="suttle" nullValue="0" />
+		<result property="suttletime" column="suttletime" />
+		<result property="suttleweighid" column="suttleweighid" />
+		<result property="suttleweigh" column="suttleweigh" />
+		<result property="suttleoperacode" column="suttleoperacode" />
+		<result property="suttleoperaname" column="suttleoperaname" />
+		<result property="entertime" column="entertime" />
+		<result property="entergatecode" column="entergatecode" />
+		<result property="entergatename" column="entergatename" />
+		<result property="leavetime" column="leavetime" />
+		<result property="leavegatecode" column="leavegatecode" />
+		<result property="leavegatename" column="leavegatename" />
+		<result property="grossb" column="grossb" nullValue="0" />
+		<result property="grosstimeb" column="grosstimeb" />
+		<result property="grossweighidb" column="grossweighidb" />
+		<result property="grossweighb" column="grossweighb" />
+		<result property="grossweighgroupb" column="grossweighgroupb" />
+		<result property="grossoperacodeb" column="grossoperacodeb" />
+		<result property="grossoperanameb" column="grossoperanameb" />
+		<result property="grossgroupnob" column="grossgroupnob"
+			nullValue="0" />
+		<result property="grossserialb" column="grossserialb"
+			nullValue="0" />
+		<result property="grosslogidb" column="grosslogidb" />
+		<result property="tareb" column="tareb" nullValue="0" />
+		<result property="taretimeb" column="taretimeb" />
+		<result property="tareweighidb" column="tareweighidb" />
+		<result property="tareweighb" column="tareweighb" />
+		<result property="tareweighgroupb" column="tareweighgroupb" />
+		<result property="tareoperacodeb" column="tareoperacodeb" />
+		<result property="tareoperanameb" column="tareoperanameb" />
+		<result property="taregroupnob" column="taregroupnob"
+			nullValue="0" />
+		<result property="tareserialb" column="tareserialb" nullValue="0" />
+		<result property="tarelogidb" column="tarelogidb" />
+		<result property="suttleb" column="suttleb" nullValue="0" />
+		<result property="batchcode" column="batchcode" />
+		<result property="sampletime" column="sampletime" />
+		<result property="sampleunitcode" column="sampleunitcode" />
+		<result property="sampleunitname" column="sampleunitname" />
+		<result property="dflag" column="dflag" nullValue="0" />
+		<result property="bflag" column="bflag" nullValue="0" />
+		<result property="mflag" column="mflag" nullValue="0" />
+		<result property="usermemo" column="usermemo" />
+		<result property="sysmemo" column="sysmemo" />
+		<result property="createdate" column="createdate" />
+		<result property="validflag" column="validflag" nullValue="1" />
+		<result property="orderno" column="orderno" />
+		<result property="mstate" column="mstate" nullValue="0" />
+		<result property="motorcadename" column="motorcadename" />
+		<result property="motorcadecode" column="motorcadecode" />
+		<result property="sflag" column="sflag" nullValue="0" />
+		<result property="mqflag" column="mqflag" nullValue="3" />
+		<result property="kqflag" column="kqflag" nullValue="0" />
+		<result property="gflag" column="gflag" nullValue="3" />
+		<result property="tarehour" column="tarehour" nullValue="0" />
+		<result property="accountstype" column="accountstype"
+			nullValue="1" />
+		<result property="printsetgross" column="printsetgross" />
+		<result property="printsetsuttle" column="printsetsuttle" />
+		<result property="minterval" column="minterval" nullValue="0" />
+		<result property="deductionunit" column="deductionunit"
+			nullValue="0" />
+		<result property="deductiontype" column="deductiontype"
+			nullValue="0" />
+		<result property="isplan" column="isplan" nullValue="0" />
+		<result property="isbasket" column="isbasket" nullValue="0" />
+		<result property="forcereceive" column="forcereceive"
+			nullValue="2" />
+		<result property="qflag" column="qflag" nullValue="4" />
+		<result property="plantimeflag" column="plantimeflag"
+			nullValue="0" />
+		<result property="plancarcountflag" column="plancarcountflag"
+			nullValue="0" />
+		<result property="planweightflag" column="planweightflag"
+			nullValue="0" />
+		<result property="plancarflag" column="plancarflag" nullValue="0" />
+		<result property="settlementmodes" column="settlementmodes"
+			nullValue="0" />
+		<result property="iscompare" column="iscompare" nullValue="0" />
+		<result property="dispatchtype" column="dispatchtype"
+			nullValue="0" />
+		<result property="price" column="price" nullValue="0" />
+		<result property="qualityprint" column="qualityprint"
+			nullValue="0" />
+		<result property="ovweitghtmin" column="ovweitghtmin"
+			nullValue="0" />
+		<result property="ovweitghtmax" column="ovweitghtmax"
+			nullValue="0" />
+		<result property="issendcar" column="issendcar" nullValue="1" />
+		<result property="isloading" column="isloading" nullValue="1" />
+		<result property="plancountflag" column="plancountflag"
+			nullValue="0" />
+		<result property="ovweitghttype" column="ovweitghttype"
+			nullValue="0" />
+		<result property="printsettare" column="printsettare"
+			nullValue="0" />
+		<result property="grosstimeout" column="grosstimeout"
+			nullValue="24" />
+		<result property="taretimeout" column="taretimeout" nullValue="24" />
+		<result property="grosstimeoutdo" column="grosstimeoutdo"
+			nullValue="2" />
+		<result property="taretimeoutdo" column="taretimeoutdo"
+			nullValue="2" />
+		<result property="notstoreoutdo" column="notstoreoutdo"
+			nullValue="2" />
+		<result property="notstoreindo" column="notstoreindo"
+			nullValue="2" />
+		<result property="tareoutdo" column="tareoutdo" nullValue="2" />
+		<result property="grossoutdo" column="grossoutdo" nullValue="2" />
+		<result property="suttleoutdo" column="suttleoutdo" nullValue="2" />
+		<result property="notentergatedo" column="notentergatedo"
+			nullValue="2" />
+		<result property="notleavegatedo" column="notleavegatedo"
+			nullValue="2" />
+		<result property="notslampedo" column="notslampedo" nullValue="2" />
+		<result property="tareoutup" column="tareoutup" nullValue="100" />
+		<result property="tareoutdown" column="tareoutdown" nullValue="100" />
+		<result property="grossoutup" column="grossoutup" nullValue="100" />
+		<result property="grossoutdown" column="grossoutdown"
+			nullValue="100" />
+		<result property="suttleoutup" column="suttleoutup" nullValue="100" />
+		<result property="suttleoutdown" column="suttleoutdown"
+			nullValue="100" />
+		<result property="checktaredo" column="checktaredo" nullValue="2" />
+		<result property="checktarelast" column="checktarelast"
+			nullValue="100" />
+		<result property="checktarehistory" column="checktarehistory"
+			nullValue="100" />
+		<result property="checktarebasic" column="checktarebasic"
+			nullValue="100" />
+		<result property="istaskcode" column="istaskcode" nullValue="0" />
+		<result property="maxtare" column="maxtare" nullValue="30" />
+		<result property="grossweightout" column="grossweightout"
+			nullValue="1" />
+		<result property="tareweightout" column="tareweightout"
+			nullValue="1" />
+		<result property="measuretype" column="measuretype" nullValue="0" />
+		<result property="checkgrossinfo" column="checkgrossinfo"
+			nullValue="1" />
+		<result property="checktareinfo" column="checktareinfo"
+			nullValue="0" />
+		<result property="checksuttleinfo" column="checksuttleinfo"
+			nullValue="1" />
+		<result property="isgrosstaskcode" column="isgrosstaskcode"
+			nullValue="1" />
+		<result property="isgrossplanid" column="isgrossplanid"
+			nullValue="1" />
+		<result property="isgrossmaterial" column="isgrossmaterial"
+			nullValue="1" />
+		<result property="isgrossship" column="isgrossship" nullValue="1" />
+		<result property="isgrosssource" column="isgrosssource"
+			nullValue="1" />
+		<result property="isgrosstarget" column="isgrosstarget"
+			nullValue="1" />
+		<result property="isgrossbasket" column="isgrossbasket"
+			nullValue="1" />
+		<result property="istaretaskcode" column="istaretaskcode"
+			nullValue="0" />
+		<result property="istareplanid" column="istareplanid"
+			nullValue="0" />
+		<result property="istarematerial" column="istarematerial"
+			nullValue="0" />
+		<result property="istaresource" column="istaresource"
+			nullValue="0" />
+		<result property="istareship" column="istareship" nullValue="0" />
+		<result property="istaretarget" column="istaretarget"
+			nullValue="0" />
+		<result property="istarebasket" column="istarebasket"
+			nullValue="0" />
+		<result property="issuttletaskcode" column="issuttletaskcode"
+			nullValue="1" />
+		<result property="issuttleplanid" column="issuttleplanid"
+			nullValue="1" />
+		<result property="issuttlematerial" column="issuttlematerial"
+			nullValue="1" />
+		<result property="issuttlesource" column="issuttlesource"
+			nullValue="1" />
+		<result property="issuttleship" column="issuttleship"
+			nullValue="1" />
+		<result property="issuttletarget" column="issuttletarget"
+			nullValue="1" />
+		<result property="issuttlebasket" column="issuttlebasket"
+			nullValue="0" />
+		<result property="regrossdo" column="regrossdo" nullValue="2" />
+		<result property="retaredo" column="retaredo" nullValue="2" />
+		<result property="resuttledo" column="resuttledo" nullValue="2" />
+		<result property="checkoperatimedo" column="checkoperatimedo"
+			nullValue="0" />
+		<result property="checkoperatime" column="checkoperatime"
+			nullValue="0" />
+		<result property="deduction2" column="deduction2" nullValue="0" />
+		<result property="begintime" column="begintime" />
+		<result property="endtime" column="endtime" />
+		<result property="snumber" column="snumber" nullValue="0" />
+		<result property="suttleapp" column="suttleapp" nullValue="0" />
+		<result property="checkplanweighdo" column="checkplanweighdo"
+			nullValue="2" />
+		<result property="planweighout" column="planweighout"
+			nullValue="0" />
+		<result property="checkplancarcountdo" column="checkplancarcountdo"
+			nullValue="3" />
+		<result property="plancarcountout" column="plancarcountout"
+			nullValue="0" />
+		<result property="checkplanmaterialcountdo" column="checkplanmaterialcountdo"
+			nullValue="3" />
+		<result property="planmaterialcountout" column="planmaterialcountout"
+			nullValue="0" />
+		<result property="checkplantimeoutdo" column="checkplantimeoutdo"
+			nullValue="3" />
+		<result property="flag" column="flag" nullValue="0" />
+		<result property="msg" column="msg" />
+		<result property="mtypes" column="mtypes" />
+		<result property="sametareoutup" column="sametareoutup"
+			nullValue="0" />
+		<result property="sametareoutdown" column="sametareoutdown"
+			nullValue="0" />
+		<result property="samegrossoutup" column="samegrossoutup"
+			nullValue="0" />
+		<result property="samegrossoutdown" column="samegrossoutdown"
+			nullValue="0" />
+		<result property="samegrosstime" column="samegrosstime"
+			nullValue="0" />
+		<result property="sametaretime" column="sametaretime"
+			nullValue="0" />
+		<result property="sameweightdo" column="sameweightdo"
+			nullValue="0" />
+		<result property="tarehourdo" column="tarehourdo" nullValue="0" />
+	</resultMap>
+	<!--获取供应商、客户、库房、厂内单位 -->
+	<select id="queryfieldname" resultMap="fieldname_map"
+		parameterClass="Measure">
+		select v.fieldname,v.fieldcode,v.queryword from b_fieldname_v v
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="sourcename">
+				( v.fieldname like
+				'%'||trim(#sourcename:varchar#) || '%' or v.queryword like
+				'%'||trim(#queryword:varchar#) || '%')
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="targetname">
+				( v.fieldname like
+				'%'||trim(#targetname:varchar#) || '%' or v.queryword like
+				'%'||trim(#queryword:varchar#) || '%')
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	<!--获取物料 -->
+	<select id="querymaterialname" resultClass="java.util.HashMap"
+		parameterClass="Measure">
+		select t.materialcode, t.materialname, t.queryword
+		from b_material_t t
+		where t.validflag = 1
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="materialname">
+				( t.materialname like
+				'%'||trim(#materialname:varchar#) || '%' or t.queryword like
+				'%'||trim(#queryword:varchar#) || '%')
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+	<select id="querymaterial" resultClass="java.util.HashMap"
+		parameterClass="Measure">
+		select t.materialcode, t.materialname, t.queryword
+		from b_material_t t
+		where t.validflag = 1
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="materialname">
+				t.materialname like
+				'%'||trim(#materialname:varchar#) || '%'
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+	<select id="querymaterial_count" resultClass="int"
+		parameterClass="Measure">
+		select count(1)
+		from b_material_t t
+		where t.validflag = 1
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="materialname">
+				t.materialname like
+				'%'||trim(#materialname:varchar#) || '%'
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+	<select id="queryoperatetype" resultClass="java.util.HashMap">
+		select * from
+		m_operaconfig_t t where t.validflag > 0 order by t.orders asc
+	</select>
+
+	<select id="querymaterialclass" resultClass="java.util.HashMap"
+		parameterClass="String">
+		SELECT T.FOLDERNAME FROM B_FOLDER_T T WHERE
+		T.FOLDERNAME LIKE '%$search$%'
+	</select>
+
+	<select id="queryallmaterialclassbyname" resultClass="java.util.HashMap">
+		select
+		t.MATERIALCODE,t.MATERIALNAME,f.foldername from B_MATERIAL_T
+		t,B_FOLDER_T f where t.foldercode = f.foldercode and t.validflag > 0
+		and f.validflag > 0
+	</select>
+
+	<!--获取计量毛、皮重、净重记录 -->
+	<select id="queryQYMeasure" resultMap="MeasureReport_Map"
+		parameterClass="Measure">
+		select
+		t.matchid,
+		t.carno,
+		t.cartype,
+		t.operatype,
+		t.planid,
+		t.taskcode,
+		t.materialcode,
+		t.materialname,
+		t.materialspeccode,
+		t.materialspec,
+		t.shipcode,
+		t.ship,
+		t.sourcecode,
+		t.sourcename,
+		t.targetcode,
+		t.targetname,
+		t.basket,
+		t.gross,
+		t.grosstime,
+		t.grossweighid,
+		t.grossweigh,
+		t.grossgroupno,
+		t.grossserial,
+		t.grosslogid,
+		t.tare,
+		t.taretime,
+		t.tareweighid,
+		t.tareweigh,
+		t.taregroupno,
+		t.tareserial,
+		t.tarelogid,
+		t.deduction,
+		t.deductiontime,
+		t.suttle,
+		t.suttletime,
+		t.suttleweighid,
+		t.suttleweigh,
+		t.createdate,
+		t.grossb,
+		t.tareb,
+		t.suttleb,
+		p.operaname
+		from M_MEASURE_T t
+		left join m_operaconfig_t p
+		on
+		t.operatype = p.operatype
+		where t.validflag > 0
+		<dynamic prepend="">
+			<isEqual prepend="AND" property="mrecord" compareValue="G">
+				t.gross > 0 and t.tare = 0
+			</isEqual>
+			<isEqual prepend="AND" property="mrecord" compareValue="T">
+				t.gross = 0 and t.tare > 0
+			</isEqual>
+			<isEqual prepend="AND" property="mrecord" compareValue="S">
+				t.suttle > 0
+			</isEqual>
+			<isNotEmpty prepend="AND" property="begintime">
+                <![CDATA[t.$selecttime$ >=to_date(trim(#begintime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="endtime">
+                <![CDATA[t.$selecttime$ <=to_date(trim(#endtime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="materialname">
+				t.materialname like
+				'%'||trim(#materialname:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="sourcename">
+				t.sourcename like
+				'%'||trim(#sourcename:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="targetname">
+				t.targetname like
+				'%'||trim(#targetname:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="carno">
+				t.carno like
+				'%'||trim(#carno:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="taskcode">
+				t.taskcode like
+				'%'||trim(#taskcode:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="taskcode">
+				t.planid like
+				'%'||trim(#planid:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="matchid">
+				t.matchid like
+				'%'||trim(#matchid:varchar#) || '%'
+			</isNotEmpty>
+			<isEqual prepend="">
+			</isEqual>
+		</dynamic>
+		order by t.createdate desc
+	</select>
+	<!-- 获取计量毛、皮重、净重记录 条数 -->
+	<select id="queryQYMeasure_count" resultClass="int"
+		parameterClass="Measure">
+		select count(1) from M_MEASURE_T t
+		where t.validflag > 0
+		<dynamic prepend="">
+			<isEqual prepend="AND" property="mrecord" compareValue="G">
+				t.gross > 0 and t.tare = 0
+			</isEqual>
+			<isEqual prepend="AND" property="mrecord" compareValue="T">
+				t.gross = 0 and t.tare > 0
+			</isEqual>
+			<isEqual prepend="AND" property="mrecord" compareValue="S">
+				t.suttle > 0
+			</isEqual>
+			<isNotEmpty prepend="AND" property="begintime">
+                <![CDATA[t.$selecttime$ >=to_date(trim(#begintime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="endtime">
+                <![CDATA[t.$selecttime$ <=to_date(trim(#endtime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="materialname">
+				t.materialname like
+				'%'||trim(#materialname:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="sourcename">
+				t.sourcename like
+				'%'||trim(#sourcename:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="targetname">
+				t.targetname like
+				'%'||trim(#targetname:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="carno">
+				t.carno like
+				'%'||trim(#carno:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="taskcode">
+				t.taskcode like
+				'%'||trim(#taskcode:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="taskcode">
+				t.planid like
+				'%'||trim(#planid:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="matchid">
+				t.matchid like
+				'%'||trim(#matchid:varchar#) || '%'
+			</isNotEmpty>
+			<isEqual prepend="">
+			</isEqual>
+		</dynamic>
+	</select>
+
+	<!-- 获取上次过皮时间、皮重 -->
+	<select id="getTarebyCarno" resultClass="measure"
+		parameterClass="measure">
+		select
+		tare,
+		to_char(taretime,'yyyy-mm-dd hh24:mi:ss') as taretime,
+		tareweighid,
+		tareweigh,
+		tareoperacode,
+		tareoperaname,
+		taregroupno,
+		tareserial,
+		tarespeed,
+		tarelogid,basicweight
+		from m_tare_t t
+		where
+		t.validflag = 1
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="carno">
+				t.carno = '$carno$'
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	<!-- 获取业务类型名称 -->
+	<select id="getoperaname" resultClass="String" parameterClass="measure">
+		select t.operaname
+		from m_operaconfig_t t
+		where t.validflag = 1
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="operatype">
+				t.operatype
+				='$operatype$'
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+	<!-- <select id="getoperaname" resultClass="String" parameterClass="measure"> 
+		select t.operaname from m_operaconfig_t t where t.validflag = 1 <dynamic 
+		prepend=""> <isNotEmpty prepend="AND" property="operatype"> t.operatype ='$operatype$' 
+		</isNotEmpty> </dynamic> </select> -->
+	<!-- 获取l_plan_v信息:具体字段后期改写 -->
+	<select id="getlplanv" resultMap="measure_map" parameterClass="measure">
+		select carno,  <!-- 车号 -->
+		cartype,  <!-- C汽车,T火车，I铁水车 -->
+		icid,  <!-- IC卡ID号 ,卡的唯一标示号 -->
+		ictype,  <!-- IC卡类型 类型(0、1)、0 临时卡、1 固定卡 -->
+		icno,  <!-- IC卡印刷编号 -->
+		rfidid,  <!-- RFID卡号 ,卡的唯一标示号 -->
+		rfidtype,  <!-- RFID类型(0、1)、0 临时卡、1 固定卡 -->
+		rfidno,  <!-- RFID印刷编号 -->
+		matchid,  <!-- 验配ID clientID+yymmdd+00000 该验配ID是第一个业务点生成 -->
+		matchidb,  <!-- 发货ID -->
+		operatype,  <!-- 业务类型 -->
+		operaname,
+		planid,  <!-- 计划ID -->
+		taskcode,  <!-- 调拨业务号 -->
+		basket,  <!-- 料篮号、包号 -->
+		materialcode,  <!-- 物料编码 -->
+		materialname,  <!-- 物料名称 -->
+		materialspeccode,  <!-- 物料规格编码 -->
+		materialspec,  <!-- 物料规格 -->
+		shipcode,  <!-- 船名编码 -->
+		ship,  <!-- 船名 -->
+		sourcecode,  <!-- 发货单位编码 -->
+		sourcename,  <!-- 发货单位 -->
+		sourceplace,  <!-- 供货地点/发站 -->
+		sourcetime,  <!-- 发货时间 -->
+		sourceoperacode,  <!-- 发货人编码 -->
+		sourceoperaname,  <!-- 发货人 -->
+		targetcode,  <!-- 收货单位编码 -->
+		targetname,  <!-- 收货单位 -->
+		targetplace,  <!-- 收货地点名称（集港的是港口，火车是到站名） -->
+		targettime,  <!-- 收货时间 -->
+		targetoperacode,  <!-- 收货人编码 -->
+		targetoperaname,  <!-- 收货人 -->
+		materialcount,  <!-- 实际发货支件数 -->
+		planweight,  <!-- 计划发货重量 -->
+		planmaterialcount,  <!-- 计划发货总支数 -->
+		plancarcount,  <!-- 计划发货总车数 -->
+		gross,  <!-- 毛重 -->
+		grosstime,  <!-- 毛重时间 -->
+		grossweighid,  <!-- 计毛衡器ID -->
+		grossweigh,  <!-- 毛重衡器名称 -->
+		grossweighgroup,  <!-- 毛重衡器组 -->
+		grossoperacode,  <!-- 计毛计量员编码 -->
+		grossoperaname,  <!-- 计毛计量员 -->
+		grossgroupno,  <!-- 毛重组号 -->
+		grossserial,  <!-- 毛重组内序号 -->
+		grossspeed,  <!-- 毛重速度 -->
+		grosslogid,  <!-- 毛重LOGID,通过毛重logid,可以从照片表中读取照片 -->
+		tare,  <!-- 皮重 -->
+		taretime,  <!-- 皮重时间 -->
+		tareweighid,  <!-- 皮重衡器ID -->
+		tareweigh,  <!-- 皮重衡器名称 -->
+		tareweighgroup,  <!-- 皮重衡器组 -->
+		tareoperacode,  <!-- 皮重计量员编码 -->
+		tareoperaname,  <!-- 皮重计量员 -->
+		taregroupno,  <!-- 皮重组号 -->
+		tareserial,  <!-- 皮重组内序号 -->
+		tarelogid,  <!-- 皮重LOGID,通过皮重logid,可以从照片表中读取照片 -->
+		tarespeed,  <!-- 计毛速度 -->
+		deduction,  <!-- 扣重值 -->
+		deductiontime,  <!-- 扣重时间 -->
+		deductioncode,  <!-- 扣重单位编码 -->
+		deductionname,  <!-- 扣重单位 -->
+		deductionoperacode,  <!-- 扣重人编码 -->
+		deductionoperaname,  <!-- 扣重人 -->
+		suttle,  <!-- 净重 -->
+		suttletime,  <!-- 净重时间 -->
+		suttleweighid,  <!-- 净重衡器ID -->
+		suttleweigh,  <!-- 净重衡器名称 -->
+		suttleoperacode,  <!-- 净重计量员编码 -->
+		suttleoperaname,  <!-- 净重计量员 -->
+		entertime,  <!-- 进厂时间 -->
+		entergatecode,  <!-- 进厂大门编码 -->
+		entergatename,  <!-- 进门大门名称 -->
+		leavetime,  <!-- 出厂时间 -->
+		leavegatecode,  <!-- 出厂大门编码 -->
+		leavegatename,  <!-- 出厂大门名称 -->
+		grossb,  <!-- 发货毛重 -->
+		grosstimeb,  <!-- 发货毛重时间 -->
+		grossweighidb,  <!-- 发货计毛衡器ID -->
+		grossweighb,  <!-- 发货毛重衡器名称 -->
+		grossweighgroupb,  <!-- 发货毛重衡器组 -->
+		grossoperacodeb,  <!-- 发货计毛计量员编码 -->
+		grossoperanameb,  <!-- 发货计毛计量员 -->
+		grossgroupnob,  <!-- 发货毛重组号 -->
+		grossserialb,  <!-- 发货毛重组内序号 -->
+		grossspeedb,  <!-- 发货毛重速度 -->
+		grosslogidb,  <!-- 发货毛重LOGID,通过毛重logid,可以从照片表中读取照片 -->
+		tareb,  <!-- 发货皮重 -->
+		taretimeb,  <!-- 发货皮重时间 -->
+		tareweighidb,  <!-- 发货皮重衡器ID -->
+		tareweighb,  <!-- 发货皮重衡器名称 -->
+		tareweighgroupb,  <!-- 发货皮重皮重衡器组 -->
+		tareoperacodeb,  <!-- 发货皮重计量员编码 -->
+		tareoperanameb,  <!-- 发货皮重计量员 -->
+		taregroupnob,  <!-- 发货皮重组号 -->
+		tareserialb,  <!-- 发货皮重组内序号 -->
+		tarelogidb,  <!-- 皮重LOGID,通过皮重logid,可以从照片表中读取照片 -->
+		tarespeedb,  <!-- 计毛速度 -->
+		suttleb,
+		batchcode,  <!-- 批号 -->
+		sampletime,  <!-- 取样时间 -->
+		sampleunitcode,  <!-- 取样单位编码 -->
+		sampleunitname,  <!-- 取样单位 -->
+		dflag,  <!-- 一车多货标记0 一车一货，1一车多货，进行第二次计量 -->
+		bflag,  <!-- 退货标记 0 不退货，1部分退货，2全部退货 -->
+		mflag,  <!-- 计量流程标记厂内调拨 0不限制,1先毛后皮,2先皮后毛 跨区调拨 3皮毛毛皮、4毛毛皮、5毛毛 -->
+		usermemo,  <!-- 用户备注 -->
+		sysmemo,  <!-- 系统备注 -->
+		createdate,  <!-- 记录的添加时间 -->
+		validflag,  <!-- 标记：1有效，0作废，8完成 -->
+		orderno,  <!-- 订单号 -->
+		mstate,  <!-- 计量状态 0没有计量，8计量完成 -->
+		motorcadename,  <!-- 物流公司 -->
+		motorcadecode,  <!-- 物流公司编码 -->
+		sflag,  <!-- 是否出入库 0不限制,1出库,2入库,3出入库 -->
+		mqflag,  <!-- 计质量标记：0不计量质检，1质检，2计量，3 计量质检 -->
+		kqflag,  <!-- 跨区标记 0：不跨区，1跨区 -->
+		gflag,  <!-- 是否进出门 0不限制，1进门，2出门，3进出门 默认3 -->
+		tarehour,  <!-- 皮重有效期 -1不限制，0一车一皮，>n n小时有效 -->
+		accountstype,  <!-- 结算方 0：发货 1：收货 -->
+		printsetgross,  <!-- 只计毛打印联，以逗号隔开 -->
+		printsetsuttle,  <!-- 出净重打印联，以逗号隔开 -->
+		minterval,  <!-- 计量时间间隔 分钟数 0表示不限制 -->
+		deductionunit,  <!-- 扣重单位 0计量、1发货、2收货 -->
+		deductiontype,  <!-- 扣重类型 0不扣、1固定值和2录入值 -->
+		isplan,  <!-- 是否执行计划0-不执行 1-执行 -->
+		isbasket,  <!-- 是否启用料篮0-启用 1-不启用 -->
+		forcereceive,  <!-- 是否强制接收 0-不强制接收、1-强制接收 -->
+		qflag,  <!-- 取样方式：1计毛前取样， 2收货前取样 ，3收货前质检 ，4收货后取样 -->
+		plantimeflag,  <!-- 按时间控制预报有效期：0否，1是 -->
+		plancarcountflag,  <!-- 按车数控制预报有效期：0否，1是 -->
+		planweightflag,  <!-- 按计划量控制预报有效期：0否，1是 -->
+		plancarflag,  <!-- 是否限制车号：0否，1是 -->
+		settlementmodes,  <!-- 结算方式（1理重，0实重） -->
+		iscompare,  <!-- 是否复磅（0否，1是） -->
+		dispatchtype,  <!-- 发货方式：1发货挑库，2发货不挑库，3不发货不挑库 -->
+		price,  <!-- 单价 -->
+		qualityprint,  <!-- 质保书打印 0 随车质保 1 不随车质保 -->
+		ovweitghtmin,  <!-- 超重重量/比例大于 -->
+		ovweitghtmax,  <!-- 超重重量/比例小于 -->
+		issendcar,  <!-- 是否启用派车 1 启用派车 0 不启用派车 -->
+		isloading,  <!-- 是否启用装车申请单 0 不启用 1 启用 -->
+		plancountflag,  <!-- 按计划数量控制有效期：0否，1是 -->
+		ovweitghttype,  <!-- 超重类型：0重量，1：比例 -->
+		printsettare,  <!-- 只计皮打印联，以逗号隔开 -->
+		grosstimeout,  <!-- 毛重有效期 -->
+		taretimeout,  <!-- 皮重有效期 当皮重是1一车一皮时，有效 -->
+		grosstimeoutdo,  <!-- 皮重超期后的处理方式，0：不检查，1：进行提示，2，进行选择，3禁止计量 -->
+		taretimeoutdo,  <!-- 毛重超期后的处理方式，0：不检查，1：进行提示，2，进行选择，3禁止计量 -->
+		notstoreoutdo,  <!-- 无发货确认时，设定要发货，0：不检查，1：进行提示，2，进行选择，3禁止计量 -->
+		notstoreindo,  <!-- 无收货确认时，设定要发货，0：不检查，1：进行提示，2，进行选择，3禁止计量 -->
+		tareoutdo,  <!-- 发货皮重超差后的处理方式，0：不检查，1：进行提示，2，进行选择，3禁止计量 -->
+		grossoutdo,  <!-- 发货毛重超差后的处理方式，0：不检查，1：进行提示，2，进行选择，3禁止计量 -->
+		suttleoutdo,  <!-- 发货净重超差后的处理方式，0：不检查，1：进行提示，2，进行选择，3禁止计量 -->
+		notentergatedo,  <!-- 无进门的处理方式，0：不检查，1：进行提示，2，进行选择，3禁止计量 -->
+		notleavegatedo,  <!-- 无出门的处理方式，0：不检查，1：进行提示，2，进行选择，3禁止计量 -->
+		notslampedo,  <!-- 无取样的处理方式，0：不检查，1：进行提示，2，进行选择，3禁止计量 -->
+		tareoutup,  <!-- 发货皮重超差上限值 value=0不允许超，0<value<1百分比控制，value>=1 按千克计算 -->
+		tareoutdown,  <!-- 发货皮重超差下限值 value=0不允许超，0<value<1百分比控制，value>=1 按千克计算 -->
+		grossoutup,  <!-- 发货毛重超差上限值 value=0不允许超，0<value<1百分比控制，value>=1 按千克计算 -->
+		grossoutdown,  <!-- 发货毛重超差下限值 value=0不允许超，0<value<1百分比控制，value>=1 按千克计算 -->
+		suttleoutup,  <!-- 发货净重超差上限值 value=0不允许超，0<value<1百分比控制，value>=1 按千克计算 -->
+		suttleoutdown,  <!-- 发货净重超差下限值 value=0不允许超，0<value<1百分比控制，value>=1 按千克计算 -->
+		checktaredo,  <!-- 皮重超差的处理方式，0：不检查，1：进行提示，2，进行选择，3禁止计量 -->
+		checktarelast,  <!-- 检查当前皮重与最后一次皮重的差值+- value<0不检查，value=0不允许超，0<value<1百分比控制，value>=1 
+			按千克计算 -->
+		checktarehistory,  <!-- 检查当前皮重与历史5次皮重的差值 +- value<0不检查，value=0不允许超，0<value<1百分比控制，value>=1 
+			按千克计算 -->
+		checktarebasic,  <!-- 检查当前皮重与基础皮重的差值+- value<0不检查，value=0不允许超，0<value<1百分比控制，value>=1 
+			按千克计算 -->
+		istaskcode,  <!-- 是否执行业务号 0-不执行 1-执行 -->
+		maxtare,  <!-- 最大皮重,用于判断计毛和计皮 -->
+		grossweightout,  <!-- 判断毛皮时，毛重超差范围 ，高于当前重量-该值，则为毛重 ，否则为皮重 单位吨 -->
+		tareweightout,  <!-- 判断毛皮时，皮重超差范围 ，高于当前重量+该值，则为毛重 ，否则为皮重 单位吨 -->
+		measuretype,  <!-- 计量方式类型 0 远程手动 1远程自动 2 现场自助 3现场自动 4自动选择 -->
+		checkgrossinfo,  <!-- 只计量毛重时，是否需要验证业务信息0 不验证，1验证 -->
+		checktareinfo,  <!-- 只计量皮重时，是否需要验证业务信息0 不验证，1验证 -->
+		checksuttleinfo,  <!-- 计量净重时，是否需要验证业务信息0 不验证，1验证 -->
+		isgrosstaskcode,  <!-- 只计毛时录入业务号 0：不检查\不用录入，1：必须进行录入，2：进行选择 -->
+		isgrossplanid,  <!-- 只计毛时录入计划号 0：不检查\不用录入，1：必须进行录入，2：进行选择 -->
+		isgrossmaterial,  <!-- 只计毛时录入货名 0：不检查\不用录入，1：必须进行录入，2：进行选择 -->
+		isgrossship,  <!-- 只计毛时录入船名 0：不检查\不用录入，1：必须进行录入，2：进行选择 -->
+		isgrosssource,  <!-- 只计毛时录入供货 0：不检查\不用录入，1：必须进行录入，2：进行选择 -->
+		isgrosstarget,  <!-- 只计毛时录入收货 0：不检查\不用录入，1：必须进行录入，2：进行选择 -->
+		isgrossbasket,  <!-- 只计毛时录入料篮 0：不检查\不用录入，1：必须进行录入，2：进行选择 -->
+		istaretaskcode,  <!-- 只计皮时录入业务号 0：不检查\不用录入，1：必须进行录入，2：进行选择 -->
+		istareplanid,  <!-- 只计皮时录入计划号 0：不检查\不用录入，1：必须进行录入，2：进行选择 -->
+		istarematerial,  <!-- 只计皮时录入货名 0：不检查\不用录入，1：必须进行录入，2：进行选择 -->
+		istaresource,  <!-- 只计皮时录入供货 0：不检查\不用录入，1：必须进行录入，2：进行选择 -->
+		istareship,  <!-- 只计皮时录入船名 0：不检查\不用录入，1：必须进行录入，2：进行选择 -->
+		istaretarget,  <!-- 只计皮时录入收货 0：不检查\不用录入，1：必须进行录入，2：进行选择 -->
+		istarebasket,  <!-- 只计皮时录入料篮 0：不检查\不用录入，1：必须进行录入，2：进行选择 -->
+		issuttletaskcode,  <!-- 计量净重时录入业务号 0：不检查\不用录入，1：必须进行录入，2：进行选择 -->
+		issuttleplanid,  <!-- 计量净重时录入计划号 0：不检查\不用录入，1：必须进行录入，2：进行选择 -->
+		issuttlematerial,  <!-- 计量净重时录入货名 0：不检查\不用录入，1：必须进行录入，2：进行选择 -->
+		issuttlesource,  <!-- 计量净重时录入供货 0：不检查\不用录入，1：必须进行录入，2：进行选择 -->
+		issuttleship,  <!-- 计量净重时录入船名 0：不检查\不用录入，1：必须进行录入，2：进行选择 -->
+		issuttletarget,  <!-- 计量净重时录入收货 0：不检查\不用录入，1：必须进行录入，2：进行选择 -->
+		issuttlebasket,  <!-- 计量净重时录入料篮 0：不检查\不用录入，1：必须进行录入，2：进行选择 -->
+		regrossdo,  <!-- 重复只计毛时,0：不检查，1：进行提示，2，进行选择，3禁止计量 -->
+		retaredo,  <!-- 重复只计皮时,0：不检查，1：进行提示，2，进行选择，3禁止计量 -->
+		resuttledo,  <!-- 重复计量净重时,0：不检查，1：进行提示，2，进行选择，3禁止计量 -->
+		checkoperatimedo,  <!-- 检查前一个业务到当前业务的时间超时后的处理方式 ，0：不检查，1：进行提示，2，进行选择，3禁止计量 
+			默认2 -->
+		checkoperatime,  <!-- 检查前一个业务到当前业务的时间超时间隔 分钟，默认0 -->
+		deduction2,  <!-- 扣重值 扣重值从配置参数或者业务点录入 0<value<1百分比控制，value>=1 按千克计算 -->
+		begintime,  <!-- 计划开始时间 -->
+		endtime,  <!-- 计划结束时间 -->
+		snumber,  <!-- 当前车计划件/支量 -->
+		suttleapp,  <!-- 当前车计划重量 -->
+		checkplanweighdo,  <!-- 计划重量超差的处理方式，0：不检查，1：进行提示，2，进行选择，3禁止计量 -->
+		planweighout,  <!-- 计划重量超差上限值 value=0不允许超，0<value<1百分比控制，value>=1 按千克计算 -->
+		checkplancarcountdo,  <!-- 计划车数超差的处理方式，0：不检查，1：进行提示，2，进行选择，3禁止计量 -->
+		plancarcountout,  <!-- 计划车数超差上限值 value=0不允许超，value>=1 车数 -->
+		checkplanmaterialcountdo,  <!-- 计划件/支超差的处理方式，0：不检查，1：进行提示，2，进行选择，3禁止计量 -->
+		planmaterialcountout,  <!-- 计划件/支数超差上限值 value=0不允许超，value>=1 件数 -->
+		checkplantimeoutdo,  <!-- 计划超期的处理方式，0：不检查，1：进行提示，2，进行选择，3禁止计量 -->
+		flag,
+		msg,
+		mtypes,
+		sametareoutup,
+		sametareoutdown,
+		samegrossoutup,
+		samegrossoutdown,
+		samegrosstime,
+		sametaretime,
+		sameweightdo,tarehourdo
+		from l_plancount_v t
+		where
+		t.validflag = 1
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="planid">
+				t.planid ='$planid$'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="operatype">
+				t.operatype
+				='$operatype$'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="matchid">
+				t.matchid !='$matchid$'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="carno">
+				t.carno ='$carno$'
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+
+	<!-- 获取l_plan_v信息:具体字段后期改写 -->
+	<select id="getBeforesave" resultMap="measure_map"
+		parameterClass="measure">
+		select carno,  <!-- 车号 -->
+		cartype,  <!-- C汽车,T火车，I铁水车 -->
+		icid,  <!-- IC卡ID号 ,卡的唯一标示号 -->
+		ictype,  <!-- IC卡类型 类型(0、1)、0 临时卡、1 固定卡 -->
+		icno,  <!-- IC卡印刷编号 -->
+		rfidid,  <!-- RFID卡号 ,卡的唯一标示号 -->
+		rfidtype,  <!-- RFID类型(0、1)、0 临时卡、1 固定卡 -->
+		rfidno,  <!-- RFID印刷编号 -->
+		matchid,  <!-- 验配ID clientID+yymmdd+00000 该验配ID是第一个业务点生成 -->
+		matchidb,  <!-- 发货ID -->
+		operatype,  <!-- 业务类型 -->
+		operaname,
+		planid,  <!-- 计划ID -->
+		taskcode,  <!-- 调拨业务号 -->
+		basket,  <!-- 料篮号、包号 -->
+		materialcode,  <!-- 物料编码 -->
+		materialname,  <!-- 物料名称 -->
+		materialspeccode,  <!-- 物料规格编码 -->
+		materialspec,  <!-- 物料规格 -->
+		shipcode,  <!-- 船名编码 -->
+		ship,  <!-- 船名 -->
+		sourcecode,  <!-- 发货单位编码 -->
+		sourcename,  <!-- 发货单位 -->
+		sourceplace,  <!-- 供货地点/发站 -->
+		sourcetime,  <!-- 发货时间 -->
+		sourceoperacode,  <!-- 发货人编码 -->
+		sourceoperaname,  <!-- 发货人 -->
+		targetcode,  <!-- 收货单位编码 -->
+		targetname,  <!-- 收货单位 -->
+		targetplace,  <!-- 收货地点名称（集港的是港口，火车是到站名） -->
+		targettime,  <!-- 收货时间 -->
+		targetoperacode,  <!-- 收货人编码 -->
+		targetoperaname,  <!-- 收货人 -->
+		materialcount,  <!-- 实际发货支件数 -->
+		planweight,  <!-- 计划发货重量 -->
+		planmaterialcount,  <!-- 计划发货总支数 -->
+		plancarcount,  <!-- 计划发货总车数 -->
+		gross,  <!-- 毛重 -->
+		grosstime,  <!-- 毛重时间 -->
+		grossweighid,  <!-- 计毛衡器ID -->
+		grossweigh,  <!-- 毛重衡器名称 -->
+		grossweighgroup,  <!-- 毛重衡器组 -->
+		grossoperacode,  <!-- 计毛计量员编码 -->
+		grossoperaname,  <!-- 计毛计量员 -->
+		grossgroupno,  <!-- 毛重组号 -->
+		grossserial,  <!-- 毛重组内序号 -->
+		grossspeed,  <!-- 毛重速度 -->
+		grosslogid,  <!-- 毛重LOGID,通过毛重logid,可以从照片表中读取照片 -->
+		tare,  <!-- 皮重 -->
+		taretime,  <!-- 皮重时间 -->
+		tareweighid,  <!-- 皮重衡器ID -->
+		tareweigh,  <!-- 皮重衡器名称 -->
+		tareweighgroup,  <!-- 皮重衡器组 -->
+		tareoperacode,  <!-- 皮重计量员编码 -->
+		tareoperaname,  <!-- 皮重计量员 -->
+		taregroupno,  <!-- 皮重组号 -->
+		tareserial,  <!-- 皮重组内序号 -->
+		tarelogid,  <!-- 皮重LOGID,通过皮重logid,可以从照片表中读取照片 -->
+		tarespeed,  <!-- 计毛速度 -->
+		deduction,  <!-- 扣重值 -->
+		deductiontime,  <!-- 扣重时间 -->
+		deductioncode,  <!-- 扣重单位编码 -->
+		deductionname,  <!-- 扣重单位 -->
+		deductionoperacode,  <!-- 扣重人编码 -->
+		deductionoperaname,  <!-- 扣重人 -->
+		suttle,  <!-- 净重 -->
+		suttletime,  <!-- 净重时间 -->
+		suttleweighid,  <!-- 净重衡器ID -->
+		suttleweigh,  <!-- 净重衡器名称 -->
+		suttleoperacode,  <!-- 净重计量员编码 -->
+		suttleoperaname,  <!-- 净重计量员 -->
+		entertime,  <!-- 进厂时间 -->
+		entergatecode,  <!-- 进厂大门编码 -->
+		entergatename,  <!-- 进门大门名称 -->
+		leavetime,  <!-- 出厂时间 -->
+		leavegatecode,  <!-- 出厂大门编码 -->
+		leavegatename,  <!-- 出厂大门名称 -->
+		grossb,  <!-- 发货毛重 -->
+		grosstimeb,  <!-- 发货毛重时间 -->
+		grossweighidb,  <!-- 发货计毛衡器ID -->
+		grossweighb,  <!-- 发货毛重衡器名称 -->
+		grossweighgroupb,  <!-- 发货毛重衡器组 -->
+		grossoperacodeb,  <!-- 发货计毛计量员编码 -->
+		grossoperanameb,  <!-- 发货计毛计量员 -->
+		grossgroupnob,  <!-- 发货毛重组号 -->
+		grossserialb,  <!-- 发货毛重组内序号 -->
+		grossspeedb,  <!-- 发货毛重速度 -->
+		grosslogidb,  <!-- 发货毛重LOGID,通过毛重logid,可以从照片表中读取照片 -->
+		tareb,  <!-- 发货皮重 -->
+		taretimeb,  <!-- 发货皮重时间 -->
+		tareweighidb,  <!-- 发货皮重衡器ID -->
+		tareweighb,  <!-- 发货皮重衡器名称 -->
+		tareweighgroupb,  <!-- 发货皮重皮重衡器组 -->
+		tareoperacodeb,  <!-- 发货皮重计量员编码 -->
+		tareoperanameb,  <!-- 发货皮重计量员 -->
+		taregroupnob,  <!-- 发货皮重组号 -->
+		tareserialb,  <!-- 发货皮重组内序号 -->
+		tarelogidb,  <!-- 皮重LOGID,通过皮重logid,可以从照片表中读取照片 -->
+		tarespeedb,  <!-- 计毛速度 -->
+		suttleb,
+		batchcode,  <!-- 批号 -->
+		sampletime,  <!-- 取样时间 -->
+		sampleunitcode,  <!-- 取样单位编码 -->
+		sampleunitname,  <!-- 取样单位 -->
+		dflag,  <!-- 一车多货标记0 一车一货，1一车多货，进行第二次计量 -->
+		bflag,  <!-- 退货标记 0 不退货，1部分退货，2全部退货 -->
+		mflag,  <!-- 计量流程标记厂内调拨 0不限制,1先毛后皮,2先皮后毛 跨区调拨 3皮毛毛皮、4毛毛皮、5毛毛 -->
+		usermemo,  <!-- 用户备注 -->
+		sysmemo,  <!-- 系统备注 -->
+		createdate,  <!-- 记录的添加时间 -->
+		validflag,  <!-- 标记：1有效，0作废，8完成 -->
+		orderno,  <!-- 订单号 -->
+		mstate,  <!-- 计量状态 0没有计量，8计量完成 -->
+		motorcadename,  <!-- 物流公司 -->
+		motorcadecode,  <!-- 物流公司编码 -->
+		sflag,  <!-- 是否出入库 0不限制,1出库,2入库,3出入库 -->
+		mqflag,  <!-- 计质量标记：0不计量质检，1质检，2计量，3 计量质检 -->
+		kqflag,  <!-- 跨区标记 0：不跨区，1跨区 -->
+		gflag,  <!-- 是否进出门 0不限制，1进门，2出门，3进出门 默认3 -->
+		tarehour,  <!-- 皮重有效期 -1不限制，0一车一皮，>n n小时有效 -->
+		accountstype,  <!-- 结算方 0：发货 1：收货 -->
+		printsetgross,  <!-- 只计毛打印联，以逗号隔开 -->
+		printsetsuttle,  <!-- 出净重打印联，以逗号隔开 -->
+		minterval,  <!-- 计量时间间隔 分钟数 0表示不限制 -->
+		deductionunit,  <!-- 扣重单位 0计量、1发货、2收货 -->
+		deductiontype,  <!-- 扣重类型 0不扣、1固定值和2录入值 -->
+		isplan,  <!-- 是否执行计划0-不执行 1-执行 -->
+		isbasket,  <!-- 是否启用料篮0-启用 1-不启用 -->
+		forcereceive,  <!-- 是否强制接收 0-不强制接收、1-强制接收 -->
+		qflag,  <!-- 取样方式：1计毛前取样， 2收货前取样 ，3收货前质检 ，4收货后取样 -->
+		plantimeflag,  <!-- 按时间控制预报有效期：0否，1是 -->
+		plancarcountflag,  <!-- 按车数控制预报有效期：0否，1是 -->
+		planweightflag,  <!-- 按计划量控制预报有效期：0否，1是 -->
+		plancarflag,  <!-- 是否限制车号：0否，1是 -->
+		settlementmodes,  <!-- 结算方式（1理重，0实重） -->
+		iscompare,  <!-- 是否复磅（0否，1是） -->
+		dispatchtype,  <!-- 发货方式：1发货挑库，2发货不挑库，3不发货不挑库 -->
+		price,  <!-- 单价 -->
+		qualityprint,  <!-- 质保书打印 0 随车质保 1 不随车质保 -->
+		ovweitghtmin,  <!-- 超重重量/比例大于 -->
+		ovweitghtmax,  <!-- 超重重量/比例小于 -->
+		issendcar,  <!-- 是否启用派车 1 启用派车 0 不启用派车 -->
+		isloading,  <!-- 是否启用装车申请单 0 不启用 1 启用 -->
+		plancountflag,  <!-- 按计划数量控制有效期：0否，1是 -->
+		ovweitghttype,  <!-- 超重类型：0重量，1：比例 -->
+		printsettare,  <!-- 只计皮打印联，以逗号隔开 -->
+		grosstimeout,  <!-- 毛重有效期 -->
+		taretimeout,  <!-- 皮重有效期 当皮重是1一车一皮时，有效 -->
+		grosstimeoutdo,  <!-- 皮重超期后的处理方式，0：不检查，1：进行提示，2，进行选择，3禁止计量 -->
+		taretimeoutdo,  <!-- 毛重超期后的处理方式，0：不检查，1：进行提示，2，进行选择，3禁止计量 -->
+		notstoreoutdo,  <!-- 无发货确认时，设定要发货，0：不检查，1：进行提示，2，进行选择，3禁止计量 -->
+		notstoreindo,  <!-- 无收货确认时，设定要发货，0：不检查，1：进行提示，2，进行选择，3禁止计量 -->
+		tareoutdo,  <!-- 发货皮重超差后的处理方式，0：不检查，1：进行提示，2，进行选择，3禁止计量 -->
+		grossoutdo,  <!-- 发货毛重超差后的处理方式，0：不检查，1：进行提示，2，进行选择，3禁止计量 -->
+		suttleoutdo,  <!-- 发货净重超差后的处理方式，0：不检查，1：进行提示，2，进行选择，3禁止计量 -->
+		notentergatedo,  <!-- 无进门的处理方式，0：不检查，1：进行提示，2，进行选择，3禁止计量 -->
+		notleavegatedo,  <!-- 无出门的处理方式，0：不检查，1：进行提示，2，进行选择，3禁止计量 -->
+		notslampedo,  <!-- 无取样的处理方式，0：不检查，1：进行提示，2，进行选择，3禁止计量 -->
+		tareoutup,  <!-- 发货皮重超差上限值 value=0不允许超，0<value<1百分比控制，value>=1 按千克计算 -->
+		tareoutdown,  <!-- 发货皮重超差下限值 value=0不允许超，0<value<1百分比控制，value>=1 按千克计算 -->
+		grossoutup,  <!-- 发货毛重超差上限值 value=0不允许超，0<value<1百分比控制，value>=1 按千克计算 -->
+		grossoutdown,  <!-- 发货毛重超差下限值 value=0不允许超，0<value<1百分比控制，value>=1 按千克计算 -->
+		suttleoutup,  <!-- 发货净重超差上限值 value=0不允许超，0<value<1百分比控制，value>=1 按千克计算 -->
+		suttleoutdown,  <!-- 发货净重超差下限值 value=0不允许超，0<value<1百分比控制，value>=1 按千克计算 -->
+		checktaredo,  <!-- 皮重超差的处理方式，0：不检查，1：进行提示，2，进行选择，3禁止计量 -->
+		checktarelast,  <!-- 检查当前皮重与最后一次皮重的差值+- value<0不检查，value=0不允许超，0<value<1百分比控制，value>=1 
+			按千克计算 -->
+		checktarehistory,  <!-- 检查当前皮重与历史5次皮重的差值 +- value<0不检查，value=0不允许超，0<value<1百分比控制，value>=1 
+			按千克计算 -->
+		checktarebasic,  <!-- 检查当前皮重与基础皮重的差值+- value<0不检查，value=0不允许超，0<value<1百分比控制，value>=1 
+			按千克计算 -->
+		istaskcode,  <!-- 是否执行业务号 0-不执行 1-执行 -->
+		maxtare,  <!-- 最大皮重,用于判断计毛和计皮 -->
+		grossweightout,  <!-- 判断毛皮时，毛重超差范围 ，高于当前重量-该值，则为毛重 ，否则为皮重 单位吨 -->
+		tareweightout,  <!-- 判断毛皮时，皮重超差范围 ，高于当前重量+该值，则为毛重 ，否则为皮重 单位吨 -->
+		measuretype,  <!-- 计量方式类型 0 远程手动 1远程自动 2 现场自助 3现场自动 4自动选择 -->
+		checkgrossinfo,  <!-- 只计量毛重时，是否需要验证业务信息0 不验证，1验证 -->
+		checktareinfo,  <!-- 只计量皮重时，是否需要验证业务信息0 不验证，1验证 -->
+		checksuttleinfo,  <!-- 计量净重时，是否需要验证业务信息0 不验证，1验证 -->
+		isgrosstaskcode,  <!-- 只计毛时录入业务号 0：不检查\不用录入，1：必须进行录入，2：进行选择 -->
+		isgrossplanid,  <!-- 只计毛时录入计划号 0：不检查\不用录入，1：必须进行录入，2：进行选择 -->
+		isgrossmaterial,  <!-- 只计毛时录入货名 0：不检查\不用录入，1：必须进行录入，2：进行选择 -->
+		isgrossship,  <!-- 只计毛时录入船名 0：不检查\不用录入，1：必须进行录入，2：进行选择 -->
+		isgrosssource,  <!-- 只计毛时录入供货 0：不检查\不用录入，1：必须进行录入，2：进行选择 -->
+		isgrosstarget,  <!-- 只计毛时录入收货 0：不检查\不用录入，1：必须进行录入，2：进行选择 -->
+		isgrossbasket,  <!-- 只计毛时录入料篮 0：不检查\不用录入，1：必须进行录入，2：进行选择 -->
+		istaretaskcode,  <!-- 只计皮时录入业务号 0：不检查\不用录入，1：必须进行录入，2：进行选择 -->
+		istareplanid,  <!-- 只计皮时录入计划号 0：不检查\不用录入，1：必须进行录入，2：进行选择 -->
+		istarematerial,  <!-- 只计皮时录入货名 0：不检查\不用录入，1：必须进行录入，2：进行选择 -->
+		istaresource,  <!-- 只计皮时录入供货 0：不检查\不用录入，1：必须进行录入，2：进行选择 -->
+		istareship,  <!-- 只计皮时录入船名 0：不检查\不用录入，1：必须进行录入，2：进行选择 -->
+		istaretarget,  <!-- 只计皮时录入收货 0：不检查\不用录入，1：必须进行录入，2：进行选择 -->
+		istarebasket,  <!-- 只计皮时录入料篮 0：不检查\不用录入，1：必须进行录入，2：进行选择 -->
+		issuttletaskcode,  <!-- 计量净重时录入业务号 0：不检查\不用录入，1：必须进行录入，2：进行选择 -->
+		issuttleplanid,  <!-- 计量净重时录入计划号 0：不检查\不用录入，1：必须进行录入，2：进行选择 -->
+		issuttlematerial,  <!-- 计量净重时录入货名 0：不检查\不用录入，1：必须进行录入，2：进行选择 -->
+		issuttlesource,  <!-- 计量净重时录入供货 0：不检查\不用录入，1：必须进行录入，2：进行选择 -->
+		issuttleship,  <!-- 计量净重时录入船名 0：不检查\不用录入，1：必须进行录入，2：进行选择 -->
+		issuttletarget,  <!-- 计量净重时录入收货 0：不检查\不用录入，1：必须进行录入，2：进行选择 -->
+		issuttlebasket,  <!-- 计量净重时录入料篮 0：不检查\不用录入，1：必须进行录入，2：进行选择 -->
+		regrossdo,  <!-- 重复只计毛时,0：不检查，1：进行提示，2，进行选择，3禁止计量 -->
+		retaredo,  <!-- 重复只计皮时,0：不检查，1：进行提示，2，进行选择，3禁止计量 -->
+		resuttledo,  <!-- 重复计量净重时,0：不检查，1：进行提示，2，进行选择，3禁止计量 -->
+		checkoperatimedo,  <!-- 检查前一个业务到当前业务的时间超时后的处理方式 ，0：不检查，1：进行提示，2，进行选择，3禁止计量 
+			默认2 -->
+		checkoperatime,  <!-- 检查前一个业务到当前业务的时间超时间隔 分钟，默认0 -->
+		deduction2,  <!-- 扣重值 扣重值从配置参数或者业务点录入 0<value<1百分比控制，value>=1 按千克计算 -->
+		begintime,  <!-- 计划开始时间 -->
+		endtime,  <!-- 计划结束时间 -->
+		snumber,  <!-- 当前车计划件/支量 -->
+		suttleapp,  <!-- 当前车计划重量 -->
+		checkplanweighdo,  <!-- 计划重量超差的处理方式，0：不检查，1：进行提示，2，进行选择，3禁止计量 -->
+		planweighout,  <!-- 计划重量超差上限值 value=0不允许超，0<value<1百分比控制，value>=1 按千克计算 -->
+		checkplancarcountdo,  <!-- 计划车数超差的处理方式，0：不检查，1：进行提示，2，进行选择，3禁止计量 -->
+		plancarcountout,  <!-- 计划车数超差上限值 value=0不允许超，value>=1 车数 -->
+		checkplanmaterialcountdo,  <!-- 计划件/支超差的处理方式，0：不检查，1：进行提示，2，进行选择，3禁止计量 -->
+		planmaterialcountout,  <!-- 计划件/支数超差上限值 value=0不允许超，value>=1 件数 -->
+		checkplantimeoutdo,  <!-- 计划超期的处理方式，0：不检查，1：进行提示，2，进行选择，3禁止计量 -->
+		flag,
+		msg,
+		mtypes, sametareoutup,
+		sametareoutdown,
+		samegrossoutup,
+		samegrossoutdown,
+		samegrosstime,
+		sametaretime,
+		sameweightdo,tarehourdo
+		from l_plancount_v t
+		where t.validflag = 1
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="matchid">
+				t.matchid ='$matchid$'
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+	<!--获取打印时的计量数据记录 lt…… -->
+	<select id="getMData" resultClass="measure" parameterClass="String"
+		remapResults="true">
+		select t.*
+		from M_PRINTDATA_V t where
+		t.Matchid='$matchId$'
+	</select>
+	
+	<!--获取打印时的计量数据记录 lt…… -->
+	<select id="queryPrintnum" resultClass="int" parameterClass="String">
+		select nvl(t.printcount, 1) printsuttlenum from B_TASKCODE_T t where t.taskcode='$taskcode$'
+	</select>
+	<!--获取打印时的模板记录 lt…… -->
+	<select id="getPrintModel" resultClass="printModel"
+		parameterClass="String">
+		select
+		t.billcode,t.billxml,t.billscrip,t.measuretype,t.pageset
+		from
+		m_billmodeltoopera_v t where t.operatype='$op$'
+	</select>
+	<!--获取车号的多少次历史皮重 lt…… -->
+	<select id="getTareHistory" resultClass="measureTareHistory"
+		parameterClass="measureTareHistory">
+		select tare,carno,taretime from
+		(select tare,a.carno,a.taretime,rownum
+		as rns from
+		(select t.tare,t.carno,t.taretime
+		from m_tare_log_t t where
+		t.validflag>0
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="carno">
+				<isNotEqual property="carno" compareValue="-1">
+					t.carno
+					=trim('$carno$')
+				</isNotEqual>
+			</isNotEmpty>
+		</dynamic>
+		and t.createdate>sysdate -100
+		order by to_date(t.taretime,'yyyy-mm-dd
+		hh24:mi:ss') DESC ) a )
+		where 1=1 and rns &lt;=$selectcount$
+	</select>
+
+	<parameterMap class="java.util.Map" id="measuresave_map">
+		<parameter property="v_logid" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="v_rfidid" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="v_rfidtype" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_rfidno" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="v_icid" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="v_ictype" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="v_icno" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="v_cartype" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="v_planid" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="v_taskcode" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_matchid" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="v_matchidb" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_measurestate" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_operatype" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_carno" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="v_basket" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="v_materialcode" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_materialname" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_materialspec" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_materialspeccode" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_materialcount" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_shipcode" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_ship" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="v_sourcecode" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_sourcename" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_sourceplace" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_sourcetime" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_sourceoperacode" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_sourceoperaname" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_targetcode" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_targetname" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_targetplace" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_targettime" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_targetoperacode" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_targetoperaname" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_gross" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="v_grosstime" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_grossoperacode" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_grossoperaname" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_grossweighid" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_grossweigh" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_grossweighgroup" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_grossgroupno" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_grossserial" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_grosslogid" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_grossspeed" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_tare" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="v_taretime" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_tareoperacode" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_tareoperaname" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_tareweighid" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_tareweigh" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_tareweighgroup" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_taregroupno" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_tareserial" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_tarelogid" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_tarespeed" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_deduction" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_deduction2" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_deductiontime" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_deductioncode" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_deductionname" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_deductionoperacode" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_deductionoperaname" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_suttle" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="v_suttletime" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_suttleoperacode" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_suttleoperaname" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_suttleweighid" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_suttleweigh" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_planweight" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_planmaterialcount" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_plancarcount" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_bflag" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="v_dflag" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="v_entertime" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_entergatecode" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_entergatename" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_leavetime" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_leavegatecode" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_leavegatename" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_sampletime" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_grossb" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="v_grosstimeb" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_grossoperacodeb" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_grossoperanameb" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_grossweighidb" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_grossweighb" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_grossweighgroupb" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_grossgroupnob" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_grossserialb" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_grosslogidb" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_grossspeedb" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_tareb" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="v_taretimeb" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_tareoperacodeb" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_tareoperanameb" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_tareweighidb" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_tareweighb" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_tareweighgroupb" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_taregroupnob" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_tareserialb" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_tarelogidb" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_tarespeedb" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_batchcode" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_usermemo" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_sysmemo" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="v_clientid" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_recordtype" jdbcType="VARCHAR"
+			javaType="java.lang.String" mode="IN" />
+		<parameter property="v_sflag" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="v_gflag" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="v_mflag" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="v_memo1" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="v_memo2" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="v_memo3" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="v_memo4" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="v_memo5" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="v_memo6" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="v_memo7" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="v_memo8" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="v_memo9" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="v_memo10" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="v_memo11" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="v_memo12" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="v_memo13" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="v_memo14" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="v_memo15" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="v_flag" jdbcType="DECIMAL" javaType="java.lang.Integer"
+			mode="OUT" />
+		<parameter property="v_msg" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="OUT" />
+	</parameterMap>
+
+	<procedure id="saveMeasure" parameterMap="measuresave_map"
+		resultClass="measure">
+		{call
+		m_measuresave_car.m_sp_savemeasuredata(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}
+	</procedure>
+
+	<!--获取所有的模板记录 lt…… -->
+	<select id="getAllPrintModelData" resultClass="printModel"
+		parameterClass="String">
+		select t.billcode,t.billxml,t.billscrip,'C' as
+		measuretype,'' pageset
+		from m_billmodel_t t where t.validflag=1
+	</select>
+
+	<!--获取所有的模板记录 lt…… -->
+	<select id="getModelCount" resultClass="String" parameterClass="String">
+		select count(1) from m_billmodel_t t where t.validflag=1 and
+		billcode=trim('$modelCode$')
+	</select>
+
+	<!--新增打印模板的保存 lt…… billxml, -->
+	<insert id="addPrintModel" parameterClass="printModel">
+		insert
+		into
+		m_billmodel_t(billcode,billxml,billscrip,validflag,createman)
+		VALUES('$billcode$',
+		#billxml,handler=org.springframework.orm.ibatis.support.ClobStringTypeHandler#,'$billscrip$',1,'$operationname$')
+	</insert>
+
+	<!--修改打印模板的保存 lt…… -->
+	<update id="modifyPrintModel" parameterClass="printModel">
+		update
+		m_billmodel_t
+		set
+		billxml=#billxml,handler=org.springframework.orm.ibatis.support.ClobStringTypeHandler#,
+		billscrip='$billscrip$',updateman='$operationname$',updatedate=sysdate
+		where billcode='$billcode$'
+	</update>
+
+	<!-- 获取业务临时表计划总数 -->
+	<select id="getPlanSumInfo" resultClass="measure"
+		parameterClass="String">
+		select sum(t.suttle) as planweight,count(1) as
+		plancarcount,sum(t.materialcount) as t.planmaterialcount
+		from
+		L_PLANCOUNT_V t
+		where t.validflag = 1
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="planid">
+				and t.planid
+				='$planid$'
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+
+	<!--获取计量毛、皮重、净重记录供计量查询使用 -->
+	<select id="getSearchInfo" resultClass="measure" parameterClass="Measure">
+		select t.matchid,
+		t.carno,
+		t.taskcode,
+		t.planid,
+		t.materialname,
+		t.sourcename,
+		t.targetname,
+		nvl(round(t.tare * 0.001, 2), 0) as tare,
+		to_char(t.taretime, 'yyyy-MM-dd hh24:mi:ss') taretime,
+		t.tareweighid,
+		t.tareweigh,
+		nvl(round(t.gross * 0.001, 2), 0) as gross,
+		to_char(t.grosstime, 'yyyy-MM-dd hh24:mi:ss') grosstime,
+		t.grossweighid,
+		t.grossweigh,
+		nvl(round(t.suttle * 0.001, 2), 0) as
+		suttle,
+		to_char(t.suttletime, 'yyyy-MM-dd hh24:mi:ss') suttletime,
+		t.suttleweighid,
+		t.suttleweigh,
+		t.grossoperaname,
+		t.tareoperaname,
+		t.suttleoperaname,
+		t.ship,
+		t.sourceplace,
+		nvl(round(t.tareb * 0.001, 2),
+		0) tareb,
+		nvl(round(t.grossb * 0.001, 2), 0) grossb,
+		nvl(round(t.suttleb * 0.001, 2), 0) as suttleb,
+		p.operaname,
+		GET_M_PRINTBILL_F(T.MATCHID, 'EQUNAME') AS lastprintequname,
+		GET_M_PRINTBILL_F(T.MATCHID, 'createtime') AS lastprintdate,
+		planweight,
+		materialcount
+		from M_MEASURE_T t
+		left join m_operaconfig_t p
+		on t.operatype = p.operatype
+		where t.validflag > 0
+        and t.cartype='C'  
+		<dynamic prepend="">
+			<isEqual prepend="AND" property="mrecord" compareValue="G">
+				t.gross > 0 and t.tare = 0
+				<isNotEmpty prepend="AND" property="tareweighid">
+					t.grossweighid
+					='$tareweighid$'
+				</isNotEmpty>
+			</isEqual>
+			<isEqual prepend="AND" property="mrecord" compareValue="T">
+				t.gross = 0 and t.tare > 0
+				<isNotEmpty prepend="AND" property="tareweighid">
+					t.tareweighid
+					='$tareweighid$'
+				</isNotEmpty>
+			</isEqual>
+			<isEqual  property="mrecord" compareValue="S">
+				<isNotEmpty prepend="AND" property="tareweighid">
+					t.suttleweighid
+					='$tareweighid$'
+				</isNotEmpty>
+			</isEqual>
+			<isNotEmpty prepend="AND" property="begintime">
+                <![CDATA[t.$selecttime$ >=to_date(trim(#begintime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="endtime">
+                <![CDATA[t.$selecttime$ <=to_date(trim(#endtime:varchar#),'yyyy-MM-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="carno">
+				t.carno like
+				'%'||trim(#carno:varchar#) || '%'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="matchid">
+				t.matchid like
+				'%'||trim(#matchid:varchar#) || '%'
+			</isNotEmpty>
+		</dynamic>
+
+		<isEqual property="mrecord" compareValue="T">
+			order by t.taretime
+			desc
+		</isEqual>
+		<isEqual property="mrecord" compareValue="G">
+			order by t.grosstime
+			desc
+		</isEqual>
+		<isEqual property="mrecord" compareValue="S">
+			order by t.suttletime
+			desc
+		</isEqual>
+
+
+	</select>
+	<select id="getPrintBillStyle" resultClass="java.util.HashMap"
+		parameterClass="String">
+		select t.printsetgross,t.printsettare,t.printsetsuttle
+		from L_PLANCOUNT_V t where t.matchid = '$matchid$'
+	</select>
+	
+	<select id="getConfigPrintStyle" resultClass="java.util.HashMap"
+		parameterClass="String">
+		select t.printsetgross,t.printsettare,t.printsetsuttle   from m_operaconfig_t t where t.operatype='$operatype$'
+	</select>
+
+	<select id="query_all_columns" resultClass="java.util.HashMap"
+		parameterClass="java.util.HashMap">
+		select ACCOUNTSTYPE as "accountstype",
+		BASKET as "basket",
+		BATCHCODE as
+		"batchcode",
+		BEGINTIME as "begintime",
+		BFLAG as "bflag",
+		CARNO as
+		"carno",
+		CARTYPE as "cartype",
+		CHECKGROSSINFO as "checkgrossinfo",
+		CHECKOPERATIME as "checkoperatime",
+		CHECKOPERATIMEDO as
+		"checkoperatimedo",
+		CHECKPLANCARCOUNTDO as "checkplancarcountdo",
+		CHECKPLANMATERIALCOUNTDO as "checkplanmaterialcountdo",
+		CHECKPLANTIMEOUTDO as "checkplantimeoutdo",
+		CHECKPLANWEIGHDO as
+		"checkplanweighdo",
+		CHECKSUTTLEINFO as "checksuttleinfo",
+		CHECKTAREBASIC as "checktarebasic",
+		CHECKTAREDO as "checktaredo",
+		CHECKTAREHISTORY as "checktarehistory",
+		CHECKTAREINFO as
+		"checktareinfo",
+		CHECKTARELAST as "checktarelast",
+		CREATEDATE as
+		"createdate",
+		DEDUCTION as "deduction",
+		DEDUCTION2 as "deduction2",
+		DEDUCTIONCODE as "deductioncode",
+		DEDUCTIONNAME as "deductionname",
+		DEDUCTIONOPERACODE as "deductionoperacode",
+		DEDUCTIONOPERANAME as
+		"deductionoperaname",
+		DEDUCTIONTIME as "deductiontime",
+		DEDUCTIONTYPE as
+		"deductiontype",
+		DEDUCTIONUNIT as "deductionunit",
+		DFLAG as "dflag",
+		DISPATCHTYPE as "dispatchtype",
+		ENDTIME as "endtime",
+		ENTERGATECODE as
+		"entergatecode",
+		ENTERGATENAME as "entergatename",
+		ENTERTIME as
+		"entertime",
+		FORCERECEIVE as "forcereceive",
+		GFLAG as "gflag",
+		GROSS as
+		"gross",
+		GROSSB as "grossb",
+		GROSSGROUPNO as "grossgroupno",
+		GROSSGROUPNOB as "grossgroupnob",
+		GROSSLOGID as "grosslogid",
+		GROSSLOGIDB as "grosslogidb",
+		GROSSOPERACODE as "grossoperacode",
+		GROSSOPERACODEB as "grossoperacodeb",
+		GROSSOPERANAME as
+		"grossoperaname",
+		GROSSOPERANAMEB as "grossoperanameb",
+		GROSSOUTDO as
+		"grossoutdo",
+		GROSSOUTDOWN as "grossoutdown",
+		GROSSOUTUP as
+		"grossoutup",
+		GROSSSERIAL as "grossserial",
+		GROSSSERIALB as
+		"grossserialb",
+		GROSSSPEED as "grossspeed",
+		GROSSSPEEDB as
+		"grossspeedb",
+		GROSSTIME as "grosstime",
+		GROSSTIMEB as "grosstimeb",
+		GROSSTIMEOUT as "grosstimeout",
+		GROSSTIMEOUTDO as "grosstimeoutdo",
+		GROSSWEIGH as "grossweigh",
+		GROSSWEIGHB as "grossweighb",
+		GROSSWEIGHGROUP as "grossweighgroup",
+		GROSSWEIGHGROUPB as
+		"grossweighgroupb",
+		GROSSWEIGHID as "grossweighid",
+		GROSSWEIGHIDB as
+		"grossweighidb",
+		GROSSWEIGHTOUT as "grossweightout",
+		ICID as "icid",
+		ICNO as "icno",
+		ICTYPE as "ictype",
+		ISBASKET as "isbasket",
+		ISCOMPARE as
+		"iscompare",
+		ISGROSSBASKET as "isgrossbasket",
+		ISGROSSMATERIAL as
+		"isgrossmaterial",
+		ISGROSSPLANID as "isgrossplanid",
+		ISGROSSSHIP as
+		"isgrossship",
+		ISGROSSSOURCE as "isgrosssource",
+		ISGROSSTARGET as
+		"isgrosstarget",
+		ISGROSSTASKCODE as "isgrosstaskcode",
+		ISLOADING as
+		"isloading",
+		ISPLAN as "isplan",
+		ISSENDCAR as "issendcar",
+		ISSUTTLEBASKET as "issuttlebasket",
+		ISSUTTLEMATERIAL as
+		"issuttlematerial",
+		ISSUTTLEPLANID as "issuttleplanid",
+		ISSUTTLESHIP as
+		"issuttleship",
+		ISSUTTLESOURCE as "issuttlesource",
+		ISSUTTLETARGET as
+		"issuttletarget",
+		ISSUTTLETASKCODE as "issuttletaskcode",
+		ISTAREBASKET
+		as "istarebasket",
+		ISTAREMATERIAL as "istarematerial",
+		ISTAREPLANID as
+		"istareplanid",
+		ISTARESHIP as "istareship",
+		ISTARESOURCE as
+		"istaresource",
+		ISTARETARGET as "istaretarget",
+		ISTARETASKCODE as
+		"istaretaskcode",
+		ISTASKCODE as "istaskcode",
+		KQFLAG as "kqflag",
+		LEAVEGATECODE as "leavegatecode",
+		LEAVEGATENAME as "leavegatename",
+		LEAVETIME as "leavetime",
+		MATCHID as "matchid",
+		MATCHIDB as "matchidb",
+		MATERIALCODE as "materialcode",
+		MATERIALCOUNT as "materialcount",
+		MATERIALNAME as "materialname",
+		MATERIALSPEC as "materialspec",
+		MATERIALSPECCODE as "materialspeccode",
+		MAXTARE as "maxtare",
+		MEASURETYPE as "measuretype",
+		MFLAG as "mflag",
+		MINTERVAL as
+		"minterval",
+		MOTORCADECODE as "motorcadecode",
+		MOTORCADENAME as
+		"motorcadename",
+		MQFLAG as "mqflag",
+		MSTATE as "mstate",
+		NOTENTERGATEDO
+		as "notentergatedo",
+		NOTLEAVEGATEDO as "notleavegatedo",
+		NOTSLAMPEDO as
+		"notslampedo",
+		NOTSTOREINDO as "notstoreindo",
+		NOTSTOREOUTDO as
+		"notstoreoutdo",
+		OPERATYPE as "operatype",
+		ORDERNO as "orderno",
+		OVWEITGHTMAX as "ovweitghtmax",
+		OVWEITGHTMIN as "ovweitghtmin",
+		OVWEITGHTTYPE as "ovweitghttype",
+		PLANCARCOUNT as "plancarcount",
+		PLANCARCOUNTFLAG as "plancarcountflag",
+		PLANCARCOUNTOUT as
+		"plancarcountout",
+		PLANCARFLAG as "plancarflag",
+		PLANCOUNTFLAG as
+		"plancountflag",
+		PLANID as "planid",
+		PLANMATERIALCOUNT as
+		"planmaterialcount",
+		PLANMATERIALCOUNTOUT as "planmaterialcountout",
+		PLANTIMEFLAG as "plantimeflag",
+		PLANWEIGHOUT as "planweighout",
+		PLANWEIGHT as "planweight",
+		PLANWEIGHTFLAG as "planweightflag",
+		PRICE as
+		"price",
+		PRINTSETGROSS as "printsetgross",
+		PRINTSETSUTTLE as
+		"printsetsuttle",
+		PRINTSETTARE as "printsettare",
+		QFLAG as "qflag",
+		QUALITYPRINT as "qualityprint",
+		REGROSSDO as "regrossdo",
+		RESUTTLEDO as
+		"resuttledo",
+		RETAREDO as "retaredo",
+		RFIDID as "rfidid",
+		RFIDNO as
+		"rfidno",
+		RFIDTYPE as "rfidtype",
+		SAMPLETIME as "sampletime",
+		SAMPLEUNITCODE as "sampleunitcode",
+		SAMPLEUNITNAME as "sampleunitname",
+		SETTLEMENTMODES as "settlementmodes",
+		SFLAG as "sflag",
+		SHIP as "ship",
+		SHIPCODE as "shipcode",
+		SHIPPLANID as "shipplanid",
+		SNUMBER as
+		"snumber",
+		SOURCECODE as "sourcecode",
+		SOURCENAME as "sourcename",
+		SOURCEOPERACODE as "sourceoperacode",
+		SOURCEOPERANAME as
+		"sourceoperaname",
+		SOURCEPLACE as "sourceplace",
+		SOURCETIME as
+		"sourcetime",
+		SUTTLE as "suttle",
+		SUTTLEAPP as "suttleapp",
+		SUTTLEOPERACODE as "suttleoperacode",
+		SUTTLEOPERANAME as
+		"suttleoperaname",
+		SUTTLEOUTDO as "suttleoutdo",
+		SUTTLEOUTDOWN as
+		"suttleoutdown",
+		SUTTLEOUTUP as "suttleoutup",
+		SUTTLETIME as
+		"suttletime",
+		SUTTLEWEIGH as "suttleweigh",
+		SUTTLEWEIGHID as
+		"suttleweighid",
+		SYSMEMO as "sysmemo",
+		TARE as "tare",
+		TAREB as "tareb",
+		TAREGROUPNO as "taregroupno",
+		TAREGROUPNOB as "taregroupnob",
+		TAREHOUR
+		as "tarehour",
+		TARELOGID as "tarelogid",
+		TARELOGIDB as "tarelogidb",
+		TAREOPERACODE as "tareoperacode",
+		TAREOPERACODEB as "tareoperacodeb",
+		TAREOPERANAME as "tareoperaname",
+		TAREOPERANAMEB as "tareoperanameb",
+		TAREOUTDO as "tareoutdo",
+		TAREOUTDOWN as "tareoutdown",
+		TAREOUTUP as
+		"tareoutup",
+		TARESERIAL as "tareserial",
+		TARESERIALB as "tareserialb",
+		TARESPEED as "tarespeed",
+		TARESPEEDB as "tarespeedb",
+		TARETIME as
+		"taretime",
+		TARETIMEB as "taretimeb",
+		TARETIMEOUT as "taretimeout",
+		TARETIMEOUTDO as "taretimeoutdo",
+		TAREWEIGH as "tareweigh",
+		TAREWEIGHB
+		as "tareweighb",
+		TAREWEIGHGROUP as "tareweighgroup",
+		TAREWEIGHGROUPB as
+		"tareweighgroupb",
+		TAREWEIGHID as "tareweighid",
+		TAREWEIGHIDB as
+		"tareweighidb",
+		TAREWEIGHTOUT as "tareweightout",
+		TARGETCODE as
+		"targetcode",
+		TARGETNAME as "targetname",
+		TARGETOPERACODE as
+		"targetoperacode",
+		TARGETOPERANAME as "targetoperaname",
+		TARGETPLACE as
+		"targetplace",
+		TARGETTIME as "targettime",
+		TASKCODE as "taskcode",
+		USERMEMO as "usermemo",
+		VALIDFLAG as "validflag"
+		from L_PLANCOUNT_V t
+		where 1=1
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="matchid">
+				matchid = '$matchid$'
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+
+	<select id="query_all_objects" resultClass="measure"
+		parameterClass="java.util.HashMap">
+		select decode(ACCOUNTSTYPE, null, 0, ACCOUNTSTYPE) as "accountstype",
+		BASKET as "basket",
+		BATCHCODE as "batchcode",
+		BEGINTIME as "begintime",
+		decode(BFLAG, null, 0, BFLAG) as "bflag",
+		CARNO as "carno",
+		CARTYPE as
+		"cartype",
+		decode(CHECKGROSSINFO, null, 0, CHECKGROSSINFO) as
+		"checkgrossinfo",
+		decode(CHECKOPERATIME, null, 0, CHECKOPERATIME) as
+		"checkoperatime",
+		decode(CHECKOPERATIMEDO, null, 0, CHECKOPERATIMEDO)
+		as
+		"checkoperatimedo",
+		decode(CHECKPLANCARCOUNTDO, null, 0,
+		CHECKPLANCARCOUNTDO) as "checkplancarcountdo",
+		decode(CHECKPLANMATERIALCOUNTDO, null, 0, CHECKPLANMATERIALCOUNTDO) as
+		"checkplanmaterialcountdo",
+		decode(CHECKPLANTIMEOUTDO, null, 0,
+		CHECKPLANTIMEOUTDO) as "checkplantimeoutdo",
+		decode(CHECKPLANWEIGHDO,
+		null, 0, CHECKPLANWEIGHDO) as
+		"checkplanweighdo",
+		decode(CHECKSUTTLEINFO, null, 0, CHECKSUTTLEINFO) as
+		"checksuttleinfo",
+		decode(CHECKTAREBASIC, null, 0, CHECKTAREBASIC) as
+		"checktarebasic",
+		decode(CHECKTAREDO, null, 0, CHECKTAREDO) as
+		"checktaredo",
+		decode(CHECKTAREHISTORY, null, 0, CHECKTAREHISTORY) as
+		"checktarehistory",
+		decode(CHECKTAREINFO, null, 0, CHECKTAREINFO) as
+		"checktareinfo",
+		decode(CHECKTARELAST, null, 0, CHECKTARELAST) as
+		"checktarelast",
+		CREATEDATE as "createdate",
+		decode(DEDUCTION, null, 0,
+		DEDUCTION) as "deduction",
+		decode(DEDUCTION2, null, 0, DEDUCTION2) as
+		"deduction2",
+		DEDUCTIONCODE as "deductioncode",
+		DEDUCTIONNAME as
+		"deductionname",
+		DEDUCTIONOPERACODE as "deductionoperacode",
+		DEDUCTIONOPERANAME as "deductionoperaname",
+		DEDUCTIONTIME as
+		"deductiontime",
+		decode(DEDUCTIONTYPE, null, 0, DEDUCTIONTYPE) as
+		"deductiontype",
+		decode(DEDUCTIONUNIT, null, 0, DEDUCTIONUNIT) as
+		"deductionunit",
+		decode(DFLAG, null, 0, DFLAG) as "dflag",
+		decode(DISPATCHTYPE, null, 0, DISPATCHTYPE) as "dispatchtype",
+		ENDTIME
+		as "endtime",
+		ENTERGATECODE as "entergatecode",
+		ENTERGATENAME as
+		"entergatename",
+		ENTERTIME as "entertime",
+		decode(FORCERECEIVE, null, 0,
+		FORCERECEIVE) as "forcereceive",
+		decode(GFLAG, null, 0, GFLAG) as
+		"gflag",
+		decode(GROSS, null, 0, GROSS) as "gross",
+		decode(GROSSB, null,
+		0, GROSSB) as "grossb",
+		decode(GROSSGROUPNO, null, 0, GROSSGROUPNO) as
+		"grossgroupno",
+		decode(GROSSGROUPNOB, null, 0, GROSSGROUPNOB) as
+		"grossgroupnob",
+		GROSSLOGID as "grosslogid",
+		GROSSLOGIDB as
+		"grosslogidb",
+		GROSSOPERACODE as "grossoperacode",
+		GROSSOPERACODEB as
+		"grossoperacodeb",
+		GROSSOPERANAME as "grossoperaname",
+		GROSSOPERANAMEB
+		as "grossoperanameb",
+		decode(GROSSOUTDO, null, 0, GROSSOUTDO) as
+		"grossoutdo",
+		decode(GROSSOUTDOWN, null, 0, GROSSOUTDOWN) as
+		"grossoutdown",
+		decode(GROSSOUTUP, null, 0, GROSSOUTUP) as
+		"grossoutup",
+		decode(GROSSSERIAL, null, 0, GROSSSERIAL) as
+		"grossserial",
+		decode(GROSSSERIALB, null, 0, GROSSSERIALB) as
+		"grossserialb",
+		decode(GROSSSPEED, null, 0, GROSSSPEED) as
+		"grossspeed",
+		decode(GROSSSPEEDB, null, 0, GROSSSPEEDB) as
+		"grossspeedb",
+		GROSSTIME as "grosstime",
+		GROSSTIMEB as "grosstimeb",
+		decode(GROSSTIMEOUT, null, 0, GROSSTIMEOUT) as "grosstimeout",
+		decode(GROSSTIMEOUTDO, null, 0, GROSSTIMEOUTDO) as "grosstimeoutdo",
+		GROSSWEIGH as "grossweigh",
+		GROSSWEIGHB as "grossweighb",
+		GROSSWEIGHGROUP as "grossweighgroup",
+		GROSSWEIGHGROUPB as
+		"grossweighgroupb",
+		GROSSWEIGHID as "grossweighid",
+		GROSSWEIGHIDB as
+		"grossweighidb",
+		decode(GROSSWEIGHTOUT, null, 0, GROSSWEIGHTOUT) as
+		"grossweightout",
+		ICID as "icid",
+		ICNO as "icno",
+		ICTYPE as "ictype",
+		decode(ISBASKET, null, 0, ISBASKET) as "isbasket",
+		decode(ISCOMPARE,
+		null, 0, ISCOMPARE) as "iscompare",
+		decode(ISGROSSBASKET, null, 0,
+		ISGROSSBASKET) as "isgrossbasket",
+		decode(ISGROSSMATERIAL, null, 0,
+		ISGROSSMATERIAL) as "isgrossmaterial",
+		decode(ISGROSSPLANID, null, 0,
+		ISGROSSPLANID) as "isgrossplanid",
+		decode(ISGROSSSHIP, null, 0,
+		ISGROSSSHIP) as "isgrossship",
+		decode(ISGROSSSOURCE, null, 0,
+		ISGROSSSOURCE) as "isgrosssource",
+		decode(ISGROSSTARGET, null, 0,
+		ISGROSSTARGET) as "isgrosstarget",
+		decode(ISGROSSTASKCODE, null, 0,
+		ISGROSSTASKCODE) as "isgrosstaskcode",
+		decode(ISLOADING, null, 0,
+		ISLOADING) as "isloading",
+		decode(ISPLAN, null, 0, ISPLAN) as "isplan",
+		decode(ISSENDCAR, null, 0, ISSENDCAR) as "issendcar",
+		decode(ISSUTTLEBASKET, null, 0, ISSUTTLEBASKET) as "issuttlebasket",
+		decode(ISSUTTLEMATERIAL, null, 0, ISSUTTLEMATERIAL) as
+		"issuttlematerial",
+		decode(ISSUTTLEPLANID, null, 0, ISSUTTLEPLANID) as
+		"issuttleplanid",
+		decode(ISSUTTLESHIP, null, 0, ISSUTTLESHIP) as
+		"issuttleship",
+		decode(ISSUTTLESOURCE, null, 0, ISSUTTLESOURCE) as
+		"issuttlesource",
+		decode(ISSUTTLETARGET, null, 0, ISSUTTLETARGET) as
+		"issuttletarget",
+		decode(ISSUTTLETASKCODE, null, 0, ISSUTTLETASKCODE)
+		as
+		"issuttletaskcode",
+		decode(ISTAREBASKET, null, 0, ISTAREBASKET) as
+		"istarebasket",
+		decode(ISTAREMATERIAL, null, 0, ISTAREMATERIAL) as
+		"istarematerial",
+		decode(ISTAREPLANID, null, 0, ISTAREPLANID) as
+		"istareplanid",
+		decode(ISTARESHIP, null, 0, ISTARESHIP) as
+		"istareship",
+		decode(ISTARESOURCE, null, 0, ISTARESOURCE) as
+		"istaresource",
+		decode(ISTARETARGET, null, 0, ISTARETARGET) as
+		"istaretarget",
+		decode(ISTARETASKCODE, null, 0, ISTARETASKCODE) as
+		"istaretaskcode",
+		decode(ISTASKCODE, null, 0, ISTASKCODE) as
+		"istaskcode",
+		decode(KQFLAG, null, 0, KQFLAG) as "kqflag",
+		LEAVEGATECODE as "leavegatecode",
+		LEAVEGATENAME as "leavegatename",
+		LEAVETIME as "leavetime",
+		MATCHID as "matchid",
+		MATCHIDB as "matchidb",
+		MATERIALCODE as "materialcode",
+		decode(MATERIALCOUNT, null, 0,
+		MATERIALCOUNT) as "materialcount",
+		MATERIALNAME as "materialname",
+		MATERIALSPEC as "materialspec",
+		MATERIALSPECCODE as "materialspeccode",
+		decode(MAXTARE, null, 0, MAXTARE) as "maxtare",
+		decode(MEASURETYPE,
+		null, 0, MEASURETYPE) as "measuretype",
+		decode(MFLAG, null, 0, MFLAG)
+		as "mflag",
+		decode(MINTERVAL, null, 0, MINTERVAL) as "minterval",
+		MOTORCADECODE as "motorcadecode",
+		MOTORCADENAME as "motorcadename",
+		decode(MQFLAG, null, 0, MQFLAG) as "mqflag",
+		decode(MSTATE, null, 0,
+		MSTATE) as "mstate",
+		decode(NOTENTERGATEDO, null, 0, NOTENTERGATEDO) as
+		"notentergatedo",
+		decode(NOTLEAVEGATEDO, null, 0, NOTLEAVEGATEDO) as
+		"notleavegatedo",
+		decode(NOTSLAMPEDO, null, 0, NOTSLAMPEDO) as
+		"notslampedo",
+		decode(NOTSTOREINDO, null, 0, NOTSTOREINDO) as
+		"notstoreindo",
+		decode(NOTSTOREOUTDO, null, 0, NOTSTOREOUTDO) as
+		"notstoreoutdo",
+		OPERATYPE as "operatype",
+		ORDERNO as "orderno",
+		decode(OVWEITGHTMAX, null, 0, OVWEITGHTMAX) as "ovweitghtmax",
+		decode(OVWEITGHTMIN, null, 0, OVWEITGHTMIN) as "ovweitghtmin",
+		decode(OVWEITGHTTYPE, null, 0, OVWEITGHTTYPE) as "ovweitghttype",
+		decode(PLANCARCOUNT, null, 0, PLANCARCOUNT) as "plancarcount",
+		decode(PLANCARCOUNTFLAG, null, 0, PLANCARCOUNTFLAG) as
+		"plancarcountflag",
+		decode(PLANCARCOUNTOUT, null, 0, PLANCARCOUNTOUT)
+		as
+		"plancarcountout",
+		decode(PLANCARFLAG, null, 0, PLANCARFLAG) as
+		"plancarflag",
+		decode(PLANCOUNTFLAG, null, 0, PLANCOUNTFLAG) as
+		"plancountflag",
+		PLANID as "planid",
+		decode(PLANMATERIALCOUNT, null, 0,
+		PLANMATERIALCOUNT) as "planmaterialcount",
+		decode(PLANMATERIALCOUNTOUT, null, 0, PLANMATERIALCOUNTOUT) as
+		"planmaterialcountout",
+		decode(PLANTIMEFLAG, null, 0, PLANTIMEFLAG) as
+		"plantimeflag",
+		decode(PLANWEIGHOUT, null, 0, PLANWEIGHOUT) as
+		"planweighout",
+		decode(PLANWEIGHT, null, 0, PLANWEIGHT) as
+		"planweight",
+		decode(PLANWEIGHTFLAG, null, 0, PLANWEIGHTFLAG) as
+		"planweightflag",
+		decode(PRICE, null, 0, PRICE) as "price",
+		PRINTSETGROSS as "printsetgross",
+		PRINTSETSUTTLE as "printsetsuttle",
+		PRINTSETTARE as "printsettare",
+		decode(QFLAG, null, 0, QFLAG) as
+		"qflag",
+		decode(QUALITYPRINT, null, 0, QUALITYPRINT) as "qualityprint",
+		decode(REGROSSDO, null, 0, REGROSSDO) as "regrossdo",
+		decode(RESUTTLEDO, null, 0, RESUTTLEDO) as "resuttledo",
+		decode(RETAREDO, null, 0, RETAREDO) as "retaredo",
+		RFIDID as "rfidid",
+		RFIDNO as "rfidno",
+		RFIDTYPE as "rfidtype",
+		SAMPLETIME as "sampletime",
+		SAMPLEUNITCODE as "sampleunitcode",
+		SAMPLEUNITNAME as "sampleunitname",
+		decode(SETTLEMENTMODES, null, 0, SETTLEMENTMODES) as
+		"settlementmodes",
+		decode(SFLAG, null, 0, SFLAG) as "sflag",
+		SHIP as
+		"ship",
+		SHIPCODE as "shipcode",
+		decode(SNUMBER, null, 0, SNUMBER) as
+		"snumber",
+		SOURCECODE as "sourcecode",
+		SOURCENAME as "sourcename",
+		SOURCEOPERACODE as "sourceoperacode",
+		SOURCEOPERANAME as
+		"sourceoperaname",
+		SOURCEPLACE as "sourceplace",
+		SOURCETIME as
+		"sourcetime",
+		decode(SUTTLE, null, 0, SUTTLE) as "suttle",
+		decode(SUTTLEAPP, null, 0, SUTTLEAPP) as "suttleapp",
+		SUTTLEOPERACODE
+		as "suttleoperacode",
+		SUTTLEOPERANAME as "suttleoperaname",
+		decode(SUTTLEOUTDO, null, 0, SUTTLEOUTDO) as "suttleoutdo",
+		decode(SUTTLEOUTDOWN, null, 0, SUTTLEOUTDOWN) as "suttleoutdown",
+		decode(SUTTLEOUTUP, null, 0, SUTTLEOUTUP) as "suttleoutup",
+		SUTTLETIME
+		as "suttletime",
+		SUTTLEWEIGH as "suttleweigh",
+		SUTTLEWEIGHID as
+		"suttleweighid",
+		SYSMEMO as "sysmemo",
+		decode(TARE, null, 0, TARE) as
+		"tare",
+		decode(TAREB, null, 0, TAREB) as "tareb",
+		decode(TAREGROUPNO,
+		null, 0, TAREGROUPNO) as "taregroupno",
+		decode(TAREGROUPNOB, null, 0,
+		TAREGROUPNOB) as "taregroupnob",
+		decode(TAREHOUR, null, 0, TAREHOUR) as
+		"tarehour",
+		TARELOGID as "tarelogid",
+		TARELOGIDB as "tarelogidb",
+		TAREOPERACODE as "tareoperacode",
+		TAREOPERACODEB as "tareoperacodeb",
+		TAREOPERANAME as "tareoperaname",
+		TAREOPERANAMEB as "tareoperanameb",
+		decode(TAREOUTDO, null, 0, TAREOUTDO) as "tareoutdo",
+		decode(TAREOUTDOWN, null, 0, TAREOUTDOWN) as "tareoutdown",
+		decode(TAREOUTUP, null, 0, TAREOUTUP) as "tareoutup",
+		decode(TARESERIAL, null, 0, TARESERIAL) as "tareserial",
+		decode(TARESERIALB, null, 0, TARESERIALB) as "tareserialb",
+		decode(TARESPEED, null, 0, TARESPEED) as "tarespeed",
+		decode(TARESPEEDB, null, 0, TARESPEEDB) as "tarespeedb",
+		TARETIME as
+		"taretime",
+		TARETIMEB as "taretimeb",
+		decode(TARETIMEOUT, null, 0,
+		TARETIMEOUT) as "taretimeout",
+		decode(TARETIMEOUTDO, null, 0,
+		TARETIMEOUTDO) as "taretimeoutdo",
+		TAREWEIGH as "tareweigh",
+		TAREWEIGHB
+		as "tareweighb",
+		TAREWEIGHGROUP as "tareweighgroup",
+		TAREWEIGHGROUPB as
+		"tareweighgroupb",
+		TAREWEIGHID as "tareweighid",
+		TAREWEIGHIDB as
+		"tareweighidb",
+		decode(TAREWEIGHTOUT, null, 0, TAREWEIGHTOUT) as
+		"tareweightout",
+		TARGETCODE as "targetcode",
+		TARGETNAME as "targetname",
+		TARGETOPERACODE as "targetoperacode",
+		TARGETOPERANAME as
+		"targetoperaname",
+		TARGETPLACE as "targetplace",
+		TARGETTIME as
+		"targettime",
+		TASKCODE as "taskcode",
+		USERMEMO as "usermemo",
+		decode(VALIDFLAG, null, 0, VALIDFLAG) as "validflag"
+		from L_PLANCOUNT_V
+		t
+		where validflag = 1
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="carno">
+				carno = '$carno$'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="matchid">
+				matchid = '$matchid$'
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+	<select id="query_sub_columns" resultClass="java.util.HashMap"
+		parameterClass="java.util.HashMap" remapResults="true">
+		select
+		<dynamic prepend="">
+			$columns$
+		</dynamic>
+		from L_PLANCOUNT_V t where 1=1
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="matchid">
+				matchid = '$matchid$'
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+	<select id="getAllTaskcode" resultClass="com.talent.measure.model.TaskCode">
+		select t.taskcode,
+		t.operatype,
+		t.materialcode,
+		t.materialname,
+		t.sourcecode,
+		t.sourcename,
+		t.targetcode,
+		t.targetname,
+		t.mqflag,
+		t.accountstype,
+		t.kqflag,
+		t.gflag,
+		t.tarehour,
+		t.printsetgross,
+		t.printsetsuttle,
+		t.printsettare,
+		t.deduction2,
+		t.deductionunit,
+		t.deductiontype,
+		t.isplan,
+		t.isbasket,
+		t.forcereceive,
+		t.measuretype,
+		t.mflag,
+		m.operaname
+		from b_taskcode_t t
+		left join m_operaconfig_t m
+		on t.operatype = m.operatype
+		where t.validflag = 1
+	</select>
+	<select id="queryscaledetail" resultClass="measure"
+		parameterClass="measure">
+		select m.id,
+		m.matchid,
+		m.carno,
+		m.carsque basket,
+		m.weight gross,
+		m.weighttime grosstime,
+		m.memo usermemo
+		from
+		m_smallscaledetail_t m where matchid='$matchid$' and validflag>0
+	</select>
+	<select id="queryscaledetailcount" resultClass="int"
+		parameterClass="measure">
+		select count(1)
+		from
+		m_smallscaledetail_t m where
+		matchid='$matchid$' and
+		m.carsque='$basket$'
+	</select>
+	<update id="updatescaledetail" parameterClass="measure">
+		update
+		m_smallscaledetail_t set carno='$carno$',
+		weight='$weight$',weighttime=sysdate,
+		memo='$usermemo$' where
+		matchid='$matchid$' and carsque='$basket$'
+	</update>
+	<insert id="insertscaledetail" parameterClass="measure">
+		<selectKey keyProperty="id">
+			select m_smallscaledetail_s.Nextval
+			from dual
+		</selectKey>
+		insert into m_smallscaledetail_t
+		(id, matchid, carno, carsque,
+		weight,
+		memo)
+		values
+		('$id$',
+		'$matchid$',
+		'$carno$',
+		'$basket$',
+		'$gross$',
+		'$usermemo$')
+	</insert>
+	<select id="queryWeight" resultClass="int" parameterClass="measure">
+		select nvl(weight,0)weight
+		from
+		m_smallscaledetail_t m where
+		matchid='$matchid$' and
+		m.carsque='$basket$'and validflag>0
+	</select>
+	<update id="cancelscaledetail" parameterClass="measure">
+		update
+		m_smallscaledetail_t set validflag=0 where
+		matchid='$matchid$' and
+		carsque='$basket$'
+	</update>
+	<update id="updateWeight" parameterClass="measure">
+		update m_measure_t set
+		gross=gross-$weight$ where matchid='$matchid$'
+	</update>
+
+	<select id="queryTaskcode" resultClass="measure" parameterClass="measure">
+		select t.taskcode,
+		t.operatype,
+		t.materialcode,
+		t.materialname,
+		t.sourcecode,
+		t.sourcename,
+		t.targetcode,
+		t.targetname,
+		t.mqflag,
+		t.accountstype,
+		t.kqflag,
+		t.gflag,
+		t.tarehour,
+		t.printsetgross,
+		t.printsetsuttle,
+		t.printsettare,
+		t.deduction2,
+		t.deductionunit,
+		t.deductiontype,
+		t.isplan,
+		t.isbasket,
+		t.forcereceive,
+		t.measuretype,
+		t.operaname,
+		t.mflag
+		from
+		l_taskcode_v t where 1=1
+		<isNotEmpty prepend="AND" property="planid">
+			taskcode = '$planid$'
+		</isNotEmpty>
+	</select>
+	<select id="queryMaxgrosstime" parameterClass="String"
+		resultClass="String">
+		select max(m.grosstime)
+		from m_measure_t m
+		where m.operatype = 10
+		and m.carno='$carno$'
+
+	</select>
+	<select id="queryzcount" parameterClass="String" resultClass="String">
+	   select t.matchid
+	  from l_curr_temp_t t
+	 where t.validflag = 1
+	   and t.mstate = 0
+	   and t.operatype = 0
+	   and t.carno='$carno$' and rownum=1
+	</select>
+	<resultMap id="completemeasure_map" class="com.talent.measure.model.Measure">
+		<result property="carno" column="carno" />
+		<result property="matchid" column="matchid" />
+		<result property="operatype" column="operatype" />
+		<result property="suttletime" column="suttletime" />
+		<result property="mstate" column="mstate" nullValue="0" />
+	</resultMap>
+	<!--根据车号查询无法过磅的信息-->
+	<select id="getCompleteMeasure" resultMap="completemeasure_map" 	parameterClass="measure">
+	   select t.carno, t.operatype, t.mstate, t.suttletime, t.matchid
+ 	   from L_COMPLETEMEASURE_V t where carno = '$carno$'
+	</select>
+</sqlMap>

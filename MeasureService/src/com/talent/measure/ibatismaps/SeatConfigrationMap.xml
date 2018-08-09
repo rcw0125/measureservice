@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="seatconfiguration">
+	<typeAlias alias="seat" type="com.talent.measure.model.SeatConfigration" />
+	<typeAlias alias="seatClientId" type="com.talent.measure.model.SeatClientId" />
+	<typeAlias alias="equipmentParam" type="com.talent.measure.model.EquipmentParam" />
+	<parameterMap class="equipmentParam" id="equipmentParam_Map">
+	<parameter  property="equcode"  jdbcType="VARCHAR" />
+	<parameter  property="paraminfos"  jdbcType="CLOB" javaType="java.lang.String" typeHandler="com.ibatis.sqlmap.engine.type.ClobTypeHandlerCallback"/>
+	<parameter  property="equname"  jdbcType="VARCHAR" />
+	<parameter  property="versionnum"  jdbcType="INT" />
+	<parameter  property="id"  jdbcType="VARCHAR" />
+	</parameterMap>	 
+	<select id="getSeatList" parameterClass="seat" resultClass="seat">
+		select t.equcode, t.equname, t.equtype,t.id
+		  from M_EQUIPMENT_T t
+		 where t.validflag = 1
+		 <dynamic prepend="">
+			<isNotEmpty prepend="AND" property="equtype">
+			 <isNotEqual property="equtype" compareValue="-1" >
+			    t.equtype =trim('$equtype$')
+			 </isNotEqual>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+		<select id="getSeatClient" parameterClass="seatClientId" resultClass="seatClientId">
+		select t.SEATID,SEATNAME,SEATRIGHT,SEATTYPE,SEATSTATE,CLIENTID
+		  from m_seat_t t
+		 where t.validflag = 1
+		 <dynamic prepend="">
+			<isNotEmpty prepend="AND" property="seatid">
+			 <isNotEqual property="seatid" compareValue="-1" >
+			    t.seatid =trim('$seatid$')
+			 </isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="seatname">
+			 <isNotEqual property="seatname" compareValue="-1" >
+			    t.seatname =trim('$seatname$')
+			 </isNotEqual>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	<select id="checkSeatClientIsAdd" parameterClass="String" resultClass="int">
+		select   count(1)
+		  from m_seat_t t
+		 where seatid =trim('$seatid$')	 and t.validflag = 1	 
+	</select>
+	
+	<select id="getLastVersionNum" parameterClass="String" resultClass="int">
+		select  case when max(VERSIONNUM) is null then 0 else  max(VERSIONNUM) end as  VERSIONNUM
+		  from M_EQUIPMENT_param_T t
+		 where EQUCODE =trim('$equcode$')		 
+	</select>
+	
+	
+	<select id="getEquParamInfo" parameterClass="equipmentParam" resultClass="equipmentParam">
+		select t.ID,t.EQUCODE,t.PARAMINFOS,t.VERSIONNUM,t.EQUNAME
+		  from M_EQUIPMENT_param_T t
+		 where 1 = 1
+		 <dynamic prepend="">
+			<isNotEmpty prepend="AND" property="equcode">
+			 <isNotEqual property="equcode" compareValue="-1" >
+			    t.equcode =trim('$equcode$')
+			 </isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="versionnum">
+			 <isNotEqual property="versionnum" compareValue="-1" >
+			    t.versionnum =trim('$versionnum$')
+			 </isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="equname">
+			 <isNotEqual property="equname" compareValue="-1" >
+			    t.equname =trim('$equname$')
+			 </isNotEqual>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+			 <!--保存秤体参数lt…… 借用一个 序列-->
+	<insert id="insertEquParamInfo" parameterClass="equipmentParam">
+		<selectKey keyProperty="id">
+			select m_printbill_s.nextval from dual
+		</selectKey>
+		insert into M_EQUIPMENT_param_T(ID,PARAMINFOS,EQUCODE,EQUNAME,VERSIONNUM)
+		VALUES($id$,#paraminfos,handler=org.springframework.orm.ibatis.support.ClobStringTypeHandler#,'$equcode$','$equname$','$versionnum$')
+	</insert>
+	
+	<update id="updateEquParamInfo" parameterClass="equipmentParam">
+		update M_EQUIPMENT_param_T set PARAMINFOS=#paraminfos,handler=org.springframework.orm.ibatis.support.ClobStringTypeHandler#,EQUNAME='$equname$',VERSIONNUM='$versionnum$' where EQUCODE='$equcode$'
+	</update> 
+	
+	 <!--保存坐席对应的秤体lt……-->
+	<insert id="insertSeatClient"  parameterClass="seatClientId">		 
+		insert into m_seat_t(seatid,seatname,clientid,seattype,seatright,validflag)
+		VALUES('$seatid$','$seatname$','$clientid$','$seattype$','$seatright$',$validflag$)
+	</insert> 
+	
+	 <!--保存坐席对应的秤体lt……-->
+	<update id="updateSeatClient"  parameterClass="seatClientId">		 
+	 update m_seat_t  set seatname='$seatname$',clientid='$clientid$',seattype='$seattype$',
+	 seatright='$seatright$',validflag=$validflag$
+	  where seatid='$seatid$'
+	</update> 
+	<!--获取秤体对应的坐席lt……-->
+	<select id="getEqucodeSeat" parameterClass="seatClientId" resultClass="seatClientId">
+		select t.seatid,t.seatname
+		  from m_seat_t t
+		 where t.validflag = 1
+		 <dynamic prepend="">
+			<isNotEmpty prepend="AND" property="clientid">
+			 <isNotEqual property="clientid" compareValue="-1" >
+			    t.clientid like trim('%$clientid$%')
+			 </isNotEqual>
+			</isNotEmpty>
+			 
+		</dynamic>
+	</select>
+</sqlMap>

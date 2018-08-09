@@ -1,0 +1,186 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="User">
+	<typeAlias alias="user" type="com.talent.privilege.model.User" />	
+	<select id="query_list" resultClass="user" parameterClass="user">
+		select id,usercode,rolecode,organcode,username,password,sex,nation,servicing,age,validflag,createtime,createman,updatetime,updateman,usermemo
+		from P_USER_T
+		where 1 = 1
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="id">
+				<isGreaterThan property="id" compareValue="0">
+					id = #id#
+				</isGreaterThan>
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="usercode">
+				usercode = '$usercode$'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="password">
+				password = '$password$'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="username">
+				username like '%$username$%'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="sex">
+				sex = '$sex$'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="nation">
+				nation = '$nation$'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="servicing">
+				servicing = '$servicing$'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="validflag">
+				validflag = $validflag$
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="usermemo">
+				usermemo like '%$usermemo$%'
+			</isNotEmpty>
+		</dynamic>
+		order by username asc,id desc
+	</select>
+	
+	<select id="query_count" resultClass="int" parameterClass="user">
+		select count(1)
+		from P_USER_T
+		where 1 = 1
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="id">
+				<isGreaterThan property="id" compareValue="0">
+					id = #id#
+				</isGreaterThan>
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="usercode">
+				usercode = '$usercode$'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="password">
+				password = '$password$'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="username">
+				username like '%$username$%'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="sex">
+				sex = '$sex$'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="nation">
+				nation = '$nation$'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="servicing">
+				servicing = '$servicing$'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="validflag">
+				validflag = $validflag$
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="usermemo">
+				usermemo like '%$usermemo$%'
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<update id="delete" parameterClass="String">
+		delete from P_USER_T where id in ($ids$)
+	</update>
+	
+	<update id="update" parameterClass="user">
+		update P_USER_T set createtime = '$createtime$',createman = '$createman$'
+		
+		<isNotEmpty prepend="," property="username">
+			username = '$username$'
+		</isNotEmpty>
+		
+		<isNotEmpty prepend="," property="usercode">
+			usercode = '$usercode$'
+		</isNotEmpty>
+		
+		<isNotEmpty prepend="," property="rolecode">
+			rolecode = '$rolecode$'
+		</isNotEmpty>
+		
+		<isNotEmpty prepend="," property="password">
+			password = '$password$'
+		</isNotEmpty>
+		
+		<isNotEmpty prepend="," property="sex">
+			sex = '$sex$'
+		</isNotEmpty>
+		
+		<isNotEmpty prepend="," property="nation">
+			nation = '$nation$'
+		</isNotEmpty>
+		
+		<isNotEmpty prepend="," property="servicing">
+			servicing = '$servicing$'
+		</isNotEmpty>
+		
+		<isNotEmpty prepend="," property="age">
+			<isGreaterThan property="age" compareValue="0">
+				age = $age$
+			</isGreaterThan>
+		</isNotEmpty>
+		
+		<isNotEmpty prepend="," property="validflag">
+			validflag = $validflag$
+		</isNotEmpty>
+		
+		<isNotEmpty prepend="," property="usermemo">
+			usermemo = '$usermemo$'
+		</isNotEmpty>
+		
+		where ID = $id$
+	</update>
+	
+	<insert id="insert" parameterClass="user">
+        	insert into P_USER_T (id,usercode,organcode,rolecode,username,password,sex,nation,servicing,age,validflag,createtime,createman,usermemo) 
+        		values (#id#,'$usercode$','$organcode$','$rolecode$','$username$','$password$',#sex#,'$nation$','$servicing$',$age$,$validflag$,'$createtime$','$createman$','$usermemo$')
+    </insert>
+    
+    <insert id="insertUserRole" parameterClass="user">
+        	insert into P_USEROLE_T (usercode,rolecode) values ('$usercode$','$rolecode$')
+    </insert>
+    
+    <delete id="deleteUserRole">
+    	delete from P_USEROLE_T where usercode = '$usercode$' and rolecode = '$rolecode$'
+    </delete>
+    
+    <select id="selectUserRole" resultClass="com.talent.privilege.model.Role" parameterClass="user" >
+    	select r.rolecode,r.rolename,r.rolememo,r.id,decode(ur.usercode,null,0,1) as selected from P_ROLE_T r left join P_USEROLE_T ur on r.rolecode = ur.rolecode and ur.usercode = '$usercode$'
+    </select>
+    
+    <select id="getAllMeasureUser" resultClass="user">
+    	SELECT DISTINCT U.ID,U.USERCODE, U.USERNAME, U.NATION
+		  FROM P_USER_T U, P_USEROLE_T UR, P_RESOURCEROLE_T RR, P_RESOURCE_T R
+		 WHERE U.USERCODE = UR.USERCODE
+		   AND UR.ROLECODE = RR.ROLECODE
+		   AND RR.RESOURCECODE = R.RESOURCECODE
+		   AND R.RESOURCENAME = '计量坐席'
+    </select>
+    
+    <select id="getNewID" resultClass="int">
+    	SELECT P_PLATFORM_S.NEXTVAL AS VALUE FROM DUAL
+    </select>
+    <select id="queryPassword" parameterClass="user" resultClass="user">
+      select t.usercode,t.password from P_USER_T t where t.usercode = '$usercode$'
+    </select>
+    
+    <update id="updatePassword" parameterClass="user">
+      update P_USER_T set password='$password$' where usercode = '$usercode$'
+    </update>
+</sqlMap>

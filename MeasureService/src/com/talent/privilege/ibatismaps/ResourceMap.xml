@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="Resource">
+	<typeAlias alias="resource" type="com.talent.privilege.model.Resource" />	
+	<select id="query_list" resultClass="resource" parameterClass="resource">
+		select id,fid,resourcetype,resourcecode,resourcename,icon,link,validflag,createtime,createman,updatetime,updateman,resourcememo,isdisplay
+		from P_RESOURCE_T
+		where 1 = 1
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="id">
+				<isGreaterThan property="id" compareValue="0">
+					id = #id#
+				</isGreaterThan>
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="fid">
+				<isGreaterThan property="fid" compareValue="-1">
+					fid = #fid#
+				</isGreaterThan>
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="resourcecode">
+				resourcecode = '$resourcecode$'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="resourcename">
+				resourcename like '%$resourcename$%'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="validflag">
+				validflag = $validflag$
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="resourcememo">
+				resourcememo like '%$resourcememo$%'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="isdisplay">
+				<isGreaterThan property="isdisplay" compareValue="-1">
+				isdisplay = $isdisplay$
+				</isGreaterThan>
+			</isNotEmpty>
+		</dynamic>
+		order by resourcename asc,id desc
+	</select>
+	
+	<select id="query_count" resultClass="int" parameterClass="resource">
+		select count(1)
+		from P_RESOURCE_T
+		where 1 = 1
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="id">
+				<isGreaterThan property="id" compareValue="0">
+					id = #id#
+				</isGreaterThan>
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="fid">
+				<isGreaterThan property="fid" compareValue="-1">
+					fid = #fid#
+				</isGreaterThan>
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="resourcecode">
+				resourcecode = '$resourcecode$'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="resourcename">
+				resourcename like '%$resourcename$%'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="validflag">
+				validflag = $validflag$
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="resourcememo">
+				resourcememo like '%$resourcememo$%'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="isdisplay">
+				<isGreaterThan property="isdisplay" compareValue="-1">
+				isdisplay = $isdisplay$
+				</isGreaterThan>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<update id="delete" parameterClass="String">
+		delete from P_RESOURCE_T where id in ($ids$)
+	</update>
+	
+	<update id="update" parameterClass="resource">
+		update P_RESOURCE_T set createtime = '$createtime$',createman = '$createman$'
+		
+		<isNotEmpty prepend="," property="fid">
+			<isGreaterThan property="fid" compareValue="-1">
+				fid = #fid#
+			</isGreaterThan>
+		</isNotEmpty>
+			
+		<isNotEmpty prepend="," property="resourcename">
+			resourcename = '$resourcename$'
+		</isNotEmpty>
+		
+		<isNotEmpty prepend="," property="resourcecode">
+			resourcecode = '$resourcecode$'
+		</isNotEmpty>
+		
+		<isNotEmpty prepend="," property="icon">
+			icon = '$icon$'
+		</isNotEmpty>
+		
+		<isNotEmpty prepend="," property="link">
+			link = '$link$'
+		</isNotEmpty>
+		
+		<isNotEmpty prepend="," property="validflag">
+			validflag = $validflag$
+		</isNotEmpty>
+		
+		<isNotEmpty prepend="," property="resourcememo">
+			resourcememo = '$resourcememo$'
+		</isNotEmpty>
+		
+		<isNotEmpty prepend="," property="isdisplay">
+			<isGreaterThan property="isdisplay" compareValue="-1">
+			isdisplay = '$isdisplay$'
+			</isGreaterThan>
+		</isNotEmpty>
+		
+		where ID = $id$
+	</update>
+	
+	<insert id="insert" parameterClass="resource">
+        	insert into P_RESOURCE_T (fid,id,resourcetype,resourcecode,resourcename,icon,link,validflag,createtime,createman,resourcememo,isdisplay) 
+        		values ($fid$,$id$,'$resourcetype$','$resourcecode$','$resourcename$','$icon$','$link$',$validflag$,'$createtime$','$createman$','$resourcememo$',$isdisplay$)
+    </insert>
+    
+    <select id="query_tree" resultClass="com.talent.base.model.BaseEntity" parameterClass="com.talent.base.model.BaseEntity">
+    	select tt.fid,tt.id,tt.resourcename as text,(tt.id || <![CDATA['&&']]> || tt.fid || <![CDATA['&&']]> || tt.resourcename || <![CDATA['&&']]> || tt.resourcecode || <![CDATA['&&']]> || tt.resourcetype) as "href" from P_RESOURCE_T tt order by tt.fid asc,tt.id asc
+    </select>
+    
+    <insert id="insertResourceRole" parameterClass="resource">
+        	insert into P_RESOURCEROLE_T (resourcecode,rolecode,ctrltype) values ('$resourcecode$','$rolecode$','$ctrltype$')
+    </insert>
+    
+    <delete id="deleteResourceRole" parameterClass="resource">
+    	delete from P_RESOURCEROLE_T where resourcecode = '$resourcecode$' and rolecode = '$rolecode$'
+    </delete>
+    
+    <select id="selectResourceRole" resultClass="com.talent.privilege.model.Role" parameterClass="resource" >
+    	select r.rolecode,r.rolename,r.rolememo,r.id,decode(rr.resourcecode,null,0,1) as selected from P_ROLE_T r left join P_RESOURCEROLE_T rr on r.rolecode = rr.rolecode and rr.resourcecode = '$resourcecode$' and rr.ctrltype = '$ctrltype$'
+    </select>
+    
+    <select id="selectResourceUser" resultClass="resource" parameterClass="com.talent.privilege.model.User" >
+    	SELECT distinct r.fid,r.id,r.resourcetype,r.resourcecode,r.resourcename,r.icon,r.link,rr.ctrltype
+		  FROM P_USER_T U, P_USEROLE_T UR, P_RESOURCEROLE_T RR, P_RESOURCE_T R
+		 WHERE U.USERCODE = UR.USERCODE
+		   AND UR.ROLECODE = RR.ROLECODE
+		   AND RR.RESOURCECODE = R.RESOURCECODE
+		   AND U.USERCODE = '$usercode$'
+		   <isGreaterThan prepend="and" property="isdisplay" compareValue="-1">
+			r.isdisplay = $isdisplay$
+			</isGreaterThan>
+    </select>
+    
+    <select id="getNewID" resultClass="int">
+    	SELECT P_PLATFORM_S.NEXTVAL AS VALUE FROM DUAL
+    </select>
+</sqlMap>

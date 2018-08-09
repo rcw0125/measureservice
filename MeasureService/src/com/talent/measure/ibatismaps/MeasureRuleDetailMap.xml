@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="MeasureRuleDetail">
+	<typeAlias alias="measureRuleDetail" type="com.talent.measure.model.MeasureRuleDetail" />	
+	<select id="query_list" resultClass="measureRuleDetail" parameterClass="measureRuleDetail">
+		select ID,PID,FUNCTIONNAME,CTRLMEMO
+		from P_MEASUREROLE_DETAIL_T
+		where 1 = 1
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="id">
+				<isNotEqual property="id" compareValue="0">
+					id = #id#
+				</isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="pid">
+				<isNotEqual property="pid" compareValue="-1">
+					pid = #pid#
+				</isNotEqual>
+			</isNotEmpty>
+		</dynamic>
+		order by id desc
+	</select>
+	
+	<select id="query_count" resultClass="int" parameterClass="measureRuleDetail">
+		select count(1)
+		from P_MEASUREROLE_DETAIL_T
+		where 1 = 1 and pid = $pid$
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="id">
+				<isNotEqual property="id" compareValue="0">
+					id = #id#
+				</isNotEqual>
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="pid">
+				<isNotEqual property="pid" compareValue="-1">
+					pid = #pid#
+				</isNotEqual>
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<update id="delete" parameterClass="String">
+		delete from P_MEASUREROLE_DETAIL_T where id in ($ids$)
+	</update>
+	
+	<insert id="insert" parameterClass="measureRuleDetail">
+        	insert into P_MEASUREROLE_DETAIL_T (ID,PID,FUNCTIONNAME,CTRLMEMO) 
+        		values ($id$,$pid$,'$functionname$','$ctrlmemo$')
+    </insert>
+    
+    <select id="getNewID" resultClass="int">
+    	SELECT P_PLATFORM_S.NEXTVAL AS VALUE FROM DUAL
+    </select>
+</sqlMap>

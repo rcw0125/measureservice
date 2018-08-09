@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="Dictionary">
+	<typeAlias alias="Dictionary" type="com.talent.base.model.Dictionary" />
+	<select id="query_count" resultClass="int" parameterClass="Dictionary">
+		select count(1) 
+		from P_Dictionary_T
+		where 1 = 1
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="id">
+				<isNotEqual property="id" compareValue="0">
+					id = #id#
+				</isNotEqual>
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="dname">
+				dname = '$dname$'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="dcode">
+				dcode = '$dcode$'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="dvalue">
+				dvalue like '%$dvalue$%'
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<select id="query_list" resultClass="Dictionary" parameterClass="Dictionary">
+		select id,dname,dcode,dvalue,ddesc
+		from P_Dictionary_T
+		where 1 = 1
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="id">
+				<isNotEqual property="id" compareValue="0">
+					id = #id#
+				</isNotEqual>
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="dname">
+				dname = '$dname$'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="dcode">
+				dcode = '$dcode$'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="dvalue">
+				dvalue like '%$dvalue$%'
+			</isNotEmpty>
+		</dynamic>
+		order by id asc
+	</select>
+	
+	<update id="delete" parameterClass="Dictionary">
+		delete from P_DICTIONARY_T where id in (ids)
+	</update>
+	
+	<update id="update" parameterClass="Dictionary">
+		update P_Dictionary_T set dname='$dname$',dcode='$dcode$',dvalue='$dvalue$',ddesc='$ddesc$' where id = $id$
+	</update>
+	
+	<insert id="insert" parameterClass="Dictionary">
+		<selectKey resultClass="int" type="pre" keyProperty="id" >
+           SELECT P_DICTIONARY_S.NEXTVAL AS VALUE FROM DUAL
+        </selectKey>
+        	insert into P_Dictionary_T (id,dname,dcode,dvalue,ddesc) 
+        		values (#id#,'$dname$','$dcode$','$dvalue$','$ddesc$')
+    </insert>
+</sqlMap>

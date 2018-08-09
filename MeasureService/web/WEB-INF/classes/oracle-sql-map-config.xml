@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMapConfig PUBLIC "-//iBATIS.com//DTD SQL Map Config 2.0//EN"
+        "http://www.ibatis.org/dtd/sql-map-config-2.dtd">
+<sqlMapConfig>
+	<settings useStatementNamespaces="true" />
+	<sqlMap resource="com/talent/base/ibatismaps/DictionaryDaoMap.xml"></sqlMap>
+	<sqlMap resource="com/talent/measure/ibatismaps/CardMap.xml"></sqlMap>
+	<sqlMap resource="com/talent/measure/ibatismaps/MeasureMap.xml"></sqlMap>
+	<sqlMap resource="com/talent/measure/ibatismaps/CommonMap.xml"></sqlMap>
+	<sqlMap resource="com/talent/measure/ibatismaps/BaseConfigMap.xml"></sqlMap>
+	<sqlMap resource="com/talent/measure/ibatismaps/SeatConfigrationMap.xml"></sqlMap>
+	<sqlMap resource="com/talent/measure/ibatismaps/DeviceConfigMap.xml"></sqlMap>
+	<sqlMap resource="com/talent/measure/ibatismaps/MeasureTaskReportMap.xml"></sqlMap>
+	 <sqlMap resource="com/talent/measure/ibatismaps/WeighterDataMap.xml"></sqlMap>
+	<sqlMap resource="com/talent/measure/ibatismaps/ConfigModelMap.xml"></sqlMap>
+	<sqlMap resource="com/talent/measure/ibatismaps/ExceptionMap.xml"></sqlMap>
+	<sqlMap resource="com/talent/measure/ibatismaps/BusinessconfigMap.xml"></sqlMap>
+	<sqlMap resource="com/talent/measure/ibatismaps/MeasureRuleMap.xml"></sqlMap>
+	<sqlMap resource="com/talent/measure/ibatismaps/MeasureRuleDetailMap.xml"></sqlMap>
+	<sqlMap resource="com/talent/privilege/ibatismaps/ResourceMap.xml"></sqlMap>
+	<sqlMap resource="com/talent/privilege/ibatismaps/UserMap.xml"></sqlMap>
+	<sqlMap resource="com/talent/privilege/ibatismaps/RoleMap.xml"></sqlMap>
+	<sqlMap resource="com/talent/privilege/ibatismaps/OrganMap.xml"></sqlMap>
+	<sqlMap resource="com/talent/measure/ibatismaps/MsameweightMap.xml"></sqlMap>
+	<sqlMap resource="com/talent/measure/ibatismaps/MeasureReportMap.xml"></sqlMap>
+	<sqlMap resource="com/talent/measure/ibatismaps/HandOvertMap.xml"></sqlMap>
+	<sqlMap resource="com/talent/measure/ibatismaps/EquipmentMap.xml"></sqlMap>
+	<sqlMap resource="com/talent/measure/ibatismaps/MointorMap.xml"></sqlMap>
+	<sqlMap resource="com/talent/measure/ibatismaps/StatisticsMReportMap.xml"></sqlMap>
+	<sqlMap resource="com/talent/measure/ibatismaps/ReportunitMap.xml"></sqlMap>
+	<sqlMap resource="com/talent/measure/ibatismaps/EquipmentParamMap.xml"></sqlMap>
+	<sqlMap resource="com/talent/measure/ibatismaps/QualityInterfaceMap.xml"></sqlMap>
+</sqlMapConfig>

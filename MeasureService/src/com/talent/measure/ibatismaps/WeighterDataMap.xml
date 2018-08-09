@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="WeighterData">
+	<typeAlias alias="weighterdata" type="com.talent.measure.model.WeighterData" />	
+	
+	<select id="query_list" resultClass="weighterdata" parameterClass="weighterdata">
+		select ID,carno,matchid,clientid,begintime,endtime,realdata
+		from M_WEIGHTERDATA_T t
+		where 1 = 1 
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="id">
+				<isNotEqual property="id" compareValue="0">
+					id = #id#
+				</isNotEqual>
+			</isNotEmpty>
+					
+			<isNotEmpty prepend="AND" property="carno">
+				carno like '%$carno$%'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="matchid">
+				matchid like '%$matchid$%'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="clientid">
+				clientid like '%$clientid$%'
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="begintime">
+				<![CDATA[to_date(substr(t.begintime,0,length(t.begintime)-4),'yyyy-mm-dd hh24:mi:ss') >= to_date('$begintime$','yyyy-mm-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+			
+			<isNotEmpty prepend="AND" property="endtime">
+				<![CDATA[to_date(substr(t.endtime,0,length(t.endtime)-4),'yyyy-mm-dd hh24:mi:ss') <= to_date('$endtime$','yyyy-mm-dd hh24:mi:ss')]]>
+			</isNotEmpty>
+		</dynamic>
+		order by id desc
+	</select>
+	
+	<insert id="insert" parameterClass="weighterdata">
+        	insert into M_WEIGHTERDATA_T (ID,carno,matchid,clientid,begintime,endtime,realdata) 
+        		values (#id#,'$carno$','$matchid$','$clientid$','$begintime$','$endtime$',#realdata,handler=org.springframework.orm.ibatis.support.ClobStringTypeHandler#)
+    </insert>
+    
+    <select id="getNewID" resultClass="int">
+    	SELECT P_PLATFORM_S.NEXTVAL AS VALUE FROM DUAL
+    </select>
+</sqlMap>

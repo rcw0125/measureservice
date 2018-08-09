@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="card">
+	<typeAlias alias="card" type="com.talent.measure.model.Card" />
+
+	<!-- 卡号或者车号是否在黑名单中 -->
+	<select id="isblack" resultClass="int" parameterClass="card">
+		select count(1)
+		from b_blacklist_v
+		where 1 = 1
+		<dynamic prepend="">
+			<!-- <isNotEmpty prepend="AND" property="recordtype"> recordtype = '$recordtype$' 
+				</isNotEmpty> -->
+			<isNotEmpty prepend="AND" property="cardid">
+				(cardid = '$cardid$' or
+				carno = '$cardid$')
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+	<!-- 根据IC卡或者RFID卡的卡号 获取 卡的状态和车号信息 -->
+	<select id="querycardinfo" resultClass="card" parameterClass="card">
+		select b.carno, b.validflag, b.cartype from b_card_v b where validflag > 0
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="recordtype">
+				cardClass =
+				'$recordtype$'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="cardid">
+				cardid = '$cardid$'
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	<!-- 根据车号，卡的类型 获取 IC卡或者RFID卡的卡号 -->
+	<select id="getCardIDbyCarno" resultClass="card" parameterClass="card">
+		select
+		cardid
+		from B_CARD_V
+		where validflag = 3
+		<dynamic prepend="">
+			<isNotEmpty prepend="AND" property="recordtype">
+				cardClass ='$recordtype$'
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="carno">
+				carno = '$carno$'
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	<insert id="insertmonitorweight"  parameterClass="card">
+	   insert into m_monitorweight_t
+		  (id, weightno, cardid,OPERANAME)
+	   values
+		  (m_monitorweight_s.nextval, '$weightno$', '$cardid$', '$carno$')
+	</insert>
+</sqlMap>

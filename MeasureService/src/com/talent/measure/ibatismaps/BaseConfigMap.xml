@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="BaseConfig">
+	<typeAlias alias="baseconfig" type="com.talent.measure.model.BaseConfig" />	
+	<select id="query_list" resultClass="baseconfig">
+		select id,memoryMointor,cpuMointor,alertMointor,adminEmail,clusters,weightMointor from P_BASECONFIG_T where ID = 1
+	</select>
+	
+	<update id="update" parameterClass="baseconfig">
+		update P_BASECONFIG_T set $fieldName$ = '$fieldValue$' where ID = 1
+	</update>
+</sqlMap>

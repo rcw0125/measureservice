@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="Equipment">
+	<typeAlias alias="equipment" type="com.talent.measure.model.Equipment" />
+
+	<select id="query_list" resultClass="equipment">
+		select
+		"ID","VALIDFLAG","EQUCODE","EQUNAME","EQUCLASS","CREATEMAN","EQUUNIT","EQUPOSTION","EQUTYPE","CREATEDATE","UPTIME","PARAMODEL","IP"
+		from M_EQUIPMENT_T t where t.validflag = 1
+		<isNotEmpty prepend="and" property="ip">
+			ip = '$ip$'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="equtype">
+			EQUTYPE = '$equtype$'
+		</isNotEmpty>
+		order by EQUNAME asc
+	</select>
+	<select id="queryEquiment" parameterClass="equipment"
+		resultClass="equipment">
+		select t.id,
+		t.validflag,
+		t.equcode,
+		t.equname,
+		decode(t.equtype,'C','衡器','RC','坐席')equtype,
+		t.ip,
+		t.range,
+		to_char(t.createdate, 'yyyy-MM-dd hh24:mi:ss') createtime,
+		t.uptime,
+		t.createman,
+		t.updateman,
+		to_char(t.updatedate, 'yyyy-MM-dd hh24:mi:ss')updatedate
+		from M_EQUIPMENT_T t
+		where t.validflag > 0
+		<isNotEmpty prepend="and" property="equname">
+			equname like '$equname$'||'%'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="equtype">
+			equtype = '$equtype$'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="ip">
+			ip like '$ip$'||'%'
+		</isNotEmpty>
+		order by t.equcode asc
+	</select>
+	<select id="queryEquiment_count" parameterClass="equipment"
+		resultClass="int">
+		select count(1)
+		from M_EQUIPMENT_T t
+		where t.validflag > 0
+		<isNotEmpty prepend="and" property="equname">
+			equname like '$equname$'||'%'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="equtype">
+			equtype = '$equtype$'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="ip">
+			ip like '$ip$'||'%'
+		</isNotEmpty>
+		order by t.equcode asc
+	</select>
+	<insert id="insertEquiment" parameterClass="equipment">
+		<selectKey keyProperty="id">
+			select m_equipment_s.Nextval from
+			dual
+		</selectKey>
+		insert into m_equipment_t
+		(id,
+		validflag,
+		equcode,
+		equname,
+		equtype,
+		ip,
+		range,
+		createdate)
+		values
+		('$id$',
+		1,
+		'$equcode$',
+		'$equname$',
+		'$equtype$',
+		'$ip$',
+		'$range$',
+		sysdate)
+	</insert>
+	<update id="updateEquiment" parameterClass="equipment">
+		update m_equipment_t
+		set equcode = '$equcode$',
+		equname = '$equname$',
+		equtype = '$equtype$',
+		ip = '$ip$',
+		range = '$range$',
+		uptime = sysdate,
+		updateman = '$createman$',
+		updatedate = sysdate
+		where id = '$id$'
+
+	</update>
+	<update id="cancelEquiment" parameterClass="equipment">
+		update m_equipment_t
+		set validflag=0,
+		cancelman = '$createman$',
+		canceldate = sysdate
+		where id = '$id$'
+	</update>
+	<select id="queryEquimentByid" parameterClass="equipment"
+		resultClass="equipment">
+		select t.id,
+		t.validflag,
+		t.equcode,
+		t.equname,
+		t.equtype,
+		t.ip,
+		t.range
+		from M_EQUIPMENT_T t
+		where t.validflag > 0 and id='$id$'
+	</select>
+	<select id="queryCBycode" parameterClass="equipment" resultClass="int">
+		select count(1) from M_EQUIPMENT_T t where t.equcode='$equcode$'
+	</select>
+	<select id="queryCByname" parameterClass="equipment" resultClass="int">
+		select count(1) from M_EQUIPMENT_T t where t.equname='$equname$'
+	</select>
+</sqlMap>
+

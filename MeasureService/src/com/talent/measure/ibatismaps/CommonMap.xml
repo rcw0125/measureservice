@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="common">
+	<typeAlias alias="task" type="com.talent.measure.model.Statistics" />
+	<parameterMap class="java.util.Map" id="t_sp_nextval_map">
+		<parameter property="name_var" jdbcType="VARCHAR" javaType="java.lang.String"
+			mode="IN" />
+		<parameter property="nextval_var" jdbcType="DECIMAL"
+			javaType="java.lang.Integer" mode="OUT" />
+	</parameterMap>
+
+	<procedure id="sp_nextval_p" parameterMap="t_sp_nextval_map"
+		resultClass="java.lang.Integer">
+		{call sp_nextval_p (?,?)}
+	</procedure>
+
+	<select id="getOracleDateTime" resultClass="java.lang.String">
+		select
+		to_char(sysdate,'yyyy-MM-dd hh24:mi:ss') oracletime from dual
+	</select>
+	<select id="sysdate" resultClass="java.util.Date">
+		select sysdate as st from dual
+	</select>
+
+	<select id="dynamicSQL" parameterClass="String" resultClass="Object"
+		remapResults="true">
+		$sql$
+	</select>
+
+	<select id="getCurrTempColumns" resultClass="java.util.HashMap">
+		SELECT
+		T.COLUMN_NAME,T.DATA_TYPE FROM USER_TAB_COLUMNS T WHERE
+		TABLE_NAME='M_OPERACONFIG_T' ORDER BY COLUMN_NAME ASC
+	</select>
+	<insert id="insertTaskStatus" parameterClass="task">
+		insert into
+		m_taskstatus_t t (t.matchid,t.weightno,t.taskstatus,t.isorprint,t.printstatus,t.printmsg)
+		values('$matchid$','$weightno$','$taskstatus$','$isorprint$','$printstatus$','$printmsg$')
+	</insert>
+	<update id="updateTaskStatus" parameterClass="task">
+		update
+		m_taskstatus_t t set
+		t.taskstatus='$taskstatus$',
+		t.isorprint='$isorprint$',
+		t.printstatus='$printstatus$',
+		t.printmsg='$printmsg$' 
+		where t.matchid='$matchid$' and t.weightno='$weightno$'
+	</update>
+	<select id="selectTaskStaus" parameterClass="task" resultClass="task">
+		select taskstatus ,isorprint,printstatus,printmsg from m_taskstatus_t where matchid='$matchid$'and
+		weightno='$weightno$' and rownum=1
+	</select>
+</sqlMap>
